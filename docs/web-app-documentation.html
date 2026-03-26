@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HMS Core Web App Documentation</title>
+    <link rel="stylesheet" href="./documentation.css" />
+  </head>
+  <body>
+    <div class="doc-shell">
+      <section class="page cover">
+        <div>
+          <div class="eyebrow">Hospital Management System</div>
+          <h1>HMS Core Web Application Documentation</h1>
+          <p>
+            Product documentation for the React and Vite based hospital management demo app.
+            This guide covers architecture, login flow, navigation, module capabilities, storage
+            behavior, and screen references captured from the current build.
+          </p>
+          <div class="cover-meta">
+            <div class="cover-card">
+              <strong>Application</strong>
+              <span>HMS Core v1.0.0 Premium</span>
+            </div>
+            <div class="cover-card">
+              <strong>Generated</strong>
+              <span>17 March 2026</span>
+            </div>
+            <div class="cover-card">
+              <strong>Source</strong>
+              <span>src/, public/, docs/screenshots/</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow">Purpose</div>
+          <p>
+            Provide a readable handoff artifact for demos, reviews, and onboarding without needing
+            to inspect the codebase directly.
+          </p>
+          <div class="toc">
+            <div>1. Overview and stack</div>
+            <div>2. Login and persistence</div>
+            <div>3. Operational module summaries</div>
+            <div>4. Storage and workflow notes</div>
+            <div>5. Screenshot gallery</div>
+            <div>6. Final deliverables</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page">
+        <h2>Application Overview</h2>
+        <p class="lede">
+          HMS Core is a single-page web app that simulates core hospital workflows across patient
+          administration, scheduling, records, billing, pharmacy, diagnostics, staffing, logistics,
+          and blood inventory.
+        </p>
+
+        <div class="grid-2">
+          <div class="info-card">
+            <h3>Technology Stack</h3>
+            <ul>
+              <li>Frontend: React 19 with React Router 7</li>
+              <li>Bundler: Vite 7</li>
+              <li>UI foundation: Bootstrap 5 with custom CSS</li>
+              <li>State management: React context and local component state</li>
+              <li>Persistence: Browser `localStorage` for session and demo data</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h3>Core UX Pattern</h3>
+            <ul>
+              <li>Protected routes redirect unauthenticated users to `/login`</li>
+              <li>Sidebar navigation exposes 12 operational modules</li>
+              <li>Navbar provides search feedback and light or dark theme toggle</li>
+              <li>Each primary module exposes seeded data and an action modal or shortcut</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 18px;">
+          <div class="info-card">
+            <h3>Navigation Model</h3>
+            <p>
+              The application uses a single shell layout with a persistent sidebar and a fixed top
+              navbar. Each module is loaded through React Router and most pages are lazy-loaded.
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>Data Model Summary</h3>
+            <p>
+              Shared operational data is held in one context provider, while a few dashboard and
+              logistics style pages render from local static arrays for demo presentation.
+            </p>
+          </div>
+        </div>
+
+        <div class="kpi-strip">
+          <div class="kpi"><strong>12</strong><span>Routed modules</span></div>
+          <div class="kpi"><strong>7</strong><span>Persisted data collections</span></div>
+          <div class="kpi"><strong>1</strong><span>Context provider</span></div>
+          <div class="kpi"><strong>13</strong><span>Reference screenshots</span></div>
+        </div>
+
+        <figure class="hero-shot">
+          <img src="./screenshots/dashboard.png" alt="Dashboard screen of the HMS Core web app" />
+          <figcaption>
+            Dashboard view showing the command center, KPI cards, department performance area, and
+            live appointment queue.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="page">
+        <h2>Login, Access, and Persistence</h2>
+        <p class="lede">
+          Authentication is demo-only and enforced entirely on the client. Successful login stores a
+          mock user object in `localStorage`, and protected routes read that session state on load.
+        </p>
+
+        <div class="grid-2">
+          <div class="callout">
+            <h3>Demo Credentials</h3>
+            <ul>
+              <li>Username: your registered account</li>
+              <li>Password: the password you created during signup</li>
+              <li>Authenticated role: Admin</li>
+              <li>User identifier: ADM001</li>
+            </ul>
+          </div>
+          <div class="callout">
+            <h3>Persisted Browser Keys</h3>
+            <ul>
+              <li>hms_user</li>
+              <li>hms_theme</li>
+              <li>hms_patients, hms_appointments, hms_records</li>
+              <li>hms_invoices, hms_medicines, hms_tests, hms_staff</li>
+            </ul>
+          </div>
+        </div>
+
+        <ul class="timeline">
+          <li>User opens a protected route and is redirected to the login screen if no saved session exists.</li>
+          <li>Successful login writes a mock admin user object to localStorage.</li>
+          <li>The selected theme is re-applied on every reload through a root data attribute.</li>
+          <li>Operational records created in the app remain available until browser storage is cleared.</li>
+        </ul>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Area</th>
+              <th>Implemented Behavior</th>
+              <th>Documentation Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Login</td>
+              <td>Validates one hard-coded username and password pair.</td>
+              <td class="status-warn">Suitable for demos only, not production security.</td>
+            </tr>
+            <tr>
+              <td>Route protection</td>
+              <td>Unauthenticated requests are redirected to `/login` with the original route saved.</td>
+              <td class="status-ok">Provides a smooth post-login return flow.</td>
+            </tr>
+            <tr>
+              <td>Theme persistence</td>
+              <td>Light and dark theme choice is stored and re-applied on reload.</td>
+              <td class="status-ok">Useful for user preference continuity.</td>
+            </tr>
+            <tr>
+              <td>Operational data</td>
+              <td>User-created demo records remain in the browser until storage is cleared.</td>
+              <td class="status-warn">No backend sync, audit trail, or multi-user consistency.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <figure class="hero-shot">
+          <img src="./screenshots/login.png" alt="Login screen of the HMS Core web app" />
+          <figcaption>
+            Login screen used to enter a registered account and access protected
+            routes.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="page">
+        <h2>Module Guide I</h2>
+        <p class="lede">
+          The first group of modules covers operational intake, scheduling, clinical records, and
+          revenue handling.
+        </p>
+
+        <div class="grid-2">
+          <div class="module-card">
+            <h3>Command Center</h3>
+            <p>Landing dashboard with KPI cards, export shortcut, and a live appointment queue.</p>
+            <ul>
+              <li>Displays static KPI values for admissions, alerts, patients, and revenue.</li>
+              <li>Uses live appointment data from context for the queue card.</li>
+              <li>Navigates directly to patient registration and appointment listing.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Patient Directory</h3>
+            <p>Registry for patient demographics, blood groups, and admission status.</p>
+            <ul>
+              <li>Lists seeded and user-added patient profiles.</li>
+              <li>Modal supports registration with age, gender, blood group, and status.</li>
+              <li>"Access EHR" links the workflow to the EMR module.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Scheduling</h3>
+            <p>Daily queue for appointments with doctor, slot, visit type, and status.</p>
+            <ul>
+              <li>Bookings are created from existing patient records.</li>
+              <li>New appointments default to the Scheduled state.</li>
+              <li>Calendar and edit actions currently trigger toast feedback only.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Medical Records</h3>
+            <p>Electronic records table for diagnosis, clinician, and prescription tracking.</p>
+            <ul>
+              <li>Creates new entries with generated clinical reference IDs.</li>
+              <li>Stores diagnosis and prescription data in client-side state.</li>
+              <li>Search and report actions are present as UI placeholders.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Revenue Cycle</h3>
+            <p>Invoice management with patient mapping, amount entry, and payment status.</p>
+            <ul>
+              <li>New invoices start in a `Pending` state with an unset payment method.</li>
+              <li>Amounts are formatted as rupee values before saving.</li>
+              <li>Print, PDF, export, and sync buttons currently simulate actions.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="page">
+        <h2>Module Guide II</h2>
+        <p class="lede">
+          The second group focuses on pharmacy, diagnostics, facility management, people operations,
+          and analytics.
+        </p>
+
+        <div class="grid-2">
+          <div class="module-card">
+            <h3>Pharmacy</h3>
+            <p>Medication stock tracking with batch number, quantity, expiry, and stock status.</p>
+            <ul>
+              <li>New stock can be added through a modal form.</li>
+              <li>Entries with more than 20 units are visually treated as healthy stock.</li>
+              <li>Dispense and stock alert functions are UI-only demo actions.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Diagnostics and Lab</h3>
+            <p>Orders and tracks pathology or imaging requests for registered patients.</p>
+            <ul>
+              <li>Lab orders are linked to a patient and doctor.</li>
+              <li>New tests default to Pending Approval.</li>
+              <li>Processing and publishing actions are present for demonstration.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Facility Management</h3>
+            <p>Visual bed board grouped into ICU, general ward, and private rooms.</p>
+            <ul>
+              <li>Shows availability, occupied beds, cleaning, and maintenance states.</li>
+              <li>Operates from local static arrays, not shared context data.</li>
+              <li>Bed click handling currently logs status rather than opening a detail view.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Human Capital</h3>
+            <p>Staff directory for role, department, shift, and duty status.</p>
+            <ul>
+              <li>Supports onboarding new staff through a modal workflow.</li>
+              <li>Directory data is persisted in browser storage.</li>
+              <li>File edit and messaging buttons are simulated actions.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Intelligence</h3>
+            <p>Analytics catalog with pre-defined reports and an advisory insight block.</p>
+            <ul>
+              <li>Shows report categories, last generated timestamp, and sync actions.</li>
+              <li>Includes a Gen-AI style advisory message for staffing scale-up.</li>
+              <li>Does not yet render real charts or downloadable analytics payloads.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="page">
+        <h2>Module Guide III</h2>
+        <p class="lede">
+          The remaining modules address logistics and emergency supply visibility. Both are useful as
+          executive snapshots, but they currently operate from static seeded arrays.
+        </p>
+
+        <div class="grid-2">
+          <div class="module-card">
+            <h3>Hospital Logistics</h3>
+            <p>Supply table for high-use hospital consumables and PPE.</p>
+            <ul>
+              <li>Shows item ID, category, current stock, consumption, and status.</li>
+              <li>Actions include audit generation, supply request, and per-item reorder.</li>
+              <li>Dataset is memoized inside the page rather than shared across modules.</li>
+            </ul>
+          </div>
+          <div class="module-card">
+            <h3>Emergency Blood Bank</h3>
+            <p>Blood group stock cards and a compact activity log for donations and requests.</p>
+            <ul>
+              <li>Displays stable, low, and critical inventory states.</li>
+              <li>Activity feed includes donors, hospitals, and unit movement.</li>
+              <li>Donor intake and request registry actions are placeholders.</li>
+            </ul>
+          </div>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th>Primary Data Source</th>
+              <th>User Data Saved</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Patients, Appointments, EMR, Billing, Pharmacy, Lab, Staff</td>
+              <td>Shared `AppContext` state</td>
+              <td>Yes, in browser `localStorage`</td>
+            </tr>
+            <tr>
+              <td>Dashboard</td>
+              <td>Mixed: static KPI data plus live appointments</td>
+              <td>No direct edits from the page</td>
+            </tr>
+            <tr>
+              <td>Beds, Inventory, Blood Bank, Reports</td>
+              <td>Static in-page arrays</td>
+              <td>No persistent edits</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="page">
+        <h2>Screen Reference Gallery</h2>
+        <p class="lede">
+          The following screens are included as visual references for stakeholders and onboarding.
+        </p>
+
+        <div class="grid-2">
+          <figure class="shot-card">
+            <img src="./screenshots/patients.png" alt="Patient directory screen" />
+            <h3>Patient Directory</h3>
+            <p>Registration workflow, active profiles table, and EHR handoff action.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/scheduling.png" alt="Scheduling screen" />
+            <h3>Scheduling</h3>
+            <p>Appointment slots with status tags and booking actions.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/emr.png" alt="EMR screen" />
+            <h3>Medical Records</h3>
+            <p>Clinical history ledger with encrypted record styling and entry controls.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/dashboard.png" alt="Dashboard screen" />
+            <h3>Command Center</h3>
+            <p>Top-level operations summary with queue visibility and quick actions.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/login.png" alt="Login screen" />
+            <h3>Login</h3>
+            <p>Entry point for protected routes using a registered user account.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/billing.png" alt="Billing screen" />
+            <h3>Revenue Cycle</h3>
+            <p>Invoice listing with export, sync, print, and PDF affordances.</p>
+          </figure>
+        </div>
+      </section>
+
+      <section class="page">
+        <h2>Additional Screens and Delivery Notes</h2>
+        <div class="grid-2">
+          <figure class="shot-card">
+            <img src="./screenshots/pharmacy.png" alt="Pharmacy screen" />
+            <h3>Pharmacy</h3>
+            <p>Medication stock management with add and dispense controls.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/lab.png" alt="Lab screen" />
+            <h3>Diagnostics and Lab</h3>
+            <p>Diagnostic queue with processing and validation actions.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/beds.png" alt="Bed management screen" />
+            <h3>Facility Management</h3>
+            <p>Visual map of ICU, ward, and room availability.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/staff.png" alt="Staff directory screen" />
+            <h3>Human Capital</h3>
+            <p>Staff directory with onboarding flow and shift tracking.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/reports.png" alt="Reports screen" />
+            <h3>Intelligence</h3>
+            <p>Operational report catalog and advisory recommendation panel.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/inventory.png" alt="Inventory management screen" />
+            <h3>Hospital Logistics</h3>
+            <p>Supply monitoring table with reorder calls to action.</p>
+          </figure>
+          <figure class="shot-card">
+            <img src="./screenshots/bloodbank.png" alt="Blood bank screen" />
+            <h3>Emergency Blood Bank</h3>
+            <p>Blood stock dashboard with activity log.</p>
+          </figure>
+        </div>
+
+        <p class="footer-note">
+          Deliverables generated for this repository: docs/web-app-documentation.html,
+          docs/documentation.css, and docs/HMS-Web-App-Documentation.pdf.
+        </p>
+      </section>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+
+from ..auth_context import get_current_user_id
+from .. import crud, models, schemas
+from ..database import get_db
+
+router = APIRouter(prefix="/invoices", tags=["invoices"])
+
+
+@router.get("", response_model=list[schemas.InvoiceRead])
+def list_invoices(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+    return crud.list_entities(db, models.Invoice, current_user_id)
+
+
+@router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED)
+def create_invoice(payload: schemas.InvoiceCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+    return crud.create_entity(db, models.Invoice, payload, current_user_id)
+
+
+@router.get("/{invoice_id}", response_model=schemas.InvoiceRead)
+def get_invoice(invoice_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+    return crud.get_entity_or_404(db, models.Invoice, invoice_id, current_user_id)
+
+
+@router.put("/{invoice_id}", response_model=schemas.InvoiceRead)
+def update_invoice(invoice_id: int, payload: schemas.InvoiceUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+    invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, current_user_id)
+    return crud.update_entity(db, invoice, payload)
+
+
+@router.delete("/{invoice_id}")
+def delete_invoice(invoice_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+    invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, current_user_id)
+    return crud.delete_entity(db, invoice)

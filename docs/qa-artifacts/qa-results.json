@@ -1,0 +1,116 @@
+{
+  "issues": [
+    {
+      "severity": "medium",
+      "title": "Unexpected page title on /",
+      "area": "/",
+      "steps": [
+        "Navigate to / after login"
+      ],
+      "details": "Expected title including \"Command Center\", got \"Clinical Operations Center\".",
+      "suggestion": "Ensure each route renders its intended section heading consistently.",
+      "screenshot": "C:\\Users\\asifk\\Documents\\antigravity\\HMS\\docs\\qa-artifacts\\1-unexpected-page-title-on-.png"
+    },
+    {
+      "severity": "medium",
+      "title": "Unexpected page title on /billing",
+      "area": "/billing",
+      "steps": [
+        "Navigate to /billing after login"
+      ],
+      "details": "Expected title including \"Billing\", got \"Financial Records\".",
+      "suggestion": "Ensure each route renders its intended section heading consistently.",
+      "screenshot": "C:\\Users\\asifk\\Documents\\antigravity\\HMS\\docs\\qa-artifacts\\2-unexpected-page-title-on-billing.png"
+    },
+    {
+      "severity": "medium",
+      "title": "API validation and server failures collapse into a generic error toast",
+      "area": "Patients / Shared API client",
+      "steps": [
+        "Log in",
+        "Open Register Patient and submit invalid data such as age -1 or too-short name",
+        "Or force /api/patients to return 500"
+      ],
+      "details": "Validation toast: API Error occurred; API failure toast: API Error occurred",
+      "suggestion": "Read FastAPI \"detail\" payloads and distinguish 4xx validation messages from 5xx failures.",
+      "screenshot": "C:\\Users\\asifk\\Documents\\antigravity\\HMS\\docs\\qa-artifacts\\3-api-validation-and-server-failures-collapse-into-a-generic-error-toast.png"
+    },
+    {
+      "severity": "medium",
+      "title": "Form labels are not programmatically associated with their fields",
+      "area": "Login and modal forms",
+      "steps": [
+        "Inspect labels on /login and Register Patient modal with a screen reader or accessibility tree"
+      ],
+      "details": "Examples: Username, Password, Full Name, Age, Gender, Blood Group",
+      "suggestion": "Add unique input ids and connect each label with htmlFor, or wrap the input inside the label.",
+      "screenshot": "C:\\Users\\asifk\\Documents\\antigravity\\HMS\\docs\\qa-artifacts\\4-form-labels-are-not-programmatically-associated-with-their-fields.png"
+    },
+    {
+      "severity": "medium",
+      "title": "Password visibility toggle is removed from keyboard navigation",
+      "area": "Login",
+      "steps": [
+        "Open /login",
+        "Navigate with Tab"
+      ],
+      "details": "Focusable control with tabindex=-1: Show password",
+      "suggestion": "Remove tabindex=-1 so keyboard users can operate the password visibility control.",
+      "screenshot": "C:\\Users\\asifk\\Documents\\antigravity\\HMS\\docs\\qa-artifacts\\5-password-visibility-toggle-is-removed-from-keyboard-navigation.png"
+    },
+    {
+      "severity": "medium",
+      "title": "Modal dialog is missing core accessibility semantics",
+      "area": "Shared Modal",
+      "steps": [
+        "Open Register Patient or any modal",
+        "Inspect accessibility tree"
+      ],
+      "details": "Observed dialog attrs: {\"hasRole\":null,\"ariaModal\":null}",
+      "suggestion": "Add role=\"dialog\", aria-modal=\"true\", a labelled title, focus management, and Escape handling.",
+      "screenshot": "C:\\Users\\asifk\\Documents\\antigravity\\HMS\\docs\\qa-artifacts\\6-modal-dialog-is-missing-core-accessibility-semantics.png"
+    }
+  ],
+  "metrics": {
+    "slowLoginLoadMs": 2947
+  },
+  "responsiveResults": [
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "route": "/patients",
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": 0
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "route": "/appointments",
+      "scrollWidth": 768,
+      "innerWidth": 768,
+      "overflow": 0
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "route": "/reports",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": 0
+    }
+  ],
+  "mismatchToast": "Passwords do not match.",
+  "invalidLoginToast": "Unauthorized. Please check credentials.",
+  "patientEmptyToast": "Please fill in all clinical identifiers.",
+  "patientInvalidToast": "API Error occurred",
+  "apiFailureToast": "API Error occurred",
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 422 (Unprocessable Content)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ]
+}

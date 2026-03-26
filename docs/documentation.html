@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HMS Core — Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #111;
+      background: #fff;
+      line-height: 1.7;
+      font-size: 11pt;
+    }
+    
+    .cover {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+      page-break-after: always;
+    }
+    
+    .cover h1 {
+      font-size: 42pt;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+      color: #000;
+    }
+    
+    .cover .subtitle {
+      font-size: 14pt;
+      color: #666;
+      font-weight: 400;
+      margin-bottom: 40px;
+    }
+    
+    .cover .meta {
+      font-size: 10pt;
+      color: #888;
+    }
+
+    .cover .meta strong { color: #333; }
+    
+    .page {
+      padding: 50px 60px;
+      page-break-after: always;
+    }
+    
+    h2 {
+      font-size: 22pt;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #000;
+      margin-bottom: 8px;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 12px;
+    }
+    
+    h3 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #111;
+      margin-top: 28px;
+      margin-bottom: 8px;
+    }
+    
+    p, li {
+      color: #444;
+      font-size: 10.5pt;
+    }
+    
+    ul {
+      padding-left: 20px;
+      margin: 8px 0 16px;
+    }
+    
+    li { margin-bottom: 4px; }
+    
+    .screenshot {
+      width: 100%;
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+      margin: 16px 0 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 10pt;
+    }
+    
+    th {
+      background: #f5f5f5;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid #eaeaea;
+      text-transform: uppercase;
+      font-size: 9pt;
+      letter-spacing: 0.05em;
+      color: #666;
+    }
+    
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #eaeaea;
+      color: #333;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 8pt;
+      font-weight: 600;
+    }
+
+    .badge-blue { background: #e8f0fe; color: #0070f3; }
+    .badge-green { background: #e6f9e6; color: #0a7d0a; }
+    
+    .toc a {
+      color: #0070f3;
+      text-decoration: none;
+    }
+
+    .toc li { margin-bottom: 6px; }
+
+    .footer {
+      text-align: center;
+      font-size: 9pt;
+      color: #999;
+      padding-top: 20px;
+      border-top: 1px solid #eaeaea;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER PAGE -->
+  <div class="cover">
+    <h1>HMS Core</h1>
+    <p class="subtitle">Hospital Management System — Technical Documentation</p>
+    <p class="meta">
+      <strong>Version:</strong> 1.0.0 Premium &nbsp;|&nbsp;
+      <strong>Author:</strong> Asif Khan &nbsp;|&nbsp;
+      <strong>Date:</strong> March 17, 2026
+    </p>
+  </div>
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="page">
+    <h2>Table of Contents</h2>
+    <ol class="toc" style="font-size: 11pt; line-height: 2.2;">
+      <li><a href="#overview">System Overview</a></li>
+      <li><a href="#tech">Technology Stack</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#auth">Authentication</a></li>
+      <li><a href="#dashboard">Dashboard — Command Center</a></li>
+      <li><a href="#patients">Patient Directory</a></li>
+      <li><a href="#appointments">Scheduling & Appointments</a></li>
+      <li><a href="#emr">Electronic Medical Records</a></li>
+      <li><a href="#billing">Revenue Cycle & Billing</a></li>
+      <li><a href="#pharmacy">Pharmacy Management</a></li>
+      <li><a href="#lab">Diagnostics & Lab</a></li>
+      <li><a href="#beds">Facility Management</a></li>
+      <li><a href="#staff">Human Capital</a></li>
+      <li><a href="#reports">Intelligence & Reports</a></li>
+      <li><a href="#inventory">Hospital Logistics</a></li>
+      <li><a href="#bloodbank">Emergency Blood Bank</a></li>
+      <li><a href="#responsive">Responsive Design</a></li>
+      <li><a href="#theming">Theming & Dark Mode</a></li>
+    </ol>
+  </div>
+
+  <!-- SYSTEM OVERVIEW -->
+  <div class="page" id="overview">
+    <h2>1. System Overview</h2>
+    <p>HMS Core is a comprehensive, premium Hospital Management System designed to digitize and streamline clinical operations. It provides a centralized platform for managing patients, appointments, medical records, billing, pharmacy, diagnostics, facility management, staffing, inventory, and blood bank operations.</p>
+    
+    <h3>Key Features</h3>
+    <ul>
+      <li>Real-time clinical operations dashboard with KPI monitoring</li>
+      <li>Complete patient lifecycle management (registration → discharge)</li>
+      <li>Appointment scheduling with live medical queue</li>
+      <li>Electronic Medical Records (EMR) with diagnosis and prescription tracking</li>
+      <li>Revenue cycle management with invoice generation</li>
+      <li>Pharmacy stock management with batch tracking</li>
+      <li>Diagnostic lab test ordering and status tracking</li>
+      <li>Bed/facility management with real-time availability</li>
+      <li>Staff/HR management with shift scheduling</li>
+      <li>Inventory and supply chain management</li>
+      <li>Blood bank with group-wise unit tracking</li>
+      <li>Fully responsive design (mobile, tablet, desktop)</li>
+      <li>Light/Dark mode theme toggle with persistence</li>
+    </ul>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="page" id="tech">
+    <h2>2. Technology Stack</h2>
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Frontend Framework</td><td>React 19</td><td>Component-based UI rendering</td></tr>
+        <tr><td>Routing</td><td>React Router v7</td><td>Client-side navigation with protected routes</td></tr>
+        <tr><td>State Management</td><td>React Context API</td><td>Global app state (auth, patients, etc.)</td></tr>
+        <tr><td>Build Tool</td><td>Vite 7</td><td>Lightning-fast dev server and bundler</td></tr>
+        <tr><td>CSS Framework</td><td>Bootstrap 5 + Custom CSS</td><td>Grid system, utilities, and Vercel-inspired design</td></tr>
+        <tr><td>Icons</td><td>Bootstrap Icons</td><td>Consistent icon library</td></tr>
+        <tr><td>Typography</td><td>Inter (Google Fonts)</td><td>Premium, modern typeface</td></tr>
+        <tr><td>Data Persistence</td><td>localStorage</td><td>Client-side data persistence</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="architecture">Architecture</h3>
+    <p>The application follows a component-based architecture with lazy-loaded pages for optimal performance. All pages are wrapped in a <code>ProtectedRoute</code> component that redirects unauthenticated users to the login page.</p>
+    <table>
+      <thead>
+        <tr><th>Directory</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>src/pages/</code></td><td>Page-level components (lazy loaded)</td></tr>
+        <tr><td><code>src/components/Layout/</code></td><td>Layout shell (Sidebar, Navbar, Layout)</td></tr>
+        <tr><td><code>src/components/Auth/</code></td><td>Authentication (ProtectedRoute)</td></tr>
+        <tr><td><code>src/components/UI/</code></td><td>Reusable UI components (Modal)</td></tr>
+        <tr><td><code>src/context/</code></td><td>Global state via Context API</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AUTHENTICATION -->
+  <div class="page" id="auth">
+    <h2>3. Authentication</h2>
+    <p>The system uses a secure login flow with session persistence via <code>localStorage</code>. All application routes are protected and require authentication.</p>
+    <h3>Login Credentials</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Username</td><td><code>Create your own account</code></td></tr>
+        <tr><td>Password</td><td><code>Use the password you signed up with</code></td></tr>
+      </tbody>
+    </table>
+    <h3>Features</h3>
+    <ul>
+      <li>Password visibility toggle (eye icon)</li>
+      <li>Session persistence across browser refreshes</li>
+      <li>Protected route system with redirect to login</li>
+      <li>Toast notifications for login success/failure</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/light_mode_login_page_1773725500347.png" alt="Login Page">
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="dashboard">
+    <h2>4. Dashboard — Command Center</h2>
+    <p>The main dashboard provides a real-time overview of hospital operations through KPI cards, department performance metrics, and a live medical queue.</p>
+    <h3>Components</h3>
+    <ul>
+      <li><strong>Stat Cards:</strong> Active Admissions, Critical Alerts, Total Patients, Monthly Revenue — each with trend indicators</li>
+      <li><strong>Department Performance:</strong> Visual analytics placeholder for charting integration</li>
+      <li><strong>Live Medical Queue:</strong> Real-time appointment feed with patient names, doctors, and statuses</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_dashboard_1773731806200.png" alt="Dashboard">
+  </div>
+
+  <!-- PATIENTS -->
+  <div class="page" id="patients">
+    <h2>5. Patient Directory</h2>
+    <p>Comprehensive patient registry with full CRUD operations. Track patient demographics, blood groups, visit history, and admission status.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Add new patients via modal form</li>
+      <li>Search and filter patient records</li>
+      <li>Track admission status (Inpatient / Outpatient)</li>
+      <li>Auto-generated patient IDs (P-XXX format)</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_patients_1773731834494.png" alt="Patient Directory">
+  </div>
+
+  <!-- APPOINTMENTS -->
+  <div class="page" id="appointments">
+    <h2>6. Scheduling & Appointments</h2>
+    <p>Schedule and manage patient appointments with doctor assignment, time slots, and status tracking.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Create appointments with patient, doctor, time, and type</li>
+      <li>Status tracking: Scheduled, In Progress, Completed</li>
+      <li>Integration with Dashboard's live medical queue</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_appointments_1773731857929.png" alt="Appointments">
+  </div>
+
+  <!-- EMR -->
+  <div class="page" id="emr">
+    <h2>7. Electronic Medical Records</h2>
+    <p>Digital medical record management with diagnosis and prescription tracking.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Create clinical records with diagnosis and prescriptions</li>
+      <li>Auto-generated Clinical IDs and EMR IDs</li>
+      <li>Link records to patients and doctors</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_emr_1773731881998.png" alt="EMR">
+  </div>
+
+  <!-- BILLING -->
+  <div class="page" id="billing">
+    <h2>8. Revenue Cycle & Billing</h2>
+    <p>Invoice management system for tracking patient billing, payment methods, and outstanding balances.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Generate invoices linked to patients</li>
+      <li>Track payment status (Paid / Pending)</li>
+      <li>Payment method tracking (UPI, Cash, Card)</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_billing_1773731896037.png" alt="Billing">
+  </div>
+
+  <!-- PHARMACY -->
+  <div class="page" id="pharmacy">
+    <h2>9. Pharmacy Management</h2>
+    <p>Medicine inventory tracking with batch management, stock levels, and expiry monitoring.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Track medicine stock with batch numbers</li>
+      <li>Monitor expiry dates</li>
+      <li>Stock status indicators (In Stock / Low Stock)</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_pharmacy_1773731907345.png" alt="Pharmacy">
+  </div>
+
+  <!-- LAB -->
+  <div class="page" id="lab">
+    <h2>10. Diagnostics & Lab</h2>
+    <p>Laboratory test ordering and result management system.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Order lab tests linked to patients and doctors</li>
+      <li>Status tracking: Pending Approval → Processing → Complete</li>
+      <li>Auto-generated Lab IDs</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_lab_1773731918662.png" alt="Lab">
+  </div>
+
+  <!-- BEDS -->
+  <div class="page" id="beds">
+    <h2>11. Facility Management</h2>
+    <p>Bed and ward management with real-time availability tracking.</p>
+    <img class="screenshot" src="IMG_DIR/doc_beds_1773731929755.png" alt="Facility Management">
+  </div>
+
+  <!-- STAFF -->
+  <div class="page" id="staff">
+    <h2>12. Human Capital</h2>
+    <p>Staff and HR management including doctor, nurse, and support staff tracking with shift scheduling.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Staff directory with role and department assignment</li>
+      <li>Shift management (Morning / Evening / Night)</li>
+      <li>Status tracking (Active / On Leave)</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_staff_1773731940636.png" alt="Staff">
+  </div>
+
+  <!-- REPORTS -->
+  <div class="page" id="reports">
+    <h2>13. Intelligence & Reports</h2>
+    <p>Analytics and reporting module for generating hospital performance insights.</p>
+    <img class="screenshot" src="IMG_DIR/doc_reports_1773731951956.png" alt="Reports">
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="page" id="inventory">
+    <h2>14. Hospital Logistics</h2>
+    <p>Inventory and supply chain management for tracking hospital supplies, PPE, surgical equipment, and consumables.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Track items with stock levels and consumption rates</li>
+      <li>Status indicators: In Stock, Low Stock, Critical</li>
+      <li>Reorder functionality per item</li>
+      <li>Category-based organization (PPE, Medical, Surgical, General)</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_inventory_1773731963205.png" alt="Inventory">
+  </div>
+
+  <!-- BLOOD BANK -->
+  <div class="page" id="bloodbank">
+    <h2>15. Emergency Blood Bank</h2>
+    <p>Real-time blood unit availability tracking with donation and request activity logs.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Card-based view for all 8 blood groups (A+, A-, B+, B-, AB+, AB-, O+, O-)</li>
+      <li>Status: Stable, Low, Critical with color-coded indicators</li>
+      <li>Daily stock trend tracking</li>
+      <li>Recent activity log (Donations & Requests)</li>
+    </ul>
+    <img class="screenshot" src="IMG_DIR/doc_bloodbank_1773731975149.png" alt="Blood Bank">
+  </div>
+
+  <!-- RESPONSIVE DESIGN -->
+  <div class="page" id="responsive">
+    <h2>16. Responsive Design</h2>
+    <p>The application is fully responsive across all device sizes using modern CSS with Flexbox and media queries.</p>
+    <table>
+      <thead>
+        <tr><th>Breakpoint</th><th>Width</th><th>Sidebar</th><th>Layout</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Desktop</td><td>≥1025px</td><td>Full (240px, labels visible)</td><td>Standard margin offset</td></tr>
+        <tr><td>Tablet</td><td>769–1024px</td><td>Collapsed (68px, icons only)</td><td>Reduced margins</td></tr>
+        <tr><td>Mobile</td><td>≤768px</td><td>Hidden (hamburger overlay)</td><td>Full width</td></tr>
+        <tr><td>Small Mobile</td><td>≤480px</td><td>Hidden (hamburger overlay)</td><td>Single-column cards</td></tr>
+      </tbody>
+    </table>
+    <img class="screenshot" src="IMG_DIR/tablet_dashboard_1773731579768.png" alt="Tablet View">
+    <img class="screenshot" src="IMG_DIR/mobile_dashboard_initial_1773731591493.png" alt="Mobile View" style="max-width: 50%; display: block; margin: 0 auto;">
+  </div>
+
+  <!-- THEMING -->
+  <div class="page" id="theming" style="page-break-after: avoid;">
+    <h2>17. Theming & Dark Mode</h2>
+    <p>The application supports both light and dark themes with a toggle button in the navbar. Theme preference is persisted in <code>localStorage</code>.</p>
+    <h3>Implementation</h3>
+    <ul>
+      <li>CSS variables defined in <code>:root</code> for light mode (default)</li>
+      <li><code>[data-theme="dark"]</code> selector overrides all variables for dark mode</li>
+      <li>Theme toggle sets <code>data-theme</code> attribute on <code>&lt;html&gt;</code> element</li>
+      <li>Smooth transitions on all color changes</li>
+    </ul>
+
+    <div class="footer">
+      <p>HMS Core v1.0.0 Premium — Hospital Management System Documentation</p>
+      <p>© 2026 Asif Khan. All rights reserved.</p>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from .. import crud, models, schemas
+from ..auth_context import get_current_user_id
+from ..database import get_db
+
+router = APIRouter(prefix="/blood_inventory", tags=["Blood Bank"])
+
+
+@router.get("", response_model=list[schemas.BloodInventoryRead])
+def list_blood_inventory(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    return crud.list_entities(db, models.BloodInventory, user_id)
+
+
+@router.post("", response_model=schemas.BloodInventoryRead)
+def create_blood_inventory(
+    payload: schemas.BloodInventoryCreate,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    return crud.create_entity(db, models.BloodInventory, payload, user_id)
+
+
+@router.put("/{bg_id}", response_model=schemas.BloodInventoryRead)
+def update_blood_inventory(
+    bg_id: int,
+    payload: schemas.BloodInventoryUpdate,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, user_id)
+    return crud.update_entity(db, item, payload)
+
+
+@router.delete("/{bg_id}")
+def delete_blood_inventory(
+    bg_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, user_id)
+    return crud.delete_entity(db, item)

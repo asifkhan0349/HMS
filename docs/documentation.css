@@ -1,0 +1,308 @@
+:root {
+  --ink: #162132;
+  --muted: #5e6b7f;
+  --line: #d8e0eb;
+  --panel: #f4f7fb;
+  --brand: #0f6cbf;
+  --brand-deep: #0b3c6f;
+  --ok: #198754;
+  --warn: #b7791f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 15px;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #eef3f9;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+}
+
+.doc-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  background: #fff;
+}
+
+.page {
+  padding: 44px 52px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cover {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(15, 108, 191, 0.95), rgba(11, 60, 111, 0.96)),
+    url("../public/hms_bg.png") center/cover no-repeat;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cover h1 {
+  font-size: 2.6rem;
+  line-height: 1.1;
+  margin: 0 0 16px;
+}
+
+.cover p {
+  max-width: 680px;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.cover-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.cover-card,
+.info-card,
+.module-card,
+.shot-card,
+.callout {
+  border: 1px solid rgba(20, 34, 50, 0.1);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(13, 34, 62, 0.08);
+}
+
+.cover-card {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  padding: 16px 18px;
+}
+
+.cover-card strong,
+.cover-card span {
+  display: block;
+}
+
+.toc {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #f9fbfe 0%, #f1f6fb 100%);
+}
+
+.toc div {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 1.8rem;
+  color: var(--brand-deep);
+}
+
+h3 {
+  margin: 0 0 8px;
+  font-size: 1.08rem;
+}
+
+.lede {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+.grid-2,
+.grid-3 {
+  display: grid;
+  gap: 18px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.info-card,
+.module-card,
+.shot-card,
+.callout {
+  padding: 18px 20px;
+}
+
+.info-card ul,
+.module-card ul,
+.callout ul {
+  margin: 10px 0 0 18px;
+  padding: 0;
+}
+
+.info-card li,
+.module-card li,
+.callout li {
+  margin: 0 0 6px;
+}
+
+.module-card {
+  break-inside: avoid;
+}
+
+.module-card p,
+.shot-card p,
+.info-card p,
+.callout p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.kpi {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.kpi strong {
+  display: block;
+  font-size: 1.55rem;
+  color: var(--brand-deep);
+}
+
+.shot-card {
+  padding: 14px;
+}
+
+.shot-card img,
+.hero-shot img {
+  width: 100%;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+}
+
+.shot-card h3 {
+  margin-top: 14px;
+}
+
+.hero-shot {
+  margin-top: 24px;
+}
+
+.hero-shot figcaption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.timeline {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline li {
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--brand);
+  background: var(--panel);
+  border-radius: 0 12px 12px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 0.94rem;
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--line);
+  padding: 11px 12px;
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--panel);
+  text-align: left;
+}
+
+.status-ok {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.status-warn {
+  color: var(--warn);
+  font-weight: 700;
+}
+
+.footer-note {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .doc-shell {
+    max-width: none;
+  }
+
+  .page {
+    border-bottom: 0;
+    page-break-after: always;
+    padding: 0;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  .cover {
+    min-height: auto;
+    padding: 42px;
+  }
+
+  .shot-card,
+  .module-card,
+  .info-card,
+  .callout,
+  .cover-card,
+  .kpi {
+    box-shadow: none;
+  }
+}
