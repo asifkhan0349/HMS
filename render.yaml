@@ -16,7 +16,6 @@ services:
   - type: web
     runtime: static
     name: hms-frontend
-    plan: free
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     envVars:
