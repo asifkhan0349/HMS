@@ -1,0 +1,69 @@
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  # Using Node 20 as it's the current LTS and widely compatible
+  NODE_IMAGE: node:20-alpine
+  # Using Python 3.11 for the FastAPI backend
+  PYTHON_IMAGE: python:3.11-slim
+
+# ---- FRONTEND JOBS ----
+
+frontend:lint:
+  image: $NODE_IMAGE
+  stage: lint
+  script:
+    - npm ci
+    - npm run lint
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull-push
+
+frontend:build:
+  image: $NODE_IMAGE
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+# ---- BACKEND JOBS ----
+
+backend:test:
+  image: $PYTHON_IMAGE
+  stage: test
+  variables:
+    # Ensure stdout/stderr are unbuffered
+    PYTHONUNBUFFERED: 1
+  before_script:
+    - cd backend
+    - apt-get update && apt-get install -y libpq-dev gcc # Required for psycopg2
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    # Simple sanity check to verify the app can be imported and dependencies are satisfied
+    - python -c "from app import main; print('Backend sanity check passed')"
+    # Add your test commands here (e.g., pytest) when tests are available
+    # - pytest
+  cache:
+    key:
+      files:
+        - backend/requirements.txt
+    paths:
+      - ~/.cache/pip
