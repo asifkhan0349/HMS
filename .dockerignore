@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.venv/
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/hms.db
+backend/hms.db.bak*
+.git/
+.env
+.coverage
+htmlcov/

@@ -1,0 +1,9 @@
+remote: GitLab:         
+remote: A default branch (e.g. main) does not yet exist for hamathopc-group/hospital-management-system        
+remote: Ask a project Owner or Maintainer to create a default branch:        
+remote: 
+remote:   https://gitlab.com/hamathopc-group/hospital-management-system/-/project_members        
+remote: 
+To https://gitlab.com/hamathopc-group/hospital-management-system.git
+ ! [remote rejected] main -> main (pre-receive hook declined)
+error: failed to push some refs to 'https://gitlab.com/hamathopc-group/hospital-management-system.git'
