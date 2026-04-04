@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build:bones": "boneyard-js build",
-    "build": "npm run build:bones && vite build",
+    "build": "vite build",
+    "build:dev": "npm run build:bones && vite build",
     "build:ci": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
