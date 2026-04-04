@@ -30,7 +30,7 @@ frontend:build:
   stage: build
   script:
     - npm ci
-    - npm run build
+    - npm run build:ci
   cache:
     key:
       files:
