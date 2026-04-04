@@ -5,6 +5,7 @@ import { bloodInventoryApi, bloodActivitiesApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const BloodBank = () => {
   const { showToast } = useApp();
@@ -227,14 +228,9 @@ const BloodBank = () => {
         </div>
       </div>
 
-      <div className="row g-4 mb-5">
-        {loadingInventory ? (
-          <div className="col-12 text-center py-5">
-            <div className="spinner-border text-danger" role="status">
-              <span className="visually-hidden">Loading Inventory...</span>
-            </div>
-          </div>
-        ) : [
+      <Skeleton name="bloodbank-inventory" loading={loadingInventory}>
+        <div className="row g-4 mb-5">
+        {[
           'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'
         ].map(type => {
           const group = bloodGroups.find(g => g.type === type) || { 
@@ -242,8 +238,8 @@ const BloodBank = () => {
           };
           return (
             <div key={type} className="col-md-3">
-              <div className="glass-card p-4 transition-all hover-translate-y position-relative h-100">
-                <div className="d-flex justify-content-between align-items-start mb-3">
+              <div className="glass-card p-4 transition-all hover-translate-y position-relative h-100 d-flex flex-column">
+                <div className="d-flex justify-content-between align-items-center mb-4">
                   <div 
                     className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
                     style={{ 
@@ -285,17 +281,19 @@ const BloodBank = () => {
                     )}
                   </div>
                 </div>
-                <h3 className="fw-bold mb-1" style={{ fontVariantNumeric: 'tabular-nums' }}>{group.units} Units</h3>
-                <p className="small text-muted mb-0">Stock Trend: <span className={group.trend?.includes('+') ? 'text-success' : 'text-danger'}>{group.trend}</span> today</p>
-                {group.units === 0 && <div className="text-warning small mt-2"><i className="bi bi-exclamation-triangle me-1"></i>Inventory Empty</div>}
+                <h3 className="fw-bold mb-1 fs-2 mt-auto" style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{group.units} Units</h3>
+                <p className="small text-muted mb-0 fw-medium">Stock Trend: <span className={group.trend?.includes('+') ? 'text-success fw-bold' : 'text-danger fw-bold'}>{group.trend}</span> today</p>
+                {group.units === 0 && <div className="text-warning small mt-3 fw-bold"><i className="bi bi-exclamation-triangle me-1"></i>Inventory Empty</div>}
               </div>
             </div>
           );
         })}
-      </div>
+        </div>
+      </Skeleton>
 
       <div className="glass-card p-4">
         <h5 className="fw-bold mb-4">Recent Activity Logs</h5>
+        <Skeleton name="bloodbank-activities" loading={loadingActivities}>
         <div className="table-responsive">
           <table className="table">
             <thead>
@@ -347,6 +345,7 @@ const BloodBank = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
       </div>
 
       {/* Log Activity Modal */}

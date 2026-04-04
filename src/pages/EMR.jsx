@@ -5,6 +5,7 @@ import { recordsApi, patientsApi, staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const EMR = () => {
   const createDraftRecord = () => ({
@@ -133,6 +134,7 @@ const EMR = () => {
           <h5 className="fw-bold mb-0">Encrypted Record History</h5>
           <div className="text-muted small">Backend records loaded: {recordSummary.total}</div>
         </div>
+        <Skeleton name="emr-table" loading={loading}>
         <div className="table-responsive">
           <table className="table table-hover mb-0 align-middle">
             <thead>
@@ -147,9 +149,7 @@ const EMR = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></td></tr>
-              ) : records.length === 0 ? (
+              {records.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="p-0">
                     <EmptyState 
@@ -195,6 +195,7 @@ const EMR = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Electronic Clinical Entry Protocol">

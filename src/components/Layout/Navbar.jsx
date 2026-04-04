@@ -27,7 +27,7 @@ const Navbar = ({ onToggleSidebar }) => {
         'invent': '/inventory', 'stock': '/inventory',
         'blood': '/bloodbank',
         'rep': '/reports', 'analy': '/reports',
-        'dash': '/'
+        'dash': '/dashboard'
       };
       
       const match = Object.keys(modules).find(key => query.includes(key));

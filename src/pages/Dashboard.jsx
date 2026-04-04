@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { dashboardApi } from '../lib/api';
 import EmptyState from '../components/UI/EmptyState';
+import { Skeleton } from 'boneyard-js/react';
+import { SkeletonStatCard } from '../components/UI/SkeletonShimmer';
 
 
 const StatCard = memo(({ stat }) => {
@@ -16,10 +18,16 @@ const StatCard = memo(({ stat }) => {
       style={{ cursor: 'pointer' }}
     >
       <div className="glass-card p-4 stat-card h-100">
-        <div className="d-flex justify-content-between mb-3">
+        <div className="d-flex justify-content-between mb-3 align-items-start">
           <div
-            className="stat-icon-wrapper"
-            style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}
+            className="stat-icon-wrapper rounded-3 d-flex align-items-center justify-content-center shadow-sm"
+            style={{ 
+              background: 'var(--accents-1)', 
+              border: '1px solid var(--accents-2)',
+              width: '56px',
+              height: '56px',
+              fontSize: '1.75rem'
+            }}
           >
             <i
               className={stat.icon}
@@ -40,10 +48,10 @@ const StatCard = memo(({ stat }) => {
             {stat.trend}
           </span>
         </div>
-        <h3 className="fw-bold mb-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <h3 className="fw-bold mb-1 fs-2 mt-2" style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>
           {stat.value}
         </h3>
-        <p className="text-muted mb-0 fw-medium small text-uppercase" style={{ letterSpacing: '0.05em' }}>
+        <p className="text-muted mb-0 fw-semibold text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.75rem' }}>
           {stat.title}
         </p>
       </div>
@@ -53,7 +61,7 @@ const StatCard = memo(({ stat }) => {
 
 const QueueItem = memo(({ app }) => {
   const { showToast } = useApp();
-  const [timePart = app.time, meridiem = ''] = app.time.split(' ');
+  const [timePart = '', meridiem = ''] = typeof app?.time === 'string' ? app.time.split(' ') : ['-', ''];
 
   return (
     <div className="list-group-item bg-transparent border-0 p-0 mb-2">
@@ -216,11 +224,21 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="row g-4 mb-5">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} stat={stat} />
-        ))}
-      </div>
+      {!statsData ? (
+        <div className="row g-4 mb-5" role="status" aria-label="Loading dashboard metrics...">
+          {[0, 1, 2, 3].map((i) => (
+            <div className="col-md-3" key={i}>
+              <SkeletonStatCard />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="row g-4 mb-5">
+          {stats.map((stat) => (
+            <StatCard key={stat.title} stat={stat} />
+          ))}
+        </div>
+      )}
 
       <div className="row g-4">
         <div className="col-lg-8">
@@ -249,17 +267,19 @@ const Dashboard = () => {
         <div className="col-lg-4">
           <div className="glass-card p-4 h-100">
             <h5 className="fw-bold mb-4">Live Medical Queue</h5>
-            <div className="list-group list-group-flush gap-2">
-              {queueData.length === 0 ? (
-                <EmptyState 
-                  icon="bi-calendar2-x"
-                  title="Queue Empty"
-                  description="No patient appointments are currently queued."
-                />
-              ) : queueData.map((app) => (
-                <QueueItem key={app.id} app={app} />
-              ))}
-            </div>
+            <Skeleton name="dashboard-queue" loading={!statsData}>
+              <div className="list-group list-group-flush gap-2">
+                {queueData.length === 0 ? (
+                  <EmptyState 
+                    icon="bi-calendar2-x"
+                    title="Queue Empty"
+                    description="No patient appointments are currently queued."
+                  />
+                ) : queueData.map((app) => (
+                  <QueueItem key={app.id} app={app} />
+                ))}
+              </div>
+            </Skeleton>
             <button className="btn btn-glass w-100 mt-4 py-2 fw-semibold" onClick={() => navigate('/appointments')}>
               View All Appointments
             </button>

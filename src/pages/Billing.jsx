@@ -5,6 +5,7 @@ import { invoicesApi, patientsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const Billing = () => {
   const { showToast } = useApp();
@@ -130,8 +131,9 @@ const Billing = () => {
             </button>
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
+        <Skeleton name="billing-table" loading={loading}>
+          <div className="table-responsive">
+            <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
                 <th className="px-4 py-3">Invoice ID</th>
@@ -144,9 +146,7 @@ const Billing = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></td></tr>
-              ) : invoices.length === 0 ? (
+              {invoices.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="p-0">
                     <EmptyState 
@@ -210,6 +210,7 @@ const Billing = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Generate Invoice">

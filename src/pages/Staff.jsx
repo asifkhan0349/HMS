@@ -5,6 +5,7 @@ import { staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const Staff = () => {
   const { showToast } = useApp();
@@ -132,8 +133,9 @@ const Staff = () => {
             <button className="btn btn-sm btn-outline-secondary">On Duty {staff.filter((member) => member.status === 'Active').length}</button>
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
+        <Skeleton name="staff-table" loading={loading}>
+          <div className="table-responsive">
+            <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
                 <th className="px-4 py-4">Staff Member</th>
@@ -145,9 +147,7 @@ const Staff = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></td></tr>
-              ) : staff.length === 0 ? (
+              {staff.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-0">
                     <EmptyState 
@@ -209,6 +209,7 @@ const Staff = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Personnel Onboarding Protocol">

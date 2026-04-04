@@ -1,0 +1,70 @@
+{
+  "breakpoints": {
+    "375": {
+      "name": "pharmacy-table",
+      "viewportWidth": 301,
+      "width": 301,
+      "height": 376,
+      "bones": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 175.2855,
+          "h": 36,
+          "r": 0
+        },
+        {
+          "x": 0,
+          "y": 36,
+          "w": 175.2855,
+          "h": 339,
+          "r": 0
+        }
+      ]
+    },
+    "768": {
+      "name": "pharmacy-table",
+      "viewportWidth": 694,
+      "width": 694,
+      "height": 377,
+      "bones": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 36,
+          "r": 0
+        },
+        {
+          "x": 0,
+          "y": 36,
+          "w": 100,
+          "h": 341,
+          "r": 0
+        }
+      ]
+    },
+    "1280": {
+      "name": "pharmacy-table",
+      "viewportWidth": 1182,
+      "width": 1182,
+      "height": 418,
+      "bones": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 43,
+          "r": 0
+        },
+        {
+          "x": 0,
+          "y": 43,
+          "w": 100,
+          "h": 375,
+          "r": 0
+        }
+      ]
+    }
+  }
+}

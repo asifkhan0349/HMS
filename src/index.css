@@ -20,6 +20,8 @@
   --geist-error: #ee0000;
   --geist-warning: #f5a623;
   --geist-link: #0070f3;
+  
+  --boneyard-color: rgba(255, 255, 255, 0.06);
 
   /* HMS specific overrides */
   --primary: var(--geist-success);
@@ -127,10 +129,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-link-custom.active {
-  background: var(--accents-1);
-  color: var(--geist-foreground);
+  background: rgba(0, 112, 243, 0.08);
+  color: var(--geist-success);
   font-weight: 600;
-  box-shadow: none;
+  box-shadow: inset 4px 0 0 var(--geist-success);
 }
 
 .main-content {

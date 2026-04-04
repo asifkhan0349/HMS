@@ -5,11 +5,13 @@ import { inventoryApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const Inventory = () => {
   const { showToast } = useApp();
   const { 
     data: inventoryItems, 
+    loading,
     addData: addInventory,
     updateData: updateInventory,
     removeData: deleteInventory
@@ -159,6 +161,7 @@ const Inventory = () => {
         </div>
       </div>
 
+      <Skeleton name="inventory-table" loading={loading}>
       <div className="glass-card overflow-hidden">
         <div className="table-responsive">
           <table className="table mb-0 align-middle">
@@ -238,6 +241,7 @@ const Inventory = () => {
           </table>
         </div>
       </div>
+      </Skeleton>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Inventory Item">
         <form onSubmit={handleSubmit}>

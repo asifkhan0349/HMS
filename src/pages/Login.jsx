@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
-const Login = () => {
-  const [mode, setMode] = useState('login');
+const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
+  const [mode, setMode] = useState(initialMode);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -13,15 +13,22 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login, signup, showToast } = useApp();
+  const { user, login, signup, showToast } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || '/dashboard';
 
   useEffect(() => {
-    setMode(location.pathname === '/signup' ? 'signup' : 'login');
-  }, [location.pathname]);
+    // If user is already logged in, they should not see the login page
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   const resetForm = () => {
     setFullName('');
@@ -36,7 +43,6 @@ const Login = () => {
     setMode(nextMode);
     setShowPassword(false);
     resetForm();
-    navigate(nextMode === 'signup' ? '/signup' : '/login', { replace: true });
   };
 
   const handleSubmit = async (e) => {
@@ -52,11 +58,14 @@ const Login = () => {
       if (mode === 'login') {
         await login(username, password);
         showToast('Login successful!', 'success');
+        const target = location.state?.from?.pathname || '/dashboard';
+        navigate(target, { replace: true });
+        if (isModal && onClose) onClose();
       } else {
         await signup({ fullName, username, email, password, role });
-        showToast('Account created successfully.', 'success');
+        showToast('Account created successfully. Please sign in.', 'success');
+        switchMode('login');
       }
-      navigate(from, { replace: true });
     } catch (error) {
       showToast(error.message || 'Authentication failed.', 'error');
     } finally {
@@ -64,16 +73,31 @@ const Login = () => {
     }
   };
 
-  return (
+  const content = (
     <div
-      className="login-page d-flex align-items-center justify-content-center"
-      style={{ minHeight: '100vh', background: 'var(--geist-background)' }}
+      className="p-4 p-md-5 position-relative shadow-lg"
+      style={{ 
+        maxWidth: '460px', 
+        width: '100%', 
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        border: '1px solid var(--accents-2)',
+        borderRadius: '12px',
+        backgroundColor: 'var(--geist-background)'
+      }}
+      onClick={(e) => e.stopPropagation()}
     >
-      <div
-        className="glass-card p-5"
-        style={{ maxWidth: '460px', width: '100%', border: '1px solid var(--accents-2)' }}
-      >
-        <div className="text-center mb-5">
+      {isModal && (
+        <button 
+          type="button"
+          className="btn btn-link position-absolute p-0 text-muted" 
+          style={{ top: '20px', right: '20px' }}
+          onClick={onClose}
+        >
+          <i className="bi bi-x-lg fs-5"></i>
+        </button>
+      )}
+      <div className="text-center mb-5">
           <h3 className="fw-bold mb-2">{mode === 'login' ? 'Sign In' : 'Create Account'}</h3>
           <p className="text-muted small mb-0">Elite Hospital Management System</p>
         </div>
@@ -237,6 +261,32 @@ const Login = () => {
           </button>
         </p>
       </div>
+  );
+
+  if (isModal) {
+    return (
+      <div 
+        className="modal-overlay d-flex align-items-center justify-content-center"
+        style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 1050
+        }}
+        onClick={onClose}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="login-page d-flex align-items-center justify-content-center"
+      style={{ minHeight: '100vh', background: 'var(--geist-background)' }}
+    >
+      {content}
     </div>
   );
 };

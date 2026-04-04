@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { reportsApi, downloadCsv } from '../lib/api';
+import { Skeleton } from 'boneyard-js/react';
 
 const formatTimestamp = (date) =>
   new Intl.DateTimeFormat('en-GB', {
@@ -20,34 +21,35 @@ const Reports = () => {
   }, [showToast]);
 
   const reports = useMemo(() => {
-    if (!stats) return [];
+    // Provide a mocked stats object so that the layout renders for boneyard
+    const realStats = stats || { appointmentsCount: 0, revenue: 0, lowStockCount: 0, doctorCount: 0 };
     const now = new Date();
 
     return [
       {
         id: 'operational',
-        title: `OPD Daily Report (${stats.appointmentsCount || 0} Appointments)`,
+        title: `OPD Daily Report (${realStats.appointmentsCount || 0} Appointments)`,
         category: 'Operational',
         lastGen: formatTimestamp(now),
         icon: 'bi-clipboard2-pulse',
       },
       {
         id: 'financial',
-        title: `Pharmacy & Billing Summary (${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(stats.revenue || 0)})`,
+        title: `Pharmacy & Billing Summary (${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(realStats.revenue || 0)})`,
         category: 'Financial',
         lastGen: formatTimestamp(now),
         icon: 'bi-cash-stack',
       },
       {
         id: 'inventory',
-        title: `Inventory Stock Level (${stats.lowStockCount || 0} Alerts)`,
+        title: `Inventory Stock Level (${realStats.lowStockCount || 0} Alerts)`,
         category: 'Inventory',
         lastGen: formatTimestamp(now),
         icon: 'bi-box-seam',
       },
       {
         id: 'performance',
-        title: `Consultation Efficiency (${stats.doctorCount || 0} Doctors Active)`,
+        title: `Consultation Efficiency (${realStats.doctorCount || 0} Doctors Active)`,
         category: 'Performance',
         lastGen: formatTimestamp(now),
         icon: 'bi-speedometer2',
@@ -118,6 +120,7 @@ const Reports = () => {
         </button>
       </div>
 
+      <Skeleton name="reports-grid" loading={!stats}>
       <div className="row g-4 mb-5">
         {reports.map((report) => (
           <div key={report.id} className="col-md-6">
@@ -153,7 +156,9 @@ const Reports = () => {
           </div>
         ))}
       </div>
+      </Skeleton>
 
+      <Skeleton name="reports-advisory" loading={!stats}>
       <div
         className="glass-card p-4 border-start border-4 border-accent shadow-lg"
         style={{ borderLeftColor: 'var(--accent-color) !important' }}
@@ -181,6 +186,7 @@ const Reports = () => {
           </div>
         </div>
       </div>
+      </Skeleton>
     </div>
   );
 };

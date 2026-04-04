@@ -6,6 +6,7 @@ import { patientsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 // Memoized individual row
 const PatientRow = memo(({ patient, onEdit, onDelete }) => {
@@ -200,8 +201,9 @@ const Patients = () => {
             />
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
+        <Skeleton name="patients-table" loading={loading}>
+          <div className="table-responsive">
+            <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
                 <th className="px-4 py-3">ID</th>
@@ -213,9 +215,7 @@ const Patients = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></td></tr>
-              ) : filteredPatients.length === 0 ? (
+              {filteredPatients.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-0">
                     <EmptyState 
@@ -238,6 +238,7 @@ const Patients = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
         <div className="p-4 border-top d-flex justify-content-between align-items-center">
           <small className="text-muted">Showing {filteredPatients.length} active profiles</small>
           <nav aria-label="Pagination">

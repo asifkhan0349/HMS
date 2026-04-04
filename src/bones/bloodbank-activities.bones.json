@@ -1,0 +1,70 @@
+{
+  "breakpoints": {
+    "375": {
+      "name": "bloodbank-activities",
+      "viewportWidth": 253,
+      "width": 253,
+      "height": 339,
+      "bones": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 197.6285,
+          "h": 36,
+          "r": 0
+        },
+        {
+          "x": 0,
+          "y": 36,
+          "w": 197.6285,
+          "h": 302,
+          "r": 0
+        }
+      ]
+    },
+    "768": {
+      "name": "bloodbank-activities",
+      "viewportWidth": 646,
+      "width": 646,
+      "height": 340,
+      "bones": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 36,
+          "r": 0
+        },
+        {
+          "x": 0,
+          "y": 36,
+          "w": 100,
+          "h": 303,
+          "r": 0
+        }
+      ]
+    },
+    "1280": {
+      "name": "bloodbank-activities",
+      "viewportWidth": 1134,
+      "width": 1134,
+      "height": 358,
+      "bones": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 43,
+          "r": 0
+        },
+        {
+          "x": 0,
+          "y": 43,
+          "w": 100,
+          "h": 315,
+          "r": 0
+        }
+      ]
+    }
+  }
+}

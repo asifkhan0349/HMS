@@ -6,7 +6,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useApp();
 
   const menuItems = [
-    { title: 'Command Center', path: '/', icon: 'bi bi-activity' },
+    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity' },
     { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people' },
     { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event' },
     { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },

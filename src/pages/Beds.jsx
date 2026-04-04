@@ -5,6 +5,7 @@ import { bedsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const Beds = () => {
   const { showToast } = useApp();
@@ -116,14 +117,9 @@ const Beds = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      ) : wards.map((ward, wIdx) => (
-        <section key={wIdx} className="mb-5" aria-labelledby={`ward-${wIdx}`}>
+      <Skeleton name="beds-grid" loading={loading}>
+        {wards.map((ward, wIdx) => (
+          <section key={wIdx} className="mb-5" aria-labelledby={`ward-${wIdx}`}>
            <h5 id={`ward-${wIdx}`} className="fw-bold mb-4 d-flex align-items-center">
              {ward.name} 
              <span className="badge rounded-pill ms-3" style={{ fontSize: '0.7rem', background: 'var(--accents-1)', border: '1px solid var(--accents-2)', color: 'var(--geist-foreground)' }}>
@@ -191,7 +187,8 @@ const Beds = () => {
               ))}
            </div>
         </section>
-      ))}
+        ))}
+      </Skeleton>
 
       {/* Add Bed Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Bed">

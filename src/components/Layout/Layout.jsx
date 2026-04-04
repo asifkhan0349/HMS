@@ -8,7 +8,9 @@ const Layout = ({ children }) => {
   const { user, toast } = useApp();
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
-  const showNav = user && !isAuthPage;
+  const isLandingPage = location.pathname === '/';
+  const isPublicPage = isAuthPage || isLandingPage;
+  const showNav = user && !isPublicPage;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -47,7 +49,7 @@ const Layout = ({ children }) => {
       )}
       
       <main className={`main-content ${!showNav ? 'ms-0 pt-0' : ''}`}>
-        <div className="container-fluid p-4">
+        <div className={isPublicPage ? "" : "container-fluid p-4"}>
           {children}
         </div>
       </main>

@@ -5,6 +5,7 @@ import { testsApi, patientsApi, staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const Lab = () => {
   const { showToast } = useApp();
@@ -129,6 +130,7 @@ const Lab = () => {
           <h5 className="fw-bold mb-0">Active Diagnostic Queue</h5>
           <div className="text-white opacity-75 small">Processing now: {labStats.processing}</div>
         </div>
+        <Skeleton name="lab-table" loading={loading}>
         <div className="table-responsive">
           <table className="table table-hover mb-0 align-middle">
             <thead>
@@ -142,9 +144,7 @@ const Lab = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></td></tr>
-              ) : tests.length === 0 ? (
+              {tests.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-0">
                      <EmptyState 
@@ -214,6 +214,7 @@ const Lab = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
       </div>
 
       {/* New Test Modal */}

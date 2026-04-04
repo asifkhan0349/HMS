@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '../lib/api';
 
 const AppContext = createContext();
@@ -216,6 +217,7 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => localStorage.getItem('hms_theme') || 'light');
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -287,6 +289,7 @@ export const AppProvider = ({ children }) => {
     setUser(null);
     sessionStorage.removeItem('hms_token');
     sessionStorage.removeItem('hms_user_data');
+    window.location.href = '/';
   };
 
   const showToast = React.useCallback((message, type = 'info') => {

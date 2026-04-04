@@ -1,0 +1,93 @@
+Hospital Management System (HMS)
+Landing Page Feature Guide
+ 
+1. Home Page
+1
+Clear positioning (target: hospitals, clinics, labs)
+2
+Core modules preview (OPD, IPD, billing, pharmacy, EMR)
+3
+Proof (clients, testimonials, metrics)
+4
+CTA: Book demo / Start trial
+2. Product / Platform Overview
+1
+System architecture overview
+2
+Modules breakdown
+3
+Integrations (lab devices, insurance, SMS, WhatsApp)
+3. Features (Modular Pages)
+1
+OPD Management (appointments, queue, doctor dashboards)
+2
+IPD / Ward Management (bed allocation, admission/discharge, nursing workflows)
+3
+EMR (patient history, prescriptions, lab reports)
+4
+Billing & Insurance (invoicing, claims, payments)
+5
+Pharmacy & Inventory (drug tracking, expiry, POS)
+4. Solutions (By Customer Type)
+1
+Multi-specialty hospitals
+2
+Clinics
+3
+Diagnostic labs
+4
+Daycare centers
+5. Pricing
+1
+Tiered pricing (Clinic / Hospital / Enterprise)
+2
+Onboarding and support details
+3
+Transparent pricing or contact sales option
+
+6. Security & Compliance
+1
+Data encryption
+2
+Role-based access
+3
+Audit logs
+4
+ABDM / NDHM readiness
+7. Integrations
+1
+Lab machines
+2
+Payment gateways
+3
+WhatsApp / SMS APIs
+4
+Government systems
+8. Case Studies / Testimonials
+1
+Real hospital success stories
+2
+Performance metrics (efficiency, error reduction)
+9. About Page
+1
+Company credibility
+2
+Mission and vision
+10. Contact / Book Demo
+1
+Demo booking form
+2
+Sales contact
+3
+WhatsApp CTA
+11. Advanced / Differentiator Pages
+1
+Workflow visualization (end-to-end hospital flow)
+2
+ROI calculator
+3
+Interactive demo sandbox
+4
+Migration & onboarding support
+5
+Support & SLA details

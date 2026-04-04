@@ -5,6 +5,7 @@ import { appointmentsApi, patientsApi, staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import { Skeleton } from 'boneyard-js/react';
 
 const STATUS_OPTIONS = ['Scheduled', 'In Progress', 'Completed', 'Cancelled'];
 
@@ -150,8 +151,9 @@ const Appointments = () => {
             <button className="btn btn-sm px-3 text-muted">Completed {appointmentSummary.completedCount}</button>
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
+        <Skeleton name="appointments-table" loading={loading}>
+          <div className="table-responsive">
+            <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
                 <th className="px-4 py-3">Slot Time</th>
@@ -163,9 +165,7 @@ const Appointments = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></td></tr>
-              ) : appointments.length === 0 ? (
+              {appointments.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-0">
                     <EmptyState
@@ -257,6 +257,7 @@ const Appointments = () => {
             </tbody>
           </table>
         </div>
+        </Skeleton>
       </div>
 
       {/* Book Appointment Modal */}
