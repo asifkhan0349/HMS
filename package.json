@@ -13,7 +13,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "boneyard-js": "^1.6.0",
     "bootstrap": "^5.3.8",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
@@ -26,6 +25,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "boneyard-js": "^1.6.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",

@@ -8,6 +8,10 @@ variables:
   NODE_IMAGE: node:20-alpine
   # Using Python 3.11 for the FastAPI backend
   PYTHON_IMAGE: python:3.11-slim
+  # Skip browser downloads for Playwright/Puppeteer (not needed in CI build)
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+  PUPPETEER_SKIP_DOWNLOAD: "true"
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
 
 # ---- FRONTEND JOBS ----
 
