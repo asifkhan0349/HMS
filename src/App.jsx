@@ -5,7 +5,6 @@ import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 // Lazy load page components for better performance
-const Landing = lazy(() => import('./pages/Landing'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Patients = lazy(() => import('./pages/Patients'));
 const Appointments = lazy(() => import('./pages/Appointments'));
@@ -46,7 +45,10 @@ function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+
+              {/* Redirect root to dashboard */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
               {/* Protected Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

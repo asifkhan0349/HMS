@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
-  const [mode, setMode] = useState(initialMode);
+  const [searchParams] = useSearchParams();
+  const urlMode = searchParams.get('mode');
+  const [mode, setMode] = useState(urlMode || initialMode);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -27,8 +29,8 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
   }, [user, navigate]);
 
   useEffect(() => {
-    setMode(initialMode);
-  }, [initialMode]);
+    setMode(urlMode || initialMode);
+  }, [initialMode, urlMode]);
 
   const resetForm = () => {
     setFullName('');

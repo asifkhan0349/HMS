@@ -47,6 +47,18 @@ frontend:build:
       - dist/
     expire_in: 1 week
 
+landing:build:
+  image: $NODE_IMAGE
+  stage: build
+  script:
+    - cd landing
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - landing/dist/
+    expire_in: 1 week
+
 # ---- BACKEND JOBS ----
 
 backend:test:

@@ -13,12 +13,12 @@ if not DATABASE_URL:
     BACKEND_DIR = Path(__file__).resolve().parent.parent
     DATABASE_PATH = BACKEND_DIR / "hms.db"
     DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
+else:
+    # Ensure modern SQLAlchemy compatibility (replace legacy postgres:// with postgresql://)
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 API_PREFIX = "/api"
 
-# Read allowed origins from env; fall back to localhost dev servers
-_raw_origins = os.environ.get(
-    "ALLOWED_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173",
-)
-CORS_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+# Completely automate CORS to allow any origin so the user doesn't have to manually configure domain whitelists
+CORS_ORIGINS = ["*"]
