@@ -28,7 +28,7 @@ const faqItems = [
 export function FaqSection() {
   return (
     <section id="faq" className="py-32 bg-white relative overflow-hidden">
-      <div className="section-container">
+      <div className="section-container max-w-5xl">
         <div className="grid lg:grid-cols-[1fr,1.5fr] gap-16 items-start">
           <ScrollReveal>
             <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-8 text-black">

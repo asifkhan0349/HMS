@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import { Layout, Users, Receipt, Droplets, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { ScrollReveal } from '../ui/effects/scroll-reveal';
 
-import { ScrollReveal } from '../ui/effects/scroll-reveal';
-
 const previewRoutes = [
   {
     id: 'dashboard',
@@ -53,23 +51,9 @@ const previewRoutes = [
 ];
 
 export function AppPreviewSection() {
-  const renderScreenshot = (preview, routeTitle) => {
-    return (
-      <div className="relative rounded-xl overflow-hidden border border-border/50 shadow-2xl bg-card transition-all duration-500 group-hover:shadow-primary/10 group-hover:border-primary/20">
-        <img 
-          src={preview.image} 
-          alt={`${routeTitle} ${preview.type} View`} 
-          className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.03]" 
-        />
-        {/* Subtle inner shadow/gloss */}
-        <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10" />
-      </div>
-    );
-  };
-
   return (
     <section id="previews" className="py-24 bg-muted/10 relative overflow-hidden">
-      <div className="section-container">
+      <div className="container mx-auto px-6 md:px-8">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <ScrollReveal>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
@@ -96,7 +80,7 @@ export function AppPreviewSection() {
                 </div>
               </ScrollReveal>
 
-              <div className="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-end">
+              <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {route.previews.map((preview, idx) => (
                   <ScrollReveal key={preview.type} delay={idx * 0.1}>
                     <motion.div
@@ -104,16 +88,24 @@ export function AppPreviewSection() {
                       className="group relative flex flex-col"
                     >
                       {/* Label and Icon */}
-                      <div className="flex items-center justify-between mb-6 px-2">
+                      <div className="flex items-center justify-between mb-4 px-2">
                         <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/70 group-hover:text-primary transition-colors">
                           {preview.type}
                         </span>
                         <preview.icon className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                       </div>
 
-                      {/* Screenshot Container */}
-                      <div className="relative">
-                        {renderScreenshot(preview, route.title)}
+                      {/* Image Container with Mockup-like Frame */}
+                      <div className={`relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-lg transition-all duration-500 group-hover:shadow-2xl group-hover:border-primary/20 ${
+                        preview.view === 'mobile' ? 'max-w-[280px] mx-auto' : ''
+                      }`}>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                        <img
+                          src={preview.image}
+                          alt={`${route.title} ${preview.type} View`}
+                          className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-[1.02]"
+                          loading="lazy"
+                        />
                       </div>
                     </motion.div>
                   </ScrollReveal>

@@ -189,7 +189,7 @@ const Dashboard = () => {
                     ['Clinical Staff',      String(statsData.staffCount)],
                     ['Active Lab Tests',    String(statsData.testsCount)],
                     ['Total Invoices',      String(statsData.invoicesCount)],
-                    ['Revenue (₹)',       new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(statsData.totalRevenue)],
+                    ['Revenue (INR)',       new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(statsData.totalRevenue)],
                   ],
                   theme: 'striped',
                   headStyles: { fillColor: [0, 112, 243] },

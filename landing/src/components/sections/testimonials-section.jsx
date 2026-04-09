@@ -7,7 +7,7 @@ export function TestimonialsSection() {
     <section id="testimonials" className="py-32 bg-white relative overflow-hidden">
       <div className="section-container">
         <ScrollReveal>
-          <div>
+          <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row gap-16 items-center">
               <div className="flex-1">
                 <Quote className="h-20 w-20 text-primary/10 mb-8 -ml-6" />
