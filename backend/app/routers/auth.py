@@ -12,11 +12,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 # SMTP Configuration
 conf = ConnectionConfig(
-    MAIL_USERNAME=os.environ.get("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.environ.get("MAIL_PASSWORD"),
-    MAIL_FROM=os.environ.get("MAIL_FROM"),
-    MAIL_PORT=int(os.environ.get("MAIL_PORT", 587)),
-    MAIL_SERVER=os.environ.get("MAIL_SERVER"),
+    MAIL_USERNAME=os.environ.get("MAIL_USERNAME") or "",
+    MAIL_PASSWORD=os.environ.get("MAIL_PASSWORD") or "",
+    MAIL_FROM=os.environ.get("MAIL_FROM") or "hms@example.com",
+    MAIL_PORT=int(os.environ.get("MAIL_PORT") or 587),
+    MAIL_SERVER=os.environ.get("MAIL_SERVER") or "",
     MAIL_STARTTLS=os.environ.get("MAIL_STARTTLS", "True") == "True",
     MAIL_SSL_TLS=os.environ.get("MAIL_SSL_TLS", "False") == "True",
     USE_CREDENTIALS=True,
