@@ -118,7 +118,7 @@ const Staff = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="fw-bold mb-0">Human Resources & Staffing</h2>
-          <p className="text-white opacity-75 mb-0">Monitor clinical personnel deployment and shifts.</p>
+          <p className="text-muted mb-0">Monitor clinical personnel deployment and shifts.</p>
         </div>
         <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
           <i className="bi bi-person-plus-fill me-2"></i>Add Staff Member
@@ -169,14 +169,14 @@ const Staff = () => {
                       >
                         <i className="bi bi-person-workspace"></i>
                       </div>
-                      <h6 className="mb-0 fw-bold text-white">{s.name}</h6>
+                      <h6 className="mb-0 fw-bold text-black">{s.name}</h6>
                     </div>
                   </td>
                   <td className="py-4">
                     <span className="badge-soft-primary px-3 py-1 rounded-pill">{s.role}</span>
                   </td>
-                  <td className="py-4 text-white opacity-75 small">{s.dept}</td>
-                  <td className="py-4 text-center text-white-50">{s.shift}</td>
+                  <td className="py-4 text-muted small">{s.dept}</td>
+                  <td className="py-4 text-center text-muted">{s.shift}</td>
                   <td className="py-4 text-center">
                     <span
                       className={`badge rounded-pill px-4 py-2 border border-opacity-25 ${
