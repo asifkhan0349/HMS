@@ -1,12 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body, BackgroundTasks
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
+from fastapi_mail import FastMail, ConnectionConfig, MessageSchema, MessageType
+import os
 
 from .. import auth_context, models, schemas
 from ..database import get_db
-from ..security import create_access_token, hash_password, verify_password
+from ..security import create_access_token, hash_password, verify_password, create_reset_token, verify_reset_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# SMTP Configuration
+conf = ConnectionConfig(
+    MAIL_USERNAME=os.environ.get("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.environ.get("MAIL_PASSWORD"),
+    MAIL_FROM=os.environ.get("MAIL_FROM"),
+    MAIL_PORT=int(os.environ.get("MAIL_PORT", 587)),
+    MAIL_SERVER=os.environ.get("MAIL_SERVER"),
+    MAIL_STARTTLS=os.environ.get("MAIL_STARTTLS", "True") == "True",
+    MAIL_SSL_TLS=os.environ.get("MAIL_SSL_TLS", "False") == "True",
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
+)
 
 
 def normalize_username(username: str) -> str:
@@ -137,3 +152,58 @@ def change_password(
     user.password_hash = hash_password(payload.new_password)
     db.commit()
     return {"message": "Password changed successfully. Please keep your new password safe."}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    payload: schemas.ForgotPasswordRequest, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    normalized_email = normalize_email(payload.email)
+    user = db.query(models.User).filter(func.lower(models.User.email) == normalized_email).first()
+    
+    if user:
+        token = create_reset_token(email=user.email)
+        reset_link = f"http://localhost:5173/reset-password?token={token}"
+        
+        # Log to terminal for easy local testing when SMTP is not configured
+        print(f"\n--- PASSWORD RESET LINK FOR {user.email} ---")
+        print(reset_link)
+        print("---------------------------------------------\n")
+        
+        try:
+            if conf.MAIL_USERNAME and conf.MAIL_PASSWORD and conf.MAIL_SERVER:
+                message = MessageSchema(
+                    subject="Password Reset",
+                    recipients=[user.email],
+                    body=f"Click the link to reset your password: {reset_link}",
+                    subtype=MessageType.plain
+                )
+                fm = FastMail(conf)
+                background_tasks.add_task(fm.send_message, message)
+        except Exception as e:
+            print(f"WARNING: FastMail failed to schedule/send email: {e}")
+            
+    # Always return success message to prevent email enumeration
+    return {"message": "If an account with that email exists, a password reset link has been sent."}
+
+
+from pydantic import BaseModel, Field
+
+class ResetPasswordPayload(BaseModel):
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+@router.post("/reset-password/{token}")
+def reset_password(token: str, payload: ResetPasswordPayload, db: Session = Depends(get_db)):
+    email = verify_reset_token(token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+        
+    user = db.query(models.User).filter(func.lower(models.User.email) == normalize_email(email)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+        
+    user.password_hash = hash_password(payload.new_password)
+    db.commit()
+    return {"message": "Password has been successfully reset."}

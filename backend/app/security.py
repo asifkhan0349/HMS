@@ -74,3 +74,21 @@ def decode_access_token(token: str) -> int:
     if user_id_str is None:
         raise JWTError("Token payload missing 'sub'.")
     return int(user_id_str)
+
+
+def create_reset_token(email: str) -> str:
+    """Create a short-lived token for password reset."""
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {"sub": email, "exp": expire, "type": "reset_password"}
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_reset_token(token: str) -> str | None:
+    """Verify reset token and return email if valid."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "reset_password":
+            return None
+        return payload.get("sub")
+    except JWTError:
+        return None

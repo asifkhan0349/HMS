@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
@@ -180,19 +180,12 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
             <div className="d-flex justify-content-between mb-2">
               <label htmlFor="auth-password" className="form-label text-muted small text-uppercase fw-bold mb-0">Password</label>
               {mode === 'login' && (
-                <button
-                  type="button"
+                <Link
+                  to="/forgot-password"
                   className="btn btn-link p-0 text-muted small text-decoration-none"
-                  onClick={() => {
-                    if (username) {
-                      showToast(`Password reset link sent to the email associated with '${username}'.`, 'success');
-                    } else {
-                      showToast('Please enter your username to reset your password.', 'info');
-                    }
-                  }}
                 >
                   Forgot?
-                </button>
+                </Link>
               )}
             </div>
             <div className="position-relative">
