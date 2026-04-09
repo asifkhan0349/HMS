@@ -7,7 +7,7 @@ import { ScrollReveal } from '../ui/effects/scroll-reveal';
 const plans = [
   {
     name: "Clinic",
-    price: "49",
+    price: "1,999",
     description: "Perfect for single-doctor clinics and small practices.",
     features: [
       "Patient Registration",
@@ -23,7 +23,7 @@ const plans = [
   },
   {
     name: "Hospital",
-    price: "199",
+    price: "7,999",
     description: "Advanced features for medium to large hospitals.",
     features: [
       "Everything in Clinic",
@@ -84,7 +84,7 @@ export function PricingSection({ onAuthRedirect }) {
                   <h3 className="text-2xl font-black mb-4">{plan.name}</h3>
                   <div className="flex items-baseline gap-1">
                     <span className="text-5xl font-black tracking-tight">
-                      {plan.price !== "Custom" && "$"}
+                      {plan.price !== "Custom" && "₹"}
                       {plan.price}
                     </span>
                     {plan.price !== "Custom" && <span className="text-muted-foreground font-bold">/mo</span>}

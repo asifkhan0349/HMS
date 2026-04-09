@@ -232,9 +232,9 @@ const Billing = () => {
             </select>
           </div>
           <div className="mb-4">
-            <label htmlFor="invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
+            <label htmlFor="invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (₹)</label>
             <div className="input-group">
-              <span className="input-group-text bg-transparent border-end-0 border-accents-2 opacity-50">INR</span>
+              <span className="input-group-text bg-transparent border-end-0 border-accents-2 opacity-50">₹</span>
               <input
                 id="invoice-amount"
                 type="number"
@@ -284,7 +284,7 @@ const Billing = () => {
             </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
-                <label htmlFor="edit-invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
+                <label htmlFor="edit-invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (₹)</label>
                 <input
                   id="edit-invoice-amount"
                   type="number"
