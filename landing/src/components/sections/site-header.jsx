@@ -9,9 +9,7 @@ const navItems = [
   { name: "Features", href: "#features" },
   { name: "Interface", href: "#previews" },
   { name: "Solutions", href: "#solutions" },
-  { name: "Testimonials", href: "#testimonials" },
   { name: "Pricing", href: "#pricing" },
-  { name: "FAQ", href: "#faq" },
   { name: "Contact", href: "#contact" },
 ]
 
@@ -32,98 +30,102 @@ export function SiteHeader({ onAuthRedirect }) {
   }
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-300",
-        scrollPosition > 20 ? "bg-background/80 backdrop-blur-lg border-b border-border/40 py-3" : "bg-transparent py-5",
-      )}
-    >
-      <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <a href="/" className="flex items-center space-x-2 z-10 no-underline text-foreground" onClick={(e) => scrollToSection(e, "#home")}>
-          <Hospital className="h-7 w-7 text-primary" />
-          <span className="font-bold text-xl tracking-tight">HMS</span>
-        </a>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1 lg:space-x-6">
-          {navItems.map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group no-underline"
-              onClick={(e) => scrollToSection(e, item.href)}
-            >
-              {item.name}
-              <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="flex items-center space-x-4">
-          <div className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" size="sm" onClick={() => onAuthRedirect('login')}>Sign in</Button>
-            <Button size="sm" className="bg-primary text-primary-foreground" onClick={() => onAuthRedirect('signup')}>Book Demo</Button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden flex items-center justify-center p-2 rounded-md bg-background/90 border border-border/40 shadow-sm"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
+    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none p-6">
+      <motion.div 
+        className={cn(
+          "floating-nav pointer-events-auto",
+          scrollPosition > 50 ? "py-2 px-4 bg-black/90 scale-95" : "py-3 px-6 bg-black"
+        )}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      >
+        <div className="flex items-center gap-8">
+          <a 
+            href="/" 
+            className="flex items-center space-x-2 no-underline text-white group" 
+            onClick={(e) => scrollToSection(e, "#home")}
           >
-            {mobileMenuOpen ? <X className="text-foreground h-5 w-5" /> : <Menu className="text-foreground h-5 w-5" />}
-          </button>
-        </div>
-      </div>
+            <Hospital className="h-5 w-5 text-primary group-hover:rotate-12 transition-transform" />
+            <span className="font-bold text-lg tracking-tight">HMS</span>
+          </a>
 
-      {/* Mobile Menu */}
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navItems.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors no-underline"
+                onClick={(e) => scrollToSection(e, item.href)}
+              >
+                {item.name}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-3">
+              <button 
+                className="text-sm font-medium text-white hover:text-white/80 transition-colors"
+                onClick={() => onAuthRedirect('login')}
+              >
+                Sign in
+              </button>
+              <Button 
+                size="sm" 
+                className="bg-white text-black hover:bg-white/90 rounded-full font-semibold px-5" 
+                onClick={() => onAuthRedirect('signup')}
+              >
+                Book Demo
+              </Button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden flex items-center justify-center p-1 rounded-full text-white hover:bg-white/10"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
             <motion.div
-              className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden pointer-events-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              onClick={closeMobileMenu}
             />
             <motion.div
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-background shadow-xl border-l border-border md:hidden"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed top-24 left-6 right-6 z-50 bg-black border border-white/10 rounded-2xl shadow-2xl p-6 md:hidden pointer-events-auto"
+              initial={{ scale: 0.9, opacity: 0, y: -20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: -20 }}
             >
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <div className="flex items-center space-x-2">
-                  <Hospital className="h-6 w-6 text-primary" />
-                  <span className="font-bold text-lg">HMS</span>
+              <nav className="flex flex-col space-y-4">
+                {navItems.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="text-lg font-medium text-white no-underline py-2 border-b border-white/5"
+                    onClick={(e) => scrollToSection(e, item.href)}
+                  >
+                    {item.name}
+                  </a>
+                ))}
+                <div className="pt-4 flex flex-col gap-3">
+                  <Button variant="outline" className="w-full text-white border-white/20 hover:bg-white/10" onClick={() => { onAuthRedirect('login'); closeMobileMenu(); }}>Sign in</Button>
+                  <Button className="w-full bg-white text-black" onClick={() => { onAuthRedirect('signup'); closeMobileMenu(); }}>Book Demo</Button>
                 </div>
-                <button
-                  onClick={closeMobileMenu}
-                  className="p-2 rounded-full hover:bg-muted transition-colors text-foreground"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              <div className="py-6 px-4">
-                <nav className="flex flex-col space-y-4">
-                  {navItems.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="text-lg font-medium text-foreground no-underline py-2"
-                      onClick={(e) => scrollToSection(e, item.href)}
-                    >
-                      {item.name}
-                    </a>
-                  ))}
-                  <div className="pt-6 border-t border-border flex flex-col gap-3">
-                    <Button variant="outline" className="w-full" onClick={() => { onAuthRedirect('login'); closeMobileMenu(); }}>Sign in</Button>
-                    <Button className="w-full" onClick={() => { onAuthRedirect('signup'); closeMobileMenu(); }}>Book Demo</Button>
-                  </div>
-                </nav>
-              </div>
+              </nav>
             </motion.div>
           </>
         )}
@@ -131,3 +133,4 @@ export function SiteHeader({ onAuthRedirect }) {
     </header>
   )
 }
+

@@ -4,71 +4,97 @@ import {
   FileHeart, 
   Receipt, 
   Pill, 
-  ShieldCheck 
+  ShieldCheck,
+  Zap,
+  Activity
 } from "lucide-react"
 import { ScrollReveal } from "../ui/effects/scroll-reveal"
-import { SpotlightCard } from "../ui/spotlight-card"
 
 const features = [
   {
+    icon: Activity,
+    title: "Patient Care",
+    desc: "Comprehensive patient histories and digital prescriptions.",
+    className: "bento-item-2",
+    color: "bg-red-50"
+  },
+  {
     icon: CalendarCheck,
-    title: "OPD Management",
-    desc: "Streamline appointments, manage queues efficiently, and empower doctors with intuitive dashboards."
+    title: "OPD",
+    desc: "Streamline appointments and manage queues.",
+    color: "bg-gray-50"
   },
   {
     icon: Hospital,
-    title: "IPD / Ward workflows",
-    desc: "Optimize bed allocation, track admissions and discharges, and enhance nursing workflows."
-  },
-  {
-    icon: FileHeart,
-    title: "Electronic Medical Records (EMR)",
-    desc: "Maintain comprehensive patient histories, digital prescriptions, and integrated lab reports."
+    title: "IPD / Ward",
+    desc: "Optimize bed allocation and track admissions.",
+    color: "bg-gray-50"
   },
   {
     icon: Receipt,
-    title: "Billing & Insurance",
-    desc: "Automate invoicing, streamline claims processing, and accept diverse payment options seamlessly."
+    title: "Billing",
+    desc: "Automate invoicing and streamline claims processing.",
+    className: "bento-item-2",
+    color: "bg-red-50 text-red-900"
   },
   {
     icon: Pill,
-    title: "Pharmacy & Inventory",
-    desc: "Track drug inventory, monitor expiry dates, and manage POS seamlessly across your network."
+    title: "Pharmacy",
+    desc: "Track inventory and monitor expiry dates.",
+    color: "bg-gray-50"
   },
   {
     icon: ShieldCheck,
-    title: "Security & Compliance",
-    desc: "Enterprise-grade data encryption, role-based access controls, and ABDM / NDHM readiness."
-  }
+    title: "Security",
+    desc: "Enterprise-grade encryption and ABDM readiness.",
+    color: "bg-black text-white",
+    iconColor: "text-primary"
+  },
 ]
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 bg-background relative overflow-hidden">
-      <div className="container mx-auto px-6 md:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <ScrollReveal>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              Everything you need to run your healthcare facility
-            </h2>
-            <p className="text-lg text-muted-foreground opacity-80">
-              Modular components that work together harmoniously, giving you complete control over your operations.
-            </p>
+    <section id="features" className="py-32 bg-white relative overflow-hidden">
+      <div className="section-container">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+          <div className="max-w-2xl">
+            <ScrollReveal>
+              <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-8 text-black">
+                Everything you need. <br />
+                <span className="text-black/40">Nothing you don't.</span>
+              </h2>
+              <p className="text-xl text-muted-foreground font-medium">
+                Our modular architecture allows you to scale your operations without the complexity of traditional legacy systems.
+              </p>
+            </ScrollReveal>
+          </div>
+          <ScrollReveal delay={0.2}>
+            <div className="flex gap-4">
+              <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center">
+                <Zap className="h-6 w-6 text-black" />
+              </div>
+              <div>
+                <div className="font-bold text-black">Fast Setup</div>
+                <div className="text-sm text-muted-foreground">Go live in days, not months.</div>
+              </div>
+            </div>
           </ScrollReveal>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="bento-grid">
           {features.map((feature, index) => (
-            <ScrollReveal key={index} delay={index * 0.1}>
-              <SpotlightCard className="h-full p-8 rounded-2xl border bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-colors group">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6 text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                  <feature.icon className="h-6 w-6" />
+            <ScrollReveal key={index} delay={index * 0.1} className={feature.className}>
+              <div className={`h-full p-10 rounded-[2.5rem] flex flex-col justify-between transition-transform duration-500 hover:scale-[0.98] cursor-pointer ${feature.color}`}>
+                <div>
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center mb-10 ${feature.iconColor || 'text-black'} bg-white/10 shadow-sm border border-black/5`}>
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-2xl font-black mb-4">{feature.title}</h3>
+                  <p className="opacity-80 font-medium leading-relaxed max-w-[280px]">
+                    {feature.desc}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {feature.desc}
-                </p>
-              </SpotlightCard>
+              </div>
             </ScrollReveal>
           ))}
         </div>
@@ -76,3 +102,4 @@ export function FeaturesSection() {
     </section>
   )
 }
+

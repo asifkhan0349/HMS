@@ -16,6 +16,7 @@ import './Landing.css';
 
 const Landing = () => {
   // Use VITE_APP_URL environment variable to redirect to main app.
+  // In development, the Main Application runs on port 5173.
   const defaultAppUrl = import.meta.env.DEV ? 'http://localhost:5173' : window.location.origin;
   const appUrl = import.meta.env.VITE_APP_URL || defaultAppUrl;
 

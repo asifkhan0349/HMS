@@ -4,56 +4,51 @@ import { ScrollReveal } from "../ui/effects/scroll-reveal"
 
 export function TestimonialsSection() {
   return (
-    <section id="testimonials" className="py-24 bg-muted/30 relative overflow-hidden">
-      <div className="container mx-auto px-6 md:px-8">
+    <section id="testimonials" className="py-32 bg-white relative overflow-hidden">
+      <div className="section-container">
         <ScrollReveal>
-          <div className="max-w-4xl mx-auto">
-            <div className="relative p-12 md:p-16 rounded-3xl border bg-card/50 backdrop-blur-xl border-border/50 shadow-2xl overflow-hidden group">
-              {/* Decorative Elements */}
-              <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors duration-500" />
-              <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-64 w-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors duration-500" />
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-16 items-center">
+              <div className="flex-1">
+                <Quote className="h-20 w-20 text-primary/10 mb-8 -ml-6" />
+                <blockquote className="relative z-10">
+                  <p className="text-4xl md:text-5xl font-black leading-[1.1] text-black mb-12">
+                    "HMS transformed our operations. It's the first system that feels designed for <span className="text-black/40">modern healthcare humans."</span>
+                  </p>
+                  
+                  <footer className="flex items-center gap-6">
+                    <div className="h-16 w-16 rounded-full bg-black flex items-center justify-center text-white font-black text-2xl">
+                      SC
+                    </div>
+                    <div>
+                      <cite className="not-italic font-extrabold text-xl text-black block">Dr. Sarah Chen</cite>
+                      <span className="text-lg font-medium text-muted-foreground">Chief of Staff, Metro General</span>
+                    </div>
+                  </footer>
+                </blockquote>
+              </div>
               
-              <Quote className="h-12 w-12 text-primary/20 mb-8" />
+              <div className="hidden lg:block w-px h-64 bg-black/5" />
               
-              <blockquote className="relative z-10">
-                <p className="text-2xl md:text-3xl font-medium leading-relaxed mb-10 text-foreground italic">
-                  "Hospital Management System has completely transformed how our ward operates. It's the first system that feels like it was designed for humans, not just databases."
-                </p>
-                
-                <footer className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-pink-500 flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg">
-                    SC
-                  </div>
-                  <div>
-                    <cite className="not-italic font-bold text-lg text-foreground block">Dr. Sarah Chen</cite>
-                    <span className="text-muted-foreground">Chief of Staff, Metro General</span>
-                  </div>
-                </footer>
-              </blockquote>
+              <div className="flex flex-col gap-10">
+                <div className="flex flex-col">
+                  <div className="text-5xl font-black text-black">500+</div>
+                  <div className="text-lg font-bold text-muted-foreground mt-1">Hospitals</div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="text-5xl font-black text-black">99.9%</div>
+                  <div className="text-lg font-bold text-muted-foreground mt-1">Satisfaction</div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="text-5xl font-black text-black">1M+</div>
+                  <div className="text-lg font-bold text-muted-foreground mt-1">Patients</div>
+                </div>
+              </div>
             </div>
           </div>
         </ScrollReveal>
-
-        {/* Client Logos / Stats Grid */}
-        <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-           <div className="flex flex-col items-center">
-             <div className="text-3xl font-bold text-foreground">500+</div>
-             <div className="text-sm uppercase tracking-widest text-muted-foreground mt-2">Hospitals</div>
-           </div>
-           <div className="flex flex-col items-center">
-             <div className="text-3xl font-bold text-foreground">1M+</div>
-             <div className="text-sm uppercase tracking-widest text-muted-foreground mt-2">Patients</div>
-           </div>
-           <div className="flex flex-col items-center">
-             <div className="text-3xl font-bold text-foreground">2018</div>
-             <div className="text-sm uppercase tracking-widest text-muted-foreground mt-2">Founded</div>
-           </div>
-           <div className="flex flex-col items-center">
-             <div className="text-3xl font-bold text-foreground">99%</div>
-             <div className="text-sm uppercase tracking-widest text-muted-foreground mt-2">Satisfaction</div>
-           </div>
-        </div>
       </div>
     </section>
   )
 }
+

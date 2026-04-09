@@ -1,149 +1,132 @@
-import { Check, CheckCircle2, Shield } from "lucide-react"
-import { motion } from "framer-motion"
-import { Button } from "../ui/button"
-import { ScrollReveal } from "../ui/effects/scroll-reveal"
-import { SpotlightCard } from "../ui/spotlight-card"
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Check, X } from 'lucide-react';
+import { Button } from '../ui/button';
+import { ScrollReveal } from '../ui/effects/scroll-reveal';
 
 const plans = [
   {
-    name: "Starter",
-    description: "Perfect for independent clinics and small medical practices.",
-    price: "₹3,999",
+    name: "Clinic",
+    price: "49",
+    description: "Perfect for single-doctor clinics and small practices.",
     features: [
-      "Up to 2 Doctors",
-      "Digital Prescriptions",
+      "Patient Registration",
       "OPD Management",
-      "Essential Billing",
-      "Email Support"
+      "Digital Prescriptions",
+      "Basic Billing",
+      "Email Support",
+      { name: "Inventory Management", included: false },
+      { name: "IPD / Ward Management", included: false },
     ],
     cta: "Start Free Trial",
-    popular: false
+    highlighted: false,
   },
   {
-    name: "Professional",
-    description: "Comprehensive solution for multi-specialty hospitals.",
-    price: "₹15,999",
+    name: "Hospital",
+    price: "199",
+    description: "Advanced features for medium to large hospitals.",
     features: [
-      "Unlimited Staff & Doctors",
-      "Full IPD / Ward Workflows",
+      "Everything in Clinic",
+      "IPD & Ward Control",
       "Pharmacy & Inventory",
-      "Lab Information System",
-      "Advanced Analytics",
-      "24/7 Priority Support"
+      "Lab Integration",
+      "Insurance Claims",
+      "Priority Support",
+      "ABDM Certification",
     ],
-    cta: "Get Started Now",
-    popular: true
+    cta: "Book a Demo",
+    highlighted: true,
   },
   {
     name: "Enterprise",
-    description: "Tailored infrastructure for hospital networks and chains.",
     price: "Custom",
+    description: "Tailored solutions for medical chains and networks.",
     features: [
-      "Multi-center Sync",
-      "Custom ABDM Integrations",
-      "On-Premise Deployment Option",
-      "Dedicated Account Manager",
-      "Custom Security Audit",
-      "SLA Guarantees"
+      "Multiple Locations",
+      "Centralized Dashboard",
+      "Data Migration",
+      "Dedicated AM",
+      "Custom SLA",
+      "On-Premise Option",
+      "White-labeling",
     ],
     cta: "Contact Sales",
-    popular: false
-  }
-]
+    highlighted: false,
+  },
+];
 
 export function PricingSection({ onAuthRedirect }) {
   return (
-    <section id="pricing" className="py-24 relative overflow-hidden bg-background">
-      {/* Background decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.03),transparent_70%)] pointer-events-none" />
-
-      <div className="container mx-auto px-6 md:px-8 relative z-10">
+    <section id="pricing" className="py-32 bg-gray-50 relative overflow-hidden">
+      <div className="section-container">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <ScrollReveal>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              Simple, Transparent Pricing
+            <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-8 text-black">
+              Simple, <span className="text-black/40">transparent pricing.</span>
             </h2>
-            <p className="text-lg text-muted-foreground opacity-80">
-              Choose the perfect plan for your healthcare facility. No hidden fees, cancel anytime.
+            <p className="text-xl text-muted-foreground font-medium">
+              Choose the plan that fits your facility. No hidden fees, cancel anytime.
             </p>
           </ScrollReveal>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan, index) => (
-            <ScrollReveal key={plan.name} delay={index * 0.1}>
-              <SpotlightCard 
-                className={`h-full p-8 rounded-3xl border flex flex-col transition-all duration-500 relative ${
-                  plan.popular 
-                    ? "bg-card/50 border-primary/50 shadow-[0_0_40px_rgba(220,38,38,0.1)] ring-1 ring-primary/20 scale-105 lg:scale-110 z-10" 
-                    : "bg-card/20 border-border/50 hover:border-primary/30"
+            <ScrollReveal key={index} delay={index * 0.1}>
+              <div 
+                className={`flex flex-col h-full p-10 rounded-[2.5rem] border-2 transition-all duration-300 ${
+                  plan.highlighted 
+                  ? "bg-black text-white border-black shadow-2xl scale-105" 
+                  : "bg-white text-black border-black/5 hover:border-black/10"
                 }`}
               >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
-                    Most Popular
+                <div className="mb-10">
+                  <h3 className="text-2xl font-black mb-4">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black tracking-tight">
+                      {plan.price !== "Custom" && "$"}
+                      {plan.price}
+                    </span>
+                    {plan.price !== "Custom" && <span className="text-muted-foreground font-bold">/mo</span>}
                   </div>
-                )}
-
-                <div className="mb-8">
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-sm text-muted-foreground min-h-[40px]">
+                  <p className={`mt-6 font-medium ${plan.highlighted ? "text-white/60" : "text-muted-foreground"}`}>
                     {plan.description}
                   </p>
                 </div>
 
-                <div className="mb-8 flex items-baseline">
-                  <span className="text-4xl font-bold tracking-tight">
-                    {plan.price}
-                  </span>
-                  {plan.price !== "Custom" && (
-                    <span className="text-muted-foreground ml-1">/month</span>
-                  )}
-                </div>
+                <ul className="space-y-4 mb-10 flex-grow p-0 list-none">
+                  {plan.features.map((feature, fIndex) => {
+                    const isIncluded = typeof feature === 'string' || feature.included !== false;
+                    const name = typeof feature === 'string' ? feature : feature.name;
+                    
+                    return (
+                      <li key={fIndex} className={`flex items-start gap-3 text-sm font-bold ${!isIncluded && "opacity-40"}`}>
+                        {isIncluded ? (
+                          <Check className={`h-5 w-5 ${plan.highlighted ? "text-primary" : "text-primary"}`} />
+                        ) : (
+                          <X className="h-5 w-5" />
+                        )}
+                        <span>{name}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
 
-                <div className="flex-grow space-y-4 mb-10">
-                  {plan.features.map((feature) => (
-                    <div key={feature} className="flex items-start">
-                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 shrink-0">
-                        <Check className="h-3 w-3 text-primary" />
-                      </div>
-                      <span className="text-sm text-foreground/90">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Button
-                  className={`w-full h-12 rounded-xl font-bold transition-all ${
-                    plan.popular
-                      ? "bg-primary text-primary-foreground shadow-[0_10px_20px_-10px_rgba(220,38,38,0.5)] hover:shadow-[0_15px_30px_-10px_rgba(220,38,38,0.6)]"
-                      : "bg-muted hover:bg-muted/80 text-foreground"
+                <Button 
+                  className={`pill-button h-14 text-lg w-full ${
+                    plan.highlighted 
+                    ? "bg-primary text-white hover:bg-primary/90" 
+                    : "bg-black text-white hover:bg-black/90"
                   }`}
-                  onClick={() => onAuthRedirect(plan.price === "Custom" ? 'contact' : 'signup')}
+                  onClick={() => onAuthRedirect('signup')}
                 >
                   {plan.cta}
                 </Button>
-              </SpotlightCard>
+              </div>
             </ScrollReveal>
           ))}
         </div>
-
-        <ScrollReveal delay={0.4}>
-          <div className="mt-20 p-8 rounded-2xl border border-dashed border-border/60 bg-muted/5 flex flex-col md:flex-row items-center justify-between gap-6 max-w-4xl mx-auto">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
-                <Shield className="h-6 w-6" />
-              </div>
-              <div>
-                <h4 className="font-bold">Enterprise Security Guaranteed</h4>
-                <p className="text-sm text-muted-foreground">HIPAA & ABDM compliant data processing with 256-bit AES encryption.</p>
-              </div>
-            </div>
-            <Button variant="outline" className="shrink-0" onClick={() => onAuthRedirect('contact')}>
-              Request Security Audit
-            </Button>
-          </div>
-        </ScrollReveal>
       </div>
     </section>
-  )
+  );
 }

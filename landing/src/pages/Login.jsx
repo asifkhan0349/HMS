@@ -14,6 +14,16 @@ export default function Login() {
   const mode = searchParams.get("mode") || "login"
   const isLogin = mode === "login"
 
+  // Use VITE_APP_URL environment variable to redirect to main app.
+  // In development, the Main Application runs on port 5173.
+  const defaultAppUrl = import.meta.env.DEV ? 'http://localhost:5173' : window.location.origin;
+  const appUrl = import.meta.env.VITE_APP_URL || defaultAppUrl;
+
+  const handleAuthRedirect = (targetMode) => {
+    // Redirect to the main app's login/signup page
+    window.location.href = `${appUrl}/login?mode=${targetMode}`;
+  };
+
   React.useEffect(() => {
     document.title = isLogin ? "Login | HMS" : "Sign Up | HMS"
   }, [isLogin])
@@ -130,7 +140,10 @@ export default function Login() {
           </CardContent>
           
           <CardFooter className="flex flex-col space-y-4 pt-2">
-            <Button className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2">
+            <Button 
+              className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2"
+              onClick={() => handleAuthRedirect(isLogin ? "login" : "signup")}
+            >
               {isLogin ? "Sign In" : "Get Started"}
               <Send className="h-4 w-4" />
             </Button>
@@ -139,16 +152,22 @@ export default function Login() {
               {isLogin ? (
                 <>
                   Don't have an account?{" "}
-                  <Link to="/login?mode=signup" className="text-primary font-semibold hover:underline decoration-2 underline-offset-4">
+                  <button 
+                    onClick={() => handleAuthRedirect('signup')}
+                    className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0 inline"
+                  >
                     Sign up
-                  </Link>
+                  </button>
                 </>
               ) : (
                 <>
                   Already have an account?{" "}
-                  <Link to="/login?mode=login" className="text-primary font-semibold hover:underline decoration-2 underline-offset-4">
+                  <button 
+                    onClick={() => handleAuthRedirect('login')}
+                    className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0 inline"
+                  >
                     Sign in
-                  </Link>
+                  </button>
                 </>
               )}
             </div>

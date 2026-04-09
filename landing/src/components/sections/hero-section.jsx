@@ -2,124 +2,146 @@ import { motion } from "framer-motion"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
 import { Button } from "../ui/button"
 import { ScrollReveal } from "../ui/effects/scroll-reveal"
-import { SpotlightCard } from "../ui/spotlight-card"
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.3,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
     },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
   },
 }
 
 export function HeroSection({ onAuthRedirect }) {
   return (
-    <section id="home" className="relative w-full py-20 md:py-32 lg:py-48 overflow-hidden">
-      {/* Background Gradient Effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(220,38,38,0.05),transparent_70%)] pointer-events-none" />
+    <section id="home" className="relative w-full pt-40 pb-20 md:pt-56 md:pb-32 overflow-hidden bg-white">
+      {/* Subtle Background elements */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[120px]" />
+      </div>
 
-      <div className="container mx-auto px-6 md:px-8 relative z-10">
-        <div className="grid gap-12 lg:grid-cols-[1fr_500px] items-center">
-          <ScrollReveal>
-            <motion.div
-              className="flex flex-col justify-center space-y-8"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div className="space-y-6" variants={itemVariants}>
-                <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-red-500/10 text-red-500 border border-red-500/20">
-                  <span className="relative flex h-2 w-2 mr-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                  v2.0 Now Live
-                </div>
-                
-                <h1 className="text-5xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none">
-                  <span className="gradient-text">Hospital Management</span>
-                  <br />
-                  <span className="text-foreground">Redefined for 2026</span>
-                </h1>
-                
-                <p className="max-w-[600px] text-muted-foreground md:text-xl opacity-80 leading-relaxed">
-                  A comprehensive, unified platform designed for modern hospitals, clinics, and labs. 
-                  Unify your workflows in one secure, beautiful workspace.
-                </p>
-              </motion.div>
-
-              <motion.div className="flex flex-col gap-4 sm:flex-row sm:items-center" variants={itemVariants}>
-                <Button 
-                  size="lg" 
-                  className="bg-primary text-primary-foreground h-12 px-8 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all"
-                  onClick={() => onAuthRedirect('signup')}
-                >
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="h-12 px-8 rounded-full border-border hover:bg-muted font-medium"
-                  onClick={() => {
-                    document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" })
-                  }}
-                >
-                  Explore Modules
-                </Button>
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="pt-4 flex flex-wrap gap-6">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
-                  ABDM / NDHM Ready
-                </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
-                  Cloud & On-Premise
-                </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
-                  256-bit AES Encryption
-                </div>
-              </motion.div>
+      <div className="section-container relative z-10">
+        <div className="grid gap-16 lg:grid-cols-2 items-center">
+          <motion.div
+            className="flex flex-col space-y-10"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div className="space-y-6" variants={itemVariants}>
+              <div className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold bg-black text-white">
+                <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse" />
+                Trusted by 500+ Hospitals
+              </div>
+              
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9] text-black">
+                Unified <span className="gradient-text">Hospital</span> <br />
+                Operations.
+              </h1>
+              
+              <p className="max-w-[540px] text-lg md:text-xl text-muted-foreground leading-relaxed font-medium">
+                The modern operating system for healthcare providers. 
+                Manage patients, billing, and pharmacy in one seamless, high-performance workspace.
+              </p>
             </motion.div>
-          </ScrollReveal>
 
-          <ScrollReveal delay={0.3}>
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-              <SpotlightCard className="relative aspect-square md:aspect-[4/3] w-full overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-xl border-border/50 p-6 flex flex-col justify-center">
-                <div className="space-y-4">
-                  <div className="h-2 w-24 bg-red-500/20 rounded-full" />
-                  <div className="h-2 w-32 bg-muted rounded-full" />
-                  <div className="grid grid-cols-2 gap-4 pt-4">
-                    <div className="aspect-video rounded-xl bg-red-500/5 border border-red-500/10 flex items-center justify-center">
-                      <div className="text-xs font-medium text-red-500/50 uppercase tracking-wider">Patient Care</div>
+            <motion.div className="flex flex-col gap-4 sm:flex-row" variants={itemVariants}>
+              <Button 
+                size="lg" 
+                className="pill-button bg-primary text-white hover:bg-primary/90 text-lg h-14"
+                onClick={() => onAuthRedirect('signup')}
+              >
+                Get Started for Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="pill-button text-lg h-14 border-2 border-black/10 hover:bg-black/5 font-bold"
+                onClick={() => {
+                  document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" })
+                }}
+              >
+                Watch Demo
+              </Button>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="pt-4 flex flex-wrap gap-8">
+              {["ABDM Certified", "ISO 27001 Ready", "24/7 Support"].map((text) => (
+                <div key={text} className="flex items-center text-sm font-bold text-black/60">
+                  <CheckCircle2 className="h-4 w-4 text-primary mr-2" />
+                  {text}
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          <ScrollReveal delay={0.4} className="relative">
+            <div className="relative z-20 group">
+              {/* Device Frame Simulation */}
+              <div className="relative overflow-hidden rounded-[2rem] border-[8px] border-black shadow-[0_40px_100px_rgba(0,0,0,0.2)] bg-card aspect-[16/10]">
+                <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 flex items-center justify-center">
+                  <div className="w-full h-full p-8 space-y-6">
+                    {/* Skeleton UI for Dashboard */}
+                    <div className="flex items-center justify-between border-b pb-4">
+                      <div className="h-4 w-32 bg-gray-200 rounded-full" />
+                      <div className="flex gap-2">
+                        <div className="h-8 w-8 rounded-full bg-gray-100" />
+                        <div className="h-8 w-8 rounded-full bg-gray-100" />
+                      </div>
                     </div>
-                    <div className="aspect-video rounded-xl bg-muted/20 border border-border flex items-center justify-center">
-                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Inventory</div>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="h-32 rounded-2xl bg-primary/5 border border-primary/10 flex flex-col p-4 justify-between">
+                        <div className="h-2 w-12 bg-primary/20 rounded-full" />
+                        <div className="h-6 w-16 bg-primary/40 rounded-full" />
+                      </div>
+                      <div className="h-32 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col p-4 justify-between">
+                        <div className="h-2 w-12 bg-gray-200 rounded-full" />
+                        <div className="h-6 w-16 bg-gray-300 rounded-full" />
+                      </div>
+                      <div className="h-32 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col p-4 justify-between">
+                        <div className="h-2 w-12 bg-gray-200 rounded-full" />
+                        <div className="h-6 w-16 bg-gray-300 rounded-full" />
+                      </div>
                     </div>
-                    <div className="col-span-2 h-32 rounded-xl bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 flex flex-col items-center justify-center p-4">
-                      <div className="text-2xl font-bold gradient-text">99.9%</div>
-                      <div className="text-xs text-muted-foreground">System Uptime</div>
+                    <div className="h-40 rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
+                      <div className="space-y-3">
+                        <div className="h-3 w-1/2 bg-gray-100 rounded-full" />
+                        <div className="h-3 w-full bg-gray-50 rounded-full" />
+                        <div className="h-3 w-4/5 bg-gray-50 rounded-full" />
+                        <div className="h-3 w-3/4 bg-gray-50 rounded-full" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </SpotlightCard>
+              </div>
+              
+              {/* Floating Badge */}
+              <motion.div 
+                className="absolute -bottom-6 -right-6 bg-white border-2 border-black rounded-2xl p-6 shadow-2xl z-30"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 1, duration: 0.5 }}
+              >
+                <div className="text-3xl font-black text-black">99.9%</div>
+                <div className="text-xs font-bold text-muted-foreground uppercase">System Uptime</div>
+              </motion.div>
+
+              {/* Decorative elements */}
+              <div className="absolute -z-10 -inset-4 bg-primary/20 rounded-[2.5rem] blur-2xl group-hover:bg-primary/30 transition-colors" />
             </div>
           </ScrollReveal>
         </div>
@@ -127,3 +149,4 @@ export function HeroSection({ onAuthRedirect }) {
     </section>
   )
 }
+

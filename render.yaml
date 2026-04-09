@@ -37,6 +37,12 @@ services:
     rootDir: landing
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
+    envVars:
+      - key: VITE_APP_URL
+        fromService:
+          name: hms-frontend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
 
 databases:
   - name: hms-db

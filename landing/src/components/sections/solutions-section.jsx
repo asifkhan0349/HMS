@@ -1,58 +1,51 @@
 import { Stethoscope, Building2, FlaskConical } from "lucide-react"
 import { ScrollReveal } from "../ui/effects/scroll-reveal"
-import { SpotlightCard } from "../ui/spotlight-card"
 
 const solutions = [
   {
     icon: Building2,
-    title: "Multi-specialty Hospitals",
-    desc: "Comprehensive workflows for large scale operations with complex department management.",
-    color: "from-blue-500/10 to-blue-500/5",
-    textColor: "text-blue-500"
+    title: "Large Hospitals",
+    desc: "Enterprise workflows for complex department and ward management.",
   },
   {
     icon: Stethoscope,
-    title: "Clinics",
-    desc: "Lightweight and fast setup for independent practitioners and small medical centers.",
-    color: "from-red-500/10 to-red-500/5",
-    textColor: "text-red-500"
+    title: "Small Clinics",
+    desc: "Lightweight and fast setup for independent practices and clinics.",
   },
   {
     icon: FlaskConical,
     title: "Diagnostic Labs",
-    desc: "Equipment integration, sample tracking, and rapid report generation for pathology labs.",
-    color: "from-purple-500/10 to-purple-500/5",
-    textColor: "text-purple-500"
+    desc: "Integrated sample tracking and pathology report generation.",
   }
 ]
 
 export function SolutionsSection() {
   return (
-    <section id="solutions" className="py-24 bg-muted/20 relative overflow-hidden">
-      <div className="container mx-auto px-6 md:px-8">
+    <section id="solutions" className="py-32 bg-white relative overflow-hidden">
+      <div className="section-container">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <ScrollReveal>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              Built for every medical practice
+            <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-8 text-black">
+              Built for <span className="text-black/40">every practice.</span>
             </h2>
-            <p className="text-lg text-muted-foreground opacity-80">
-              Tailored solutions that scale with your growth, from individual clinics to enterprise networks.
+            <p className="text-xl text-muted-foreground font-medium">
+              Tailored modules that adapt to your facility's unique requirements, no matter the size.
             </p>
           </ScrollReveal>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-12 md:grid-cols-3">
           {solutions.map((solution, index) => (
             <ScrollReveal key={index} delay={index * 0.1}>
-              <SpotlightCard className="h-full p-10 rounded-3xl border bg-card/40 backdrop-blur-md border-border/50 hover:shadow-xl transition-all">
-                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${solution.color} flex items-center justify-center mb-8 ${solution.textColor}`}>
-                  <solution.icon className="h-8 w-8" />
+              <div className="flex flex-col items-center text-center group">
+                <div className="h-20 w-20 rounded-[2rem] bg-gray-50 border border-black/5 flex items-center justify-center mb-8 text-black group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                  <solution.icon className="h-10 w-10" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">{solution.title}</h3>
-                <p className="text-muted-foreground text-lg leading-relaxed">
+                <h3 className="text-2xl font-black mb-4">{solution.title}</h3>
+                <p className="text-lg text-muted-foreground font-medium leading-relaxed max-w-[280px]">
                   {solution.desc}
                 </p>
-              </SpotlightCard>
+              </div>
             </ScrollReveal>
           ))}
         </div>
@@ -60,3 +53,4 @@ export function SolutionsSection() {
     </section>
   )
 }
+
