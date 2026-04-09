@@ -17,6 +17,7 @@ const Staff = lazy(() => import('./pages/Staff'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Inventory = lazy(() => import('./pages/Inventory'));
 const BloodBank = lazy(() => import('./pages/BloodBank'));
+const Settings = lazy(() => import('./pages/Settings'));
 const Login = lazy(() => import('./pages/Login'));
 
 // Loading spinner component for Suspense fallback
@@ -63,6 +64,7 @@ function App() {
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
               <Route path="/bloodbank" element={<ProtectedRoute><BloodBank /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />

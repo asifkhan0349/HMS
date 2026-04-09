@@ -17,30 +17,43 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 h
 
 
+from passlib.context import CryptContext
+
 # ---------------------------------------------------------------------------
-# Password helpers (unchanged — PBKDF2-HMAC-SHA256 with random salt)
+# Password hashing context (using bcrypt with support for legacy PBKDF2)
 # ---------------------------------------------------------------------------
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def hash_password(password: str) -> str:
-    salt = secrets.token_hex(16)
-    hashed = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt.encode("utf-8"),
-        100000,
-    ).hex()
-    return f"{salt}${hashed}"
+    """Hash a password using bcrypt."""
+    return pwd_context.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    salt, stored_hash = password_hash.split("$", 1)
-    computed_hash = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt.encode("utf-8"),
-        100000,
-    ).hex()
-    return hmac.compare_digest(stored_hash, computed_hash)
+    """
+    Verify a password. Supports bcrypt and legacy PBKDF2.
+    Legacy format: salt$hashed (PBKDF2-HMAC-SHA256)
+    """
+    # Detect legacy PBKDF2 format (salt$hash)
+    if "$" in password_hash and not password_hash.startswith("$"):
+        try:
+            salt, stored_hash = password_hash.split("$", 1)
+            computed_hash = hashlib.pbkdf2_hmac(
+                "sha256",
+                password.encode("utf-8"),
+                salt.encode("utf-8"),
+                100000,
+            ).hex()
+            return hmac.compare_digest(stored_hash, computed_hash)
+        except Exception:
+            return False
+
+    # Otherwise use passlib (bcrypt)
+    try:
+        return pwd_context.verify(password, password_hash)
+    except Exception:
+        return False
 
 
 # ---------------------------------------------------------------------------

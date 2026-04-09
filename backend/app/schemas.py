@@ -345,3 +345,14 @@ class InventoryItemUpdate(BaseModel):
 class InventoryItemRead(InventoryItemBase, ORMBase):
     id: int
     created_at: datetime
+
+
+class ProfileUpdate(BaseModel):
+    full_name: str | None = Field(default=None, min_length=2, max_length=120)
+    username: str | None = Field(default=None, min_length=3, max_length=50)
+    email: str | None = Field(default=None, min_length=5, max_length=120)
+
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(..., min_length=8, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)

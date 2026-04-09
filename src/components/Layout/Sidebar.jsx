@@ -18,6 +18,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line' },
     { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes' },
     { title: 'Emergency Blood Bank', path: '/bloodbank', icon: 'bi bi-droplet-half' },
+    { title: 'Account Settings', path: '/settings', icon: 'bi bi-gear' },
   ];
 
   const handleNavClick = () => {

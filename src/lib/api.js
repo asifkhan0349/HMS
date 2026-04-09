@@ -1,4 +1,4 @@
-const API_URL = '/api';
+const API_URL = 'http://127.0.0.1:8001/api';
 
 const getAuthHeaders = () => {
   const token = sessionStorage.getItem('hms_token');
@@ -74,6 +74,22 @@ export const authApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
+    });
+    return handleResponse(res);
+  },
+  updateProfile: async (profileData) => {
+    const res = await fetch(`${API_URL}/auth/profile`, {
+      method: 'PATCH',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(profileData)
+    });
+    return handleResponse(res);
+  },
+  changePassword: async (passwordData) => {
+    const res = await fetch(`${API_URL}/auth/change-password`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(passwordData)
     });
     return handleResponse(res);
   }
