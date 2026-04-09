@@ -67,14 +67,28 @@ backend:test:
   variables:
     # Ensure stdout/stderr are unbuffered
     PYTHONUNBUFFERED: 1
+    # Ensure the backend directory is in the python path
+    PYTHONPATH: "."
   before_script:
     - cd backend
     - apt-get update && apt-get install -y libpq-dev gcc # Required for psycopg2
     - pip install --upgrade pip
     - pip install -r requirements.txt
+    - pip list # Diagnostic: confirm installed packages and versions
+    - pwd # Diagnostic: confirm current directory
   script:
-    # Simple sanity check to verify the app can be imported and dependencies are satisfied
-    - python -c "from app import main; print('Backend sanity check passed')"
+    # Improved sanity check with traceback reporting to diagnose import failures
+    - |
+      python -c "
+      import sys
+      import traceback
+      try:
+          from app import main
+          print('Backend sanity check passed')
+      except Exception:
+          traceback.print_exc()
+          sys.exit(1)
+      "
     # Add your test commands here (e.g., pytest) when tests are available
     # - pytest
   cache:
