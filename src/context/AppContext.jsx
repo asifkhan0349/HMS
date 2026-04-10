@@ -91,13 +91,15 @@ export const parseDisplayTime = (value) => {
 export const createCode = (prefix) => `${prefix}-${Date.now().toString().slice(-6)}`;
 
 export const mapPatientFromApi = (patient) => ({
-  id: patient.patient_code,
+  id: patient.id,
+  patientCode: patient.patient_code,
   apiId: patient.id,
   name: patient.name,
   age: patient.age,
   gender: patient.gender,
   bloodGroup: patient.blood_group,
   lastVisit: formatDate(patient.last_visit),
+  rawLastVisit: patient.last_visit ? patient.last_visit.split('T')[0] : '',
   status: patient.status,
 });
 
@@ -105,6 +107,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   id: appointment.appointment_code,
   apiId: appointment.id,
   time: formatTime(appointment.scheduled_time),
+  rawTime: appointment.scheduled_time, // Keep ISO for potential edit
   patient: appointment.patient_name,
   doctor: appointment.doctor_name,
   type: appointment.appointment_type,
@@ -116,6 +119,7 @@ export const mapRecordFromApi = (record) => ({
   apiId: record.id,
   clinicalId: record.clinical_id,
   date: formatDate(record.record_date),
+  rawDate: record.record_date ? record.record_date.split('T')[0] : '',
   patient: record.patient_name,
   doctor: record.doctor_name,
   diagnosis: record.diagnosis,
@@ -127,6 +131,7 @@ export const mapInvoiceFromApi = (invoice) => ({
   apiId: invoice.id,
   patient: invoice.patient_name,
   date: formatDate(invoice.invoice_date),
+  rawDate: invoice.invoice_date ? invoice.invoice_date.split('T')[0] : '',
   amount: formatCurrency(invoice.amount),
   amountValue: Number(invoice.amount),
   status: invoice.status,
@@ -140,6 +145,7 @@ export const mapMedicineFromApi = (medicine) => ({
   batch: medicine.batch,
   stock: medicine.stock,
   expiry: formatDate(medicine.expiry_date, { month: 'short', year: 'numeric' }),
+  rawExpiry: medicine.expiry_date ? medicine.expiry_date.split('T')[0] : '',
   status: medicine.status,
 });
 
@@ -187,7 +193,8 @@ export const mapActivityFromApi = (act) => ({
   units: act.units,
   donor: act.donor_name,
   hospital: act.donor_name,
-  date: act.date,
+  date: formatDate(act.date),
+  rawDate: act.date ? act.date.split('T')[0] : '',
 });
 
 export const mapInventoryFromApi = (inv) => ({

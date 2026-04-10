@@ -64,7 +64,7 @@ const Billing = () => {
     setEditingInvoice(inv);
     setEditFormData({
       patient: inv.patient,
-      amount: inv.amount.replace(/[^0-9.]/g, ''),
+      amount: inv.amountValue,
       status: inv.status,
       method: inv.method
     });

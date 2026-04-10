@@ -65,7 +65,7 @@ const Pharmacy = () => {
       name: med.name,
       batch: med.batch,
       stock: med.stock,
-      expiry: med.expiry,
+      expiry: med.rawExpiry,
       status: med.status
     });
     setIsEditModalOpen(true);

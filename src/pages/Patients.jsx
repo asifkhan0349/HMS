@@ -164,6 +164,7 @@ const Patients = () => {
     if (!q) return true;
     return p.name.toLowerCase().includes(q) || 
            p.id.toString().includes(q) || 
+           p.patientCode.toLowerCase().includes(q) ||
            p.bloodGroup.toLowerCase().includes(q);
   });
 

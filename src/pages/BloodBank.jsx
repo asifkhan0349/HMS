@@ -62,7 +62,10 @@ const BloodBank = () => {
       return;
     }
     try {
-      await addActivity(formData);
+      await addActivity({
+        ...formData,
+        units: parseInt(formData.units, 10)
+      });
       showToast(`Blood ${formData.type.toLowerCase()} logged successfully.`);
       setIsModalOpen(false);
       setFormData({ type: 'Donation', blood_group: 'O+', units: '', donor_name: '' });
@@ -86,7 +89,10 @@ const BloodBank = () => {
   const handleActivityEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateActivity(editingActivity.apiId, activityEditFormData);
+      await updateActivity(editingActivity.apiId, {
+        ...activityEditFormData,
+        units: parseInt(activityEditFormData.units, 10)
+      });
       showToast('Activity log updated.');
       setIsActivityEditModalOpen(false);
       setEditingActivity(null);
