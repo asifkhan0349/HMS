@@ -25,6 +25,7 @@ app = FastAPI(
     version="1.0.0",
     description="FastAPI backend with SQLite storage for the HMS frontend.",
     lifespan=lifespan,
+    swagger_ui_parameters={"persistAuthorization": True},
 )
 
 app.add_middleware(

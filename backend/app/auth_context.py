@@ -1,4 +1,5 @@
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
 from sqlalchemy.orm import Session
 
@@ -7,19 +8,23 @@ from .models import User
 from .security import decode_access_token
 
 
+# Initialize standard Bearer token security scheme
+# auto_error=False allows us to keep our custom 401 error message format
+security = HTTPBearer(auto_error=False)
+
 def get_current_user_id(
-    authorization: str | None = Header(default=None),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db)
 ) -> int:
-    """Extract and validate the JWT from the Authorization: Bearer <token> header, and verify user exists."""
-    if authorization is None or not authorization.lower().startswith("bearer "):
+    """Extract and validate the JWT from the Authorization header, and verify user exists."""
+    if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing or malformed authorization header. Please sign in again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = authorization[len("bearer "):].strip()
+    token = credentials.credentials
 
     try:
         user_id = decode_access_token(token)
