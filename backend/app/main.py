@@ -1,14 +1,29 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from .auth_context import get_current_user_id
 from .config import API_PREFIX, CORS_ORIGINS
 from .database import Base, SessionLocal, engine
-from .routers import appointments, auth, beds, blood_activities, blood_inventory, dashboard, inventory, invoices, medicines, patients, records, staff, tests
+from .routers import (
+    appointments,
+    auth,
+    beds,
+    blood_activities,
+    blood_inventory,
+    dashboard,
+    inventory,
+    invoices,
+    medicines,
+    patients,
+    records,
+    staff,
+    tests,
+)
 from .seed import seed_database
 
 
@@ -45,19 +60,19 @@ def health_check():
     return {"status": "ok"}
 
 
-app.include_router(patients.router, prefix=API_PREFIX)
+app.include_router(patients.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 app.include_router(auth.router, prefix=API_PREFIX)
-app.include_router(appointments.router, prefix=API_PREFIX)
-app.include_router(records.router, prefix=API_PREFIX)
-app.include_router(invoices.router, prefix=API_PREFIX)
-app.include_router(medicines.router, prefix=API_PREFIX)
-app.include_router(tests.router, prefix=API_PREFIX)
-app.include_router(staff.router, prefix=API_PREFIX)
-app.include_router(dashboard.router, prefix=API_PREFIX)
-app.include_router(beds.router, prefix=API_PREFIX)
-app.include_router(blood_inventory.router, prefix=API_PREFIX)
-app.include_router(blood_activities.router, prefix=API_PREFIX)
-app.include_router(inventory.router, prefix=API_PREFIX)
+app.include_router(appointments.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(records.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(invoices.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(medicines.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(tests.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(staff.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(dashboard.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(beds.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(blood_inventory.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(blood_activities.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(inventory.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 
 # Serve static files and handle SPA routing
 # This resolves to the parent of the parent of 'app', which is the root project directory locally, or '/app' in Docker
