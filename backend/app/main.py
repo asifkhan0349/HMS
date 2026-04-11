@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -37,7 +38,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Hospital Management System API",
-    version="1.0.0",
+    version="1.0.1",
     description="FastAPI backend with SQLite storage for the HMS frontend.",
     lifespan=lifespan,
     swagger_ui_parameters={"persistAuthorization": True},
@@ -50,6 +51,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 
 
 # Replaced the root route with SPA handling below

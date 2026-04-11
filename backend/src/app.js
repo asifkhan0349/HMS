@@ -10,29 +10,56 @@ const FASTAPI_URL = process.env.FASTAPI_URL || 'http://127.0.0.1:8000';
 // Global Middlewares
 app.use(cors());
 
-// Auth Routes (Specific handler for public auth actions)
-app.use('/api/auth', authRoutes);
+const onProxyReq = (proxyReq, req, res) => {
+  if (req.body && Object.keys(req.body).length) {
+    const bodyData = JSON.stringify(req.body);
+    proxyReq.setHeader('Content-Type', 'application/json');
+    proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+    proxyReq.write(bodyData);
+  }
+};
+
+const proxyOptions = {
+  target: FASTAPI_URL,
+  changeOrigin: true,
+  onProxyReq,
+  onError: (err, req, res) => {
+    console.error('[Proxy Error]:', err);
+    res.status(500).send('Proxy Error');
+  }
+};
+
+// Node-handled auth endpoints (forgot/reset password)
+app.use('/api/auth/forgot-password', authRoutes);
+app.use('/api/auth/reset-password', authRoutes);
 
 /**
- * Proxy Middleware for everything else
- * Enforces authentication for all routes except public endpoints
+ * Individual-Endpoint Authorization
+ * We apply the 'protect' middleware explicitly to each API endpoint resource.
  */
-const publicPaths = [
-  '/api/auth/login',
-  '/api/auth/signup',
-  '/api/health'
-];
+app.use('/api/patients', protect);
+app.use('/api/appointments', protect);
+app.use('/api/records', protect);
+app.use('/api/invoices', protect);
+app.use('/api/medicines', protect);
+app.use('/api/tests', protect);
+app.use('/api/staff', protect);
+app.use('/api/dashboard', protect);
+app.use('/api/beds', protect);
+app.use('/api/blood_inventory', protect);
+app.use('/api/blood_activities', protect);
+app.use('/api/inventory', protect);
 
-app.use('/', (req, res, next) => {
-  // Allow public paths to pass through to the proxy without authentication
-  if (publicPaths.includes(req.path)) {
-    return next();
-  }
-  // Enforce authentication for all other resources
-  return protect(req, res, next);
-}, createProxyMiddleware({
-  target: FASTAPI_URL,
-  changeOrigin: true
-}));
+/**
+ * Global API Proxy
+ * Handles all other /api calls (including login/signup)
+ */
+app.use('/api', createProxyMiddleware(proxyOptions));
+
+/**
+ * Global Catch-all Proxy
+ * Handles SPA and other non-api routes
+ */
+app.use('/', createProxyMiddleware(proxyOptions));
 
 module.exports = app;

@@ -2,7 +2,6 @@ import hashlib
 import hmac
 import os
 import secrets
-import uuid
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -62,13 +61,9 @@ def verify_password(password: str, password_hash: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def create_access_token(user_id: int) -> str:
-    """Create a signed JWT containing the user ID as subject and a unique JTI."""
+    """Create a signed JWT containing the user ID as subject."""
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    payload = {
-        "sub": str(user_id),
-        "exp": expire,
-        "jti": str(uuid.uuid4())
-    }
+    payload = {"sub": str(user_id), "exp": expire}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -82,14 +77,9 @@ def decode_access_token(token: str) -> int:
 
 
 def create_reset_token(email: str) -> str:
-    """Create a short-lived unique token for password reset."""
+    """Create a short-lived token for password reset."""
     expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    payload = {
-        "sub": email,
-        "exp": expire,
-        "type": "reset_password",
-        "jti": str(uuid.uuid4())
-    }
+    payload = {"sub": email, "exp": expire, "type": "reset_password"}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 

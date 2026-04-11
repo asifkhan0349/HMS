@@ -7,14 +7,7 @@ from .database import get_db
 from .models import User
 from .security import decode_access_token
 
-
-# Initialize standard Bearer token security scheme
-# auto_error=False allows us to keep our custom 401 error message format
-security = HTTPBearer(
-    auto_error=False,
-    bearerFormat="JWT",
-    description="Enter your JSON Web Token (JWT) to access protected resources. Format: Bearer &lt;token&gt;"
-)
+security = HTTPBearer(auto_error=False)
 
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
