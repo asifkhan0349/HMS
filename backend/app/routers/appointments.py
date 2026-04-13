@@ -14,8 +14,13 @@ def list_appointments(db: Session = Depends(get_db), current_user_id: int = Depe
 
 
 @router.post("", response_model=schemas.AppointmentRead, status_code=status.HTTP_201_CREATED)
-def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
-    return crud.create_entity(db, models.Appointment, payload, current_user_id)
+def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends(get_db)):
+    # Allow public appointment booking without an access token
+    default_user = db.query(models.User).filter(models.User.role.ilike('%admin%')).first()
+    if not default_user:
+        default_user = db.query(models.User).first()
+    owner_id = default_user.id if default_user else 1
+    return crud.create_entity(db, models.Appointment, payload, owner_id)
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentRead)

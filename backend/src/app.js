@@ -38,7 +38,6 @@ app.use('/api/auth/reset-password', authRoutes);
  * We apply the 'protect' middleware explicitly to each API endpoint resource.
  */
 app.use('/api/patients', protect);
-app.use('/api/appointments', protect);
 app.use('/api/records', protect);
 app.use('/api/invoices', protect);
 app.use('/api/medicines', protect);
