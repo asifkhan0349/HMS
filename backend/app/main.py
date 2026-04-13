@@ -89,7 +89,7 @@ def health_check():
 
 app.include_router(patients.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 app.include_router(auth.router, prefix=API_PREFIX)
-app.include_router(appointments.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(appointments.router, prefix=API_PREFIX)
 app.include_router(records.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 app.include_router(invoices.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 app.include_router(medicines.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])

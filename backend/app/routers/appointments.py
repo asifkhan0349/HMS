@@ -15,6 +15,7 @@ def list_appointments(db: Session = Depends(get_db), current_user_id: int = Depe
 
 @router.post("", response_model=schemas.AppointmentRead, status_code=status.HTTP_201_CREATED)
 def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends(get_db)):
+    print("DEBUG: create_appointment called")
     # Allow public appointment booking without an access token
     default_user = db.query(models.User).filter(models.User.role.ilike('%admin%')).first()
     if not default_user:
