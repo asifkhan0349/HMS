@@ -16,8 +16,46 @@ def get_entity_or_404(db: Session, model, entity_id: int, owner_user_id: int):
     return entity
 
 
-def create_entity(db: Session, model, payload, owner_user_id: int):
-    entity = model(owner_user_id=owner_user_id, **payload.model_dump())
+import uuid
+
+# Maps model names to their unique-code field names
+_CODE_FIELDS = {
+    "Patient":       ("patient_code",      "PAT"),
+    "Appointment":   ("appointment_code",  "APT"),
+    "MedicalRecord": ("record_code",       "REC"),
+    "MedicalRecord": ("clinical_id",       "CLN"),
+    "Invoice":       ("invoice_code",      "INV"),
+    "Medicine":      ("medicine_code",     "MED"),
+    "LabTest":       ("test_code",         "TST"),
+    "Staff":         ("staff_code",        "STF"),
+    "InventoryItem": ("item_code",         "ITM"),
+}
+
+# Models that have TWO code fields (record_code + clinical_id)
+_MULTI_CODE_FIELDS = {
+    "MedicalRecord": [("record_code", "REC"), ("clinical_id", "CLN")],
+}
+
+
+def _generate_code(prefix: str) -> str:
+    return f"{prefix}-{uuid.uuid4().hex[:8].upper()}"
+
+
+def create_entity(db, model, payload, owner_user_id: int):
+    data = payload.model_dump()
+    model_name = model.__name__
+
+    # Auto-generate any missing code fields
+    if model_name in _MULTI_CODE_FIELDS:
+        for field, prefix in _MULTI_CODE_FIELDS[model_name]:
+            if not data.get(field):
+                data[field] = _generate_code(prefix)
+    elif model_name in _CODE_FIELDS:
+        field, prefix = _CODE_FIELDS[model_name]
+        if not data.get(field):
+            data[field] = _generate_code(prefix)
+
+    entity = model(owner_user_id=owner_user_id, **data)
     db.add(entity)
     db.commit()
     db.refresh(entity)

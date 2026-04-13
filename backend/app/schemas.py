@@ -18,7 +18,7 @@ class PatientBase(BaseModel):
 
 
 class PatientCreate(PatientBase):
-    patient_code: str
+    patient_code: str | None = None
 
 
 class PatientUpdate(BaseModel):
@@ -46,7 +46,7 @@ class AppointmentBase(BaseModel):
 
 
 class AppointmentCreate(AppointmentBase):
-    appointment_code: str
+    appointment_code: str | None = None
 
 
 class AppointmentUpdate(BaseModel):
@@ -69,7 +69,7 @@ class AppointmentRead(AppointmentBase, ORMBase):
 
 
 class MedicalRecordBase(BaseModel):
-    clinical_id: str
+    clinical_id: str | None = None
     record_date: date
     patient_name: str
     doctor_name: str
@@ -78,7 +78,7 @@ class MedicalRecordBase(BaseModel):
 
 
 class MedicalRecordCreate(MedicalRecordBase):
-    record_code: str
+    record_code: str | None = None
 
 
 class MedicalRecordUpdate(BaseModel):
@@ -106,7 +106,7 @@ class InvoiceBase(BaseModel):
 
 
 class InvoiceCreate(InvoiceBase):
-    invoice_code: str
+    invoice_code: str | None = None
 
 
 class InvoiceUpdate(BaseModel):
@@ -133,7 +133,7 @@ class MedicineBase(BaseModel):
 
 
 class MedicineCreate(MedicineBase):
-    medicine_code: str
+    medicine_code: str | None = None
 
 
 class MedicineUpdate(BaseModel):
@@ -159,7 +159,7 @@ class LabTestBase(BaseModel):
 
 
 class LabTestCreate(LabTestBase):
-    test_code: str
+    test_code: str | None = None
 
 
 class LabTestUpdate(BaseModel):
@@ -185,7 +185,7 @@ class StaffBase(BaseModel):
 
 
 class StaffCreate(StaffBase):
-    staff_code: str
+    staff_code: str | None = None
 
 
 class StaffUpdate(BaseModel):
@@ -325,7 +325,7 @@ class BloodActivityRead(BloodActivityBase, ORMBase):
 
 # --- Inventory Schemas ---
 class InventoryItemBase(BaseModel):
-    item_code: str
+    item_code: str | None = None
     name: str
     category: str
     stock: int = Field(default=0, ge=0)
