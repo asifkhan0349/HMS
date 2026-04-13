@@ -60,86 +60,51 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
-export const authApi = {
-  login: async (credentials) => {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials)
-    });
-    return handleResponse(res);
-  },
-  signup: async (userData) => {
-    const res = await fetch(`${API_URL}/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData)
-    });
-    return handleResponse(res);
-  },
-  updateProfile: async (profileData) => {
-    const res = await fetch(`${API_URL}/auth/profile`, {
-      method: 'PATCH',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(profileData)
-    });
-    return handleResponse(res);
-  },
-  changePassword: async (passwordData) => {
-    const res = await fetch(`${API_URL}/auth/change-password`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(passwordData)
-    });
-    return handleResponse(res);
-  },
-  forgotPassword: async (email) => {
-    const res = await fetch(`${API_URL}/auth/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    return handleResponse(res);
-  },
-  resetPassword: async (token, new_password) => {
-    const res = await fetch(`${API_URL}/auth/reset-password/${token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ new_password })
-    });
-    return handleResponse(res);
+const request = async (endpoint, options = {}) => {
+  const { method = 'GET', body, isProtected = false, headers = {} } = options;
+
+  const authHeaders = isProtected ? getAuthHeaders() : {};
+
+  const config = {
+    method,
+    headers: {
+      ...authHeaders,
+      ...headers,
+    },
+  };
+
+  if (body) {
+    config.body = JSON.stringify(body);
+    if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
   }
+
+  const response = await fetch(`${API_URL}${endpoint}`, config);
+  return handleResponse(response);
+};
+
+export const authApi = {
+  login: (credentials) => request('/auth/login', { method: 'POST', body: credentials }),
+  signup: (userData) => request('/auth/signup', { method: 'POST', body: userData }),
+  updateProfile: (profileData) => 
+    request('/auth/profile', { method: 'PATCH', body: profileData, isProtected: true }),
+  changePassword: (passwordData) => 
+    request('/auth/change-password', { method: 'POST', body: passwordData, isProtected: true }),
+  forgotPassword: (email) => 
+    request('/auth/forgot-password', { method: 'POST', body: { email } }),
+  resetPassword: (token, new_password) => 
+    request(`/auth/reset-password/${token}`, { method: 'POST', body: { new_password } })
 };
 
 const createCrudClient = (resourceName) => ({
-  list: async () => {
-    const res = await fetch(`${API_URL}/${resourceName}`, { headers: getAuthHeaders() });
-    return handleResponse(res);
-  },
-  create: async (data) => {
-    const res = await fetch(`${API_URL}/${resourceName}`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return handleResponse(res);
-  },
-  update: async (id, data) => {
-    const res = await fetch(`${API_URL}/${resourceName}/${id}`, {
-      method: 'PUT',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return handleResponse(res);
-  },
-  remove: async (id) => {
-    const res = await fetch(`${API_URL}/${resourceName}/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    });
-    return handleResponse(res);
-  }
+  list: () => request(`/${resourceName}`, { isProtected: true }),
+  create: (data) => request(`/${resourceName}`, { method: 'POST', body: data, isProtected: true }),
+  update: (id, data) => 
+    request(`/${resourceName}/${id}`, { method: 'PUT', body: data, isProtected: true }),
+  remove: (id) => request(`/${resourceName}/${id}`, { method: 'DELETE', isProtected: true })
 });
+
 
 export const patientsApi = createCrudClient('patients');
 export const appointmentsApi = createCrudClient('appointments');

@@ -51,14 +51,8 @@ app.use('/api/blood_activities', protect);
 app.use('/api/inventory', protect);
 
 /**
- * Global API Proxy
- * Handles all other /api calls (including login/signup)
- */
-app.use('/api', createProxyMiddleware(proxyOptions));
-
-/**
  * Global Catch-all Proxy
- * Handles SPA and other non-api routes
+ * Handles all other /api calls (including login/signup), SPA, and other non-api routes.
  */
 app.use('/', createProxyMiddleware(proxyOptions));
 
