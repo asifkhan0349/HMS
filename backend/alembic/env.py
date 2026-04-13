@@ -45,9 +45,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    """
     url = DATABASE_URL
-    context.configure(
     context.configure(
         url=url,
         target_metadata=target_metadata,

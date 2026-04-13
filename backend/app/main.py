@@ -15,10 +15,15 @@ from .database import Base, SessionLocal, engine
 from .limiter import limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from secure import Secure
+from secure import Secure, ContentSecurityPolicy
 
-# Initialize secure headers
-secure_headers = Secure.with_default_headers()
+# Initialize secure headers with a policy that allows Swagger UI CDN assets
+csp = ContentSecurityPolicy()
+csp.script_src("'self'", "'unsafe-inline'", "cdn.jsdelivr.net")
+csp.style_src("'self'", "'unsafe-inline'", "cdn.jsdelivr.net")
+csp.img_src("'self'", "data:", "cdn.jsdelivr.net")
+
+secure_headers = Secure(csp=csp)
 from .routers import (
     appointments,
     auth,
@@ -68,12 +73,38 @@ app.add_middleware(
 
 @app.middleware("http")
 async def set_secure_headers(request, call_next):
+    # Skip security headers for documentation routes to ensure Swagger UI loads correctly
+    path = request.url.path
+    if path.startswith("/docs") or path.startswith("/redoc") or path.startswith("/openapi.json"):
+        return await call_next(request)
+
     response = await call_next(request)
-    secure_headers.framework.fastapi(response)
-    # Additional security headers not handled by default in Secure
+    secure_headers.set_headers(response)
+
+    # Enable HSTS for production if using HTTPS (suggested header)
+    if settings.ENV == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+    # Additional security headers
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     return response
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    """
+    Catch all unhandled exceptions and return a clean JSON response.
+    Prevents raw Python tracebacks from leaking in production.
+    """
+    import logging
+    logger = logging.getLogger("uvicorn.error")
+    logger.error(f"Unhandled error: {str(exc)}", exc_info=True)
+    
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An internal server error occurred. Our team has been notified."}
+    )
 
 
 
@@ -101,7 +132,7 @@ app.include_router(blood_inventory.router, prefix=API_PREFIX, dependencies=[Depe
 app.include_router(blood_activities.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 app.include_router(inventory.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
 
-# Serve static files and handle SPA routing
+# Serve static files
 # This resolves to the parent of the parent of 'app', which is the root project directory locally, or '/app' in Docker
 dist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "dist")
 assets_dir = os.path.join(dist_dir, "assets")
@@ -109,15 +140,22 @@ assets_dir = os.path.join(dist_dir, "assets")
 if os.path.isdir(assets_dir):
     app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-@app.get("/{full_path:path}", include_in_schema=False)
-async def serve_spa(full_path: str):
-    # Do not catch API routes
-    if full_path.startswith(API_PREFIX.lstrip("/")) or full_path.startswith("api/"):
+@app.exception_handler(404)
+async def spa_fallback_handler(request, exc):
+    """
+    Handle 404 errors by serving the SPA index.html for non-API routes.
+    This allows FastAPI's /docs, /redoc, and /openapi.json to work correctly.
+    """
+    # Do not catch API routes - return a standard 404 JSON for these
+    if request.url.path.startswith(API_PREFIX) or request.url.path.startswith("/api"):
         return JSONResponse({"detail": "Not Found"}, status_code=404)
         
     # Check if a specific file exists in dist (e.g. vite.svg, robots.txt)
-    file_path = os.path.join(dist_dir, full_path)
-    if os.path.isfile(file_path):
+    # Path is relative to dist_dir
+    rel_path = request.url.path.lstrip("/")
+    file_path = os.path.join(dist_dir, rel_path)
+    
+    if rel_path and os.path.isfile(file_path):
         return FileResponse(file_path)
         
     # Otherwise, return index.html for React Router to handle
@@ -126,3 +164,4 @@ async def serve_spa(full_path: str):
         return FileResponse(index_path)
         
     return JSONResponse({"detail": "Frontend not built or dist folder missing"}, status_code=404)
+
