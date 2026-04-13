@@ -265,19 +265,22 @@ const Appointments = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Patient</label>
-            <select
+            <input
               id="appointment-patient"
-              className="form-select"
+              type="text"
+              className="form-control"
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-            >
-              <option value="">Select a registered patient...</option>
+              list="patient-options"
+              placeholder="Search or enter patient name"
+            />
+            <datalist id="patient-options">
               {patients.map((p) => (
                 <option key={p.id} value={p.name}>
-                  {p.name} ({p.id})
+                  {p.id}
                 </option>
               ))}
-            </select>
+            </datalist>
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
@@ -340,19 +343,15 @@ const Appointments = () => {
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
               <label htmlFor="edit-appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Patient</label>
-              <select
+              <input
                 id="edit-appointment-patient"
-                className="form-select"
+                type="text"
+                className="form-control"
                 value={editFormData.patient}
                 onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-              >
-                <option value="">Select a registered patient...</option>
-                {patients.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name} ({p.id})
-                  </option>
-                ))}
-              </select>
+                list="patient-options"
+                placeholder="Search or enter patient name"
+              />
             </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
