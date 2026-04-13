@@ -22,7 +22,13 @@ const formatTime = (value) => {
     return '-';
   }
 
-  const parsed = new Date(value);
+  // Ensure string has timezone indicator to avoid naive local interpretation
+  let timeStr = value;
+  if (typeof timeStr === 'string' && !timeStr.includes('Z') && !timeStr.includes('+')) {
+    timeStr = `${timeStr}Z`;
+  }
+
+  const parsed = new Date(timeStr);
   if (Number.isNaN(parsed.getTime())) {
     return value;
   }
@@ -59,13 +65,14 @@ export const parseDisplayMonth = (value) => {
   return parsed.toISOString().slice(0, 10);
 };
 
-export const parseDisplayTime = (value) => {
+export const parseDisplayTime = (value, baseDate = null) => {
   if (!value) {
     return new Date().toISOString();
   }
 
   const match = value.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
-  const now = new Date();
+  const now = baseDate ? new Date(baseDate) : new Date();
+  
   if (!match) {
     return now.toISOString();
   }

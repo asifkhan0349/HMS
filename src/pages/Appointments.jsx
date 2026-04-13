@@ -30,7 +30,7 @@ const Appointments = () => {
   const [deletingApp, setDeletingApp] = useState(null);
 
   const [formData, setFormData] = useState({
-    time: '14:30 PM',
+    time: '10:30 AM',
     patient: '',
     doctor: '',
     type: 'Checkup',
@@ -70,7 +70,7 @@ const Appointments = () => {
       await addAppointment(payload);
       showToast(`Appointment for ${formData.patient} scheduled successfully.`);
       setIsModalOpen(false);
-      setFormData({ time: '14:30 PM', patient: '', doctor: '', type: 'Checkup' });
+      setFormData({ time: '10:30 AM', patient: '', doctor: '', type: 'Checkup' });
     } catch (error) {
       showToast(error.message || 'Unable to schedule the appointment.', 'error');
     }
@@ -94,7 +94,7 @@ const Appointments = () => {
       const payload = {
         patient_name: editFormData.patient,
         doctor_name: editFormData.doctor,
-        scheduled_time: parseDisplayTime(editFormData.time),
+        scheduled_time: parseDisplayTime(editFormData.time, editingApp.rawTime),
         appointment_type: editFormData.type,
         status: editFormData.status
       };
@@ -318,7 +318,7 @@ const Appointments = () => {
               id="appointment-time"
               type="text"
               className="form-control"
-              placeholder="e.g. 10:30 AM"
+              placeholder="e.g. 10:30 AM or 02:45 PM"
               value={formData.time}
               onChange={(e) => setFormData({ ...formData, time: e.target.value })}
             />

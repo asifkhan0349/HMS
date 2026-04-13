@@ -1,7 +1,7 @@
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, field_serializer
 
 
 class ORMBase(BaseModel):
@@ -62,6 +62,10 @@ class AppointmentRead(AppointmentBase, ORMBase):
     id: int
     appointment_code: str
     created_at: datetime
+    
+    @field_serializer("scheduled_time", "created_at")
+    def serialize_dt(self, dt: datetime, _info):
+        return dt.isoformat() if dt.tzinfo else f"{dt.isoformat()}Z"
 
 
 class MedicalRecordBase(BaseModel):
