@@ -1,42 +1,39 @@
 # Stage 1: Build the React Application
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app
-
-# Puppeteer skips download on frontend build
-ENV PUPPETEER_SKIP_DOWNLOAD=true
-
-# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
-
-# Copy the rest of the frontend source code and build
+RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Build the FastAPI Backend Image
-FROM python:3.11-slim AS backend
-WORKDIR /app/backend
+# Stage 2: Serve with FastAPI
+FROM python:3.11-slim
+WORKDIR /app
 
-# Install necessary system dependencies for psycopg2 and other packages
+# Install runtime dependencies for psycopg2 and health checks
 RUN apt-get update && apt-get install -y \
-    libpq-dev gcc \
+    libpq5 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy backend requirements and install
+# Install python dependencies
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend source code
+# Copy backend source
 COPY backend /app/backend
+WORKDIR /app/backend
 
-# Copy the built React app from the previous stage into the '/app/dist' directory
+# Copy the built React app
 COPY --from=frontend-builder /app/dist /app/dist
 
-# Expose port 8000
+# Environment defaults
+ENV ENV=production
+ENV DEBUG_MODE=False
+ENV PYTHONPATH=/app/backend
+ENV PORT=8000
+
 EXPOSE 8000
 
-# Set environment variables for the application to default to local sqlite inside container
-ENV DATABASE_URL="sqlite:////app/backend/hms.db"
-
-# Run FastAPI using Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run with uvicorn (standard workers for production)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

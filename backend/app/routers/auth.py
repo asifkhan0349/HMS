@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Body, BackgroundTasks, Request
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from fastapi_mail import FastMail, ConnectionConfig, MessageSchema, MessageType
@@ -7,6 +7,10 @@ import os
 from .. import auth_context, models, schemas
 from ..database import get_db
 from ..security import create_access_token, hash_password, verify_password, create_reset_token, verify_reset_token
+from ..config import settings
+
+# For rate limiting
+from ..limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -33,7 +37,8 @@ def normalize_email(email: str) -> str:
 
 
 @router.post("/signup", response_model=schemas.AuthResponse, status_code=status.HTTP_201_CREATED)
-def signup(payload: schemas.SignupRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def signup(request: Request, payload: schemas.SignupRequest, db: Session = Depends(get_db)):
     normalized_username = normalize_username(payload.username)
     normalized_email = normalize_email(payload.email)
 
@@ -68,7 +73,8 @@ def signup(payload: schemas.SignupRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.AuthResponse)
-def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, payload: schemas.LoginRequest, db: Session = Depends(get_db)):
     normalized_username = normalize_username(payload.username)
     user = db.query(models.User).filter(func.lower(models.User.username) == normalized_username).first()
     
@@ -165,7 +171,7 @@ async def forgot_password(
     
     if user:
         token = create_reset_token(email=user.email)
-        reset_link = f"http://localhost:5173/reset-password?token={token}"
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
         
         # Log to terminal for easy local testing when SMTP is not configured
         print(f"\n--- PASSWORD RESET LINK FOR {user.email} ---")

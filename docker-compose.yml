@@ -1,0 +1,26 @@
+services:
+  hms-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - DATABASE_URL=postgresql://hms_user:hms_pass@hms-db:5432/hms_db
+      - HMS_SECRET_KEY=production-secret-replace-me
+      - FRONTEND_URL=http://localhost:8000
+    depends_on:
+      - hms-db
+
+  hms-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=hms_user
+      - POSTGRES_PASSWORD=hms_pass
+      - POSTGRES_DB=hms_db
+    volumes:
+      - hms-db-data:/var/lib/postgresql/data
+
+volumes:
+  hms-db-data:

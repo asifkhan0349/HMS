@@ -1,24 +1,64 @@
 import os
 from pathlib import Path
+from typing import List
 
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load .env if present (development convenience — production sets vars directly)
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
-BACKEND_DIR = Path(__file__).resolve().parent.parent
-DATABASE_URL = os.environ.get("DATABASE_URL")
-if not DATABASE_URL:
-    # Fallback for development if .env is missing or DATABASE_URL not set
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=str(Path(__file__).resolve().parent.parent / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+    # General
+    ENV: str = "development"
+    DEBUG_MODE: bool = True
+    API_PREFIX: str = "/api"
+
+    # Security
+    HMS_SECRET_KEY: str = "dev-insecure-secret-change-me"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    ALLOWED_ORIGINS: str = ""
+
+    # Database
+    DATABASE_URL: str = ""
+
+    # Email (FastMail)
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = "hms@example.com"
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = ""
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+
+    # Frontend
+    FRONTEND_URL: str = "http://localhost:5173"
+
+    @property
+    def cors_origins(self) -> List[str]:
+        if not self.ALLOWED_ORIGINS:
+            return ["*"] if self.ENV != "production" else []
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
+
+settings = Settings()
+
+# Post-processing for production safety
+if settings.ENV == "production" and settings.HMS_SECRET_KEY == "dev-insecure-secret-change-me":
+    raise ValueError("HMS_SECRET_KEY must be a secure value in production!")
+
+# Database URL adjustment for Postgres (Render compatibility)
+if settings.DATABASE_URL.startswith("postgres://"):
+    settings.DATABASE_URL = settings.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+elif not settings.DATABASE_URL:
     BACKEND_DIR = Path(__file__).resolve().parent.parent
     DATABASE_PATH = BACKEND_DIR / "hms.db"
-    DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
-else:
-    # Ensure modern SQLAlchemy compatibility (replace legacy postgres:// with postgresql://)
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    settings.DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
 
-API_PREFIX = "/api"
-
-# Completely automate CORS to allow any origin so the user doesn't have to manually configure domain whitelists
-CORS_ORIGINS = ["*"]
+# Constants for migration logic
+API_PREFIX = settings.API_PREFIX
+CORS_ORIGINS = settings.cors_origins
+DATABASE_URL = settings.DATABASE_URL
+SECRET_KEY = settings.HMS_SECRET_KEY

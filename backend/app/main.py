@@ -8,8 +8,17 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .auth_context import get_current_user_id
-from .config import API_PREFIX, CORS_ORIGINS
+from .config import API_PREFIX, CORS_ORIGINS, settings
 from .database import Base, SessionLocal, engine
+
+# Production-ready Security and Rate Limiting
+from .limiter import limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from secure import Secure
+
+# Initialize secure headers
+secure_headers = Secure.with_default_headers()
 from .routers import (
     appointments,
     auth,
@@ -42,7 +51,12 @@ app = FastAPI(
     description="FastAPI backend with SQLite storage for the HMS frontend.",
     lifespan=lifespan,
     swagger_ui_parameters={"persistAuthorization": True},
+    debug=settings.DEBUG_MODE
 )
+
+# Attach Limiter and RateLimit handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +65,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def set_secure_headers(request, call_next):
+    response = await call_next(request)
+    secure_headers.framework.fastapi(response)
+    # Additional security headers not handled by default in Secure
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
 
 
 
