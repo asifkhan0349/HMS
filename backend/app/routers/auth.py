@@ -195,13 +195,8 @@ async def forgot_password(
     return {"message": "If an account with that email exists, a password reset link has been sent."}
 
 
-from pydantic import BaseModel, Field
-
-class ResetPasswordPayload(BaseModel):
-    new_password: str = Field(..., min_length=8, max_length=128)
-
 @router.post("/reset-password/{token}")
-def reset_password(token: str, payload: ResetPasswordPayload, db: Session = Depends(get_db)):
+def reset_password(token: str, payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
     email = verify_reset_token(token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")

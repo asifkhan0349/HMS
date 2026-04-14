@@ -67,7 +67,7 @@ def create_blood_activity(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    activity = models.BloodActivity(**payload.dict(), owner_user_id=user_id)
+    activity = models.BloodActivity(**payload.model_dump(), owner_user_id=user_id)
     db.add(activity)
     sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type)
     db.commit()
@@ -88,7 +88,7 @@ def update_blood_activity(
     sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type, revert=True)
 
     # 2. Update the activity record fields
-    for field, value in payload.dict(exclude_unset=True).items():
+    for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(activity, field, value)
     db.flush() # Ensure the new group/units reflect in the object
         
