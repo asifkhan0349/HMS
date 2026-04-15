@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from .auth_context import get_current_user_id
 from .config import API_PREFIX, CORS_ORIGINS, settings
 from .database import Base, SessionLocal, engine
+from .schema_bootstrap import ensure_schema_compatibility
 
 # Production-ready Security and Rate Limiting
 from .limiter import limiter
@@ -45,6 +46,7 @@ from .seed import seed_database
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    ensure_schema_compatibility(engine)
     with SessionLocal() as db:
         seed_database(db)
     yield
@@ -164,4 +166,3 @@ async def spa_fallback_handler(request, exc):
         return FileResponse(index_path)
         
     return JSONResponse({"detail": "Frontend not built or dist folder missing"}, status_code=404)
-

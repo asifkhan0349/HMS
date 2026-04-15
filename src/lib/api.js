@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+const DEV_BACKEND_URL = 'http://127.0.0.1:8000';
 
 const getAuthHeaders = () => {
   const token = sessionStorage.getItem('hms_token');
@@ -50,11 +51,25 @@ const toErrorMessage = (errorData, response) => {
 const handleResponse = async (response) => {
   if (!response.ok) {
     let errorData = {};
+    const contentType = response.headers.get('content-type') || '';
+
     try {
-      errorData = await response.json();
+      errorData = contentType.includes('application/json')
+        ? await response.json()
+        : { detail: await response.text() };
     } catch {
       // Fall back to status-based messages when the server does not return JSON.
     }
+
+    // Vite's dev proxy commonly returns a plain-text 5xx response when the backend is down.
+    if (
+      import.meta.env.DEV &&
+      response.status >= 500 &&
+      !contentType.includes('application/json')
+    ) {
+      throw new Error(`Cannot reach the backend API. Make sure the server is running on ${DEV_BACKEND_URL}.`);
+    }
+
     throw new Error(toErrorMessage(errorData, response));
   }
   return response.json();
@@ -80,8 +95,20 @@ const request = async (endpoint, options = {}) => {
     }
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, config);
-  return handleResponse(response);
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, config);
+    return handleResponse(response);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        import.meta.env.DEV
+          ? `Cannot reach the backend API. Make sure the server is running on ${DEV_BACKEND_URL}.`
+          : 'Unable to connect to the server. Please try again.'
+      );
+    }
+
+    throw error;
+  }
 };
 
 export const authApi = {

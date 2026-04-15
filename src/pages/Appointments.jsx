@@ -8,6 +8,21 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const STATUS_OPTIONS = ['Scheduled', 'In Progress', 'Completed', 'Cancelled'];
+const APPOINTMENT_TYPE_OPTIONS = ['New Consultation', 'Follow-up', 'Routine Check-up'];
+const GENDER_OPTIONS = ['Male', 'Female', 'Other'];
+const DEFAULT_APPOINTMENT_TIME = '09:00 AM';
+
+const createEmptyAppointmentForm = () => ({
+  preferredDate: new Date().toISOString().slice(0, 10),
+  patient: '',
+  dateOfBirth: '',
+  age: '',
+  gender: 'Male',
+  address: '',
+  department: '',
+  doctor: '',
+  type: 'New Consultation',
+});
 
 const Appointments = () => {
   const { showToast } = useApp();
@@ -22,6 +37,7 @@ const Appointments = () => {
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff } = useCrud(staffApi, mapStaffFromApi);
   const doctorOptions = [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))];
+  const departmentOptions = [...new Set(staff.map((member) => member.dept).filter(Boolean))];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -29,19 +45,54 @@ const Appointments = () => {
   const [editingApp, setEditingApp] = useState(null);
   const [deletingApp, setDeletingApp] = useState(null);
 
-  const [formData, setFormData] = useState({
-    time: '10:30 AM',
-    patient: '',
-    doctor: '',
-    type: 'Checkup',
-  });
+  const [formData, setFormData] = useState(createEmptyAppointmentForm);
 
   const [editFormData, setEditFormData] = useState({
-    time: '',
+    preferredDate: new Date().toISOString().slice(0, 10),
     patient: '',
+    dateOfBirth: '',
+    age: '',
+    gender: 'Male',
+    address: '',
+    department: '',
     doctor: '',
-    type: 'Checkup',
+    type: 'New Consultation',
     status: 'Scheduled'
+  });
+
+  const syncPatientDetails = (name, currentData) => {
+    const matchedPatient = patients.find((patient) => patient.name.toLowerCase() === name.trim().toLowerCase());
+
+    if (!matchedPatient) {
+      return { ...currentData, patient: name };
+    }
+
+    return {
+      ...currentData,
+      patient: name,
+      age: matchedPatient.age?.toString() ?? currentData.age,
+      gender: matchedPatient.gender || currentData.gender,
+    };
+  };
+
+  const buildAppointmentPayload = (
+    appointmentData,
+    status,
+    appointmentCode = undefined,
+    timeValue = DEFAULT_APPOINTMENT_TIME,
+    baseTime = null
+  ) => ({
+    patient_name: appointmentData.patient.trim(),
+    patient_date_of_birth: appointmentData.dateOfBirth || null,
+    patient_age: appointmentData.dateOfBirth ? null : Number(appointmentData.age),
+    patient_gender: appointmentData.gender,
+    patient_address: appointmentData.address.trim() || null,
+    department: appointmentData.department.trim(),
+    doctor_name: appointmentData.doctor.trim(),
+    scheduled_time: parseDisplayTime(timeValue, appointmentData.preferredDate || baseTime),
+    appointment_type: appointmentData.type,
+    status,
+    ...(appointmentCode ? { appointment_code: appointmentCode } : {}),
   });
 
   const appointmentSummary = useMemo(
@@ -54,23 +105,30 @@ const Appointments = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient) {
-      showToast('Please select a patient for the appointment.', 'warning');
+    if (!formData.patient.trim()) {
+      showToast('Please enter the patient full name.', 'warning');
+      return;
+    }
+    if (!formData.dateOfBirth && !formData.age) {
+      showToast('Please provide either date of birth or age.', 'warning');
+      return;
+    }
+
+    if (!formData.department.trim()) {
+      showToast('Please select a department or specialization.', 'warning');
       return;
     }
     try {
-      const payload = {
-        patient_name: formData.patient,
-        doctor_name: formData.doctor,
-        scheduled_time: parseDisplayTime(formData.time),
-        appointment_type: formData.type,
-        appointment_code: createCode('A'),
-        status: 'Scheduled'
-      };
+      const payload = buildAppointmentPayload(
+        formData,
+        'Scheduled',
+        createCode('A'),
+        DEFAULT_APPOINTMENT_TIME
+      );
       await addAppointment(payload);
       showToast(`Appointment for ${formData.patient} scheduled successfully.`);
       setIsModalOpen(false);
-      setFormData({ time: '10:30 AM', patient: '', doctor: '', type: 'Checkup' });
+      setFormData(createEmptyAppointmentForm());
     } catch (error) {
       showToast(error.message || 'Unable to schedule the appointment.', 'error');
     }
@@ -79,8 +137,13 @@ const Appointments = () => {
   const openEditModal = (app) => {
     setEditingApp(app);
     setEditFormData({
-      time: app.time,
+      preferredDate: app.preferredDate || new Date().toISOString().slice(0, 10),
       patient: app.patient,
+      dateOfBirth: app.patientDateOfBirth || '',
+      age: app.patientAge?.toString() || '',
+      gender: app.patientGender || 'Male',
+      address: app.patientAddress || '',
+      department: app.department || '',
       doctor: app.doctor,
       type: app.type,
       status: app.status
@@ -90,14 +153,27 @@ const Appointments = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    if (!editFormData.patient.trim()) {
+      showToast('Please enter the patient full name.', 'warning');
+      return;
+    }
+    if (!editFormData.dateOfBirth && !editFormData.age) {
+      showToast('Please provide either date of birth or age.', 'warning');
+      return;
+    }
+
+    if (!editFormData.department.trim()) {
+      showToast('Please select a department or specialization.', 'warning');
+      return;
+    }
     try {
-      const payload = {
-        patient_name: editFormData.patient,
-        doctor_name: editFormData.doctor,
-        scheduled_time: parseDisplayTime(editFormData.time, editingApp.rawTime),
-        appointment_type: editFormData.type,
-        status: editFormData.status
-      };
+      const payload = buildAppointmentPayload(
+        editFormData,
+        editFormData.status,
+        undefined,
+        editingApp.time || DEFAULT_APPOINTMENT_TIME,
+        editingApp.rawTime
+      );
       await updateAppointment(editingApp.apiId, payload);
       showToast(`Appointment for ${editFormData.patient} updated successfully.`);
       setIsEditModalOpen(false);
@@ -264,67 +340,132 @@ const Appointments = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Schedule Appointment">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Patient</label>
-            <input
-              id="appointment-patient"
-              type="text"
-              className="form-control"
-              value={formData.patient}
-              onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-              list="patient-options"
-              placeholder="Search or enter patient name"
-            />
-            <datalist id="patient-options">
-              {patients.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.id}
-                </option>
-              ))}
-            </datalist>
-          </div>
-          <div className="row g-3 mb-4">
-            <div className="col-md-6">
-              <label htmlFor="appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2">Doctor</label>
-              <input
-                id="appointment-doctor"
-                type="text"
-                className="form-control"
-                value={formData.doctor}
-                onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-                list="doctor-options"
-                placeholder="Enter doctor name"
-              />
-              <datalist id="doctor-options">
-                {doctorOptions.map((doctor) => (
-                  <option key={doctor} value={doctor} />
-                ))}
-              </datalist>
-            </div>
-            <div className="col-md-6">
-              <label htmlFor="appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Visit Type</label>
-              <select
-                id="appointment-type"
-                className="form-select"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              >
-                <option>Checkup</option>
-                <option>Follow-up</option>
-                <option>Consultation</option>
-                <option>Emergency</option>
-              </select>
+            <h6 className="fw-bold mb-3">Patient Details</h6>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label htmlFor="appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Full Name</label>
+                <input
+                  id="appointment-patient"
+                  type="text"
+                  className="form-control"
+                  value={formData.patient}
+                  onChange={(e) => setFormData((current) => syncPatientDetails(e.target.value, current))}
+                  list="patient-options"
+                  placeholder="Search or enter patient name"
+                />
+                <datalist id="patient-options">
+                  {patients.map((p) => (
+                    <option key={p.id} value={p.name}>
+                      {p.id}
+                    </option>
+                  ))}
+                </datalist>
+              </div>
+              <div className="col-md-3">
+                <label htmlFor="appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2">Date of Birth</label>
+                <input
+                  id="appointment-dob"
+                  type="date"
+                  className="form-control"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                />
+              </div>
+              <div className="col-md-3">
+                <label htmlFor="appointment-age" className="form-label text-muted fw-bold small text-uppercase mb-2">Age</label>
+                <input
+                  id="appointment-age"
+                  type="number"
+                  min="0"
+                  className="form-control"
+                  placeholder="If DOB not available"
+                  value={formData.age}
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                />
+              </div>
+              <div className="col-md-12">
+                <label htmlFor="appointment-gender" className="form-label text-muted fw-bold small text-uppercase mb-2">Gender</label>
+                <select
+                  id="appointment-gender"
+                  className="form-select"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                >
+                  {GENDER_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </div>
+              <div className="col-12">
+                <label htmlFor="appointment-address" className="form-label text-muted fw-bold small text-uppercase mb-2">Address</label>
+                <textarea
+                  id="appointment-address"
+                  className="form-control"
+                  rows="2"
+                  placeholder="Optional"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                />
+              </div>
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="appointment-time" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
-            <input
-              id="appointment-time"
-              type="text"
-              className="form-control"
-              placeholder="e.g. 10:30 AM or 02:45 PM"
-              value={formData.time}
-              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-            />
+            <h6 className="fw-bold mb-3">Appointment Details</h6>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label htmlFor="appointment-department" className="form-label text-muted fw-bold small text-uppercase mb-2">Department or Specialization</label>
+                <input
+                  id="appointment-department"
+                  type="text"
+                  className="form-control"
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  list="department-options"
+                  placeholder="e.g. Cardiology"
+                />
+                <datalist id="department-options">
+                  {departmentOptions.map((department) => (
+                    <option key={department} value={department} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Doctor</label>
+                <input
+                  id="appointment-doctor"
+                  type="text"
+                  className="form-control"
+                  value={formData.doctor}
+                  onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+                  list="doctor-options"
+                  placeholder="Optional"
+                />
+                <datalist id="doctor-options">
+                  {doctorOptions.map((doctor) => (
+                    <option key={doctor} value={doctor} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="col-md-4">
+                <label htmlFor="appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Preferred Date</label>
+                <input
+                  id="appointment-date"
+                  type="date"
+                  className="form-control"
+                  value={formData.preferredDate}
+                  onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                />
+              </div>
+              <div className="col-md-8">
+                <label htmlFor="appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Type</label>
+                <select
+                  id="appointment-type"
+                  className="form-select"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                >
+                  {APPOINTMENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </div>
+            </div>
           </div>
           <div className="d-flex gap-2 mt-5">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsModalOpen(false)}>
@@ -342,67 +483,122 @@ const Appointments = () => {
         {editingApp && (
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
-              <label htmlFor="edit-appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Patient</label>
-              <input
-                id="edit-appointment-patient"
-                type="text"
-                className="form-control"
-                value={editFormData.patient}
-                onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-                list="patient-options"
-                placeholder="Search or enter patient name"
-              />
+              <h6 className="fw-bold mb-3">Patient Details</h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label htmlFor="edit-appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Full Name</label>
+                  <input
+                    id="edit-appointment-patient"
+                    type="text"
+                    className="form-control"
+                    value={editFormData.patient}
+                    onChange={(e) => setEditFormData((current) => syncPatientDetails(e.target.value, current))}
+                    list="patient-options"
+                    placeholder="Search or enter patient name"
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="edit-appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2">Date of Birth</label>
+                  <input
+                    id="edit-appointment-dob"
+                    type="date"
+                    className="form-control"
+                    value={editFormData.dateOfBirth}
+                    onChange={(e) => setEditFormData({ ...editFormData, dateOfBirth: e.target.value })}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="edit-appointment-age" className="form-label text-muted fw-bold small text-uppercase mb-2">Age</label>
+                  <input
+                    id="edit-appointment-age"
+                    type="number"
+                    min="0"
+                    className="form-control"
+                    value={editFormData.age}
+                    onChange={(e) => setEditFormData({ ...editFormData, age: e.target.value })}
+                  />
+                </div>
+                  <div className="col-md-12">
+                    <label htmlFor="edit-appointment-gender" className="form-label text-muted fw-bold small text-uppercase mb-2">Gender</label>
+                    <select
+                      id="edit-appointment-gender"
+                      className="form-select"
+                      value={editFormData.gender}
+                      onChange={(e) => setEditFormData({ ...editFormData, gender: e.target.value })}
+                    >
+                      {GENDER_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                    </select>
+                  </div>
+                <div className="col-12">
+                  <label htmlFor="edit-appointment-address" className="form-label text-muted fw-bold small text-uppercase mb-2">Address</label>
+                  <textarea
+                    id="edit-appointment-address"
+                    className="form-control"
+                    rows="2"
+                    value={editFormData.address}
+                    onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="row g-3 mb-4">
-              <div className="col-md-6">
-                <label htmlFor="edit-appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2">Doctor</label>
-                <input
-                  id="edit-appointment-doctor"
-                  type="text"
-                  className="form-control"
-                  value={editFormData.doctor}
-                  onChange={(e) => setEditFormData({ ...editFormData, doctor: e.target.value })}
-                  list="doctor-options"
-                  placeholder="Enter doctor name"
-                />
-              </div>
-              <div className="col-md-6">
-                <label htmlFor="edit-appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Visit Type</label>
-                <select
-                  id="edit-appointment-type"
-                  className="form-select"
-                  value={editFormData.type}
-                  onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
-                >
-                  <option>Checkup</option>
-                  <option>Follow-up</option>
-                  <option>Consultation</option>
-                  <option>Emergency</option>
-                </select>
-              </div>
-            </div>
-            <div className="row g-3 mb-4">
-              <div className="col-md-6">
-                <label htmlFor="edit-appointment-time" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
-                <input
-                  id="edit-appointment-time"
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. 10:30 AM"
-                  value={editFormData.time}
-                  onChange={(e) => setEditFormData({ ...editFormData, time: e.target.value })}
-                />
-              </div>
-              <div className="col-md-6">
-                <label htmlFor="edit-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Status</label>
-                <select
-                  id="edit-status"
-                  className="form-select"
-                  value={editFormData.status}
-                  onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                >
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+            <div className="mb-4">
+              <h6 className="fw-bold mb-3">Appointment Details</h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label htmlFor="edit-appointment-department" className="form-label text-muted fw-bold small text-uppercase mb-2">Department or Specialization</label>
+                  <input
+                    id="edit-appointment-department"
+                    type="text"
+                    className="form-control"
+                    value={editFormData.department}
+                    onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                    list="department-options"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="edit-appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Doctor</label>
+                  <input
+                    id="edit-appointment-doctor"
+                    type="text"
+                    className="form-control"
+                    value={editFormData.doctor}
+                    onChange={(e) => setEditFormData({ ...editFormData, doctor: e.target.value })}
+                    list="doctor-options"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="edit-appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Preferred Date</label>
+                  <input
+                    id="edit-appointment-date"
+                    type="date"
+                    className="form-control"
+                    value={editFormData.preferredDate}
+                    onChange={(e) => setEditFormData({ ...editFormData, preferredDate: e.target.value })}
+                  />
+                </div>
+                <div className="col-md-8">
+                  <label htmlFor="edit-appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Type</label>
+                  <select
+                    id="edit-appointment-type"
+                    className="form-select"
+                    value={editFormData.type}
+                    onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
+                  >
+                    {APPOINTMENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="edit-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Status</label>
+                  <select
+                    id="edit-status"
+                    className="form-select"
+                    value={editFormData.status}
+                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                  >
+                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
             <div className="d-flex gap-2 mt-5">

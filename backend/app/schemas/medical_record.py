@@ -8,9 +8,9 @@ class MedicalRecordBase(AppBaseModel):
     clinical_id: Optional[str] = None
     record_date: date
     patient_name: str = Field(..., min_length=2, max_length=120)
-    doctor_name: str = Field(..., min_length=2, max_length=120)
-    diagnosis: str = Field(..., min_length=2)
-    prescription: str = Field(..., min_length=2)
+    doctor_name: str = Field("", max_length=120)
+    diagnosis: str = Field(..., min_length=1)
+    prescription: str = Field(..., min_length=1)
 
 
 class MedicalRecordCreate(MedicalRecordBase):
