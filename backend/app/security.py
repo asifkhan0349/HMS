@@ -9,12 +9,11 @@ from jose import JWTError, jwt
 # ---------------------------------------------------------------------------
 # Secret key — read from environment in production, use a safe dev default.
 # ---------------------------------------------------------------------------
-SECRET_KEY = os.environ.get(
-    "HMS_SECRET_KEY",
-    "dev-insecure-secret-change-me-in-production-please",
-)
+from .config import settings
+
+SECRET_KEY = settings.HMS_SECRET_KEY
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 h
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 from passlib.context import CryptContext

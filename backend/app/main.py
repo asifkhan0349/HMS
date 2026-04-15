@@ -10,7 +10,10 @@ from fastapi.staticfiles import StaticFiles
 from .auth_context import get_current_user_id
 from .config import API_PREFIX, CORS_ORIGINS, settings
 from .database import Base, SessionLocal, engine
-from .schema_bootstrap import ensure_schema_compatibility
+from .logging_config import setup_logging
+
+# Initialize logging immediately
+setup_logging()
 
 # Production-ready Security and Rate Limiting
 from .limiter import limiter
@@ -45,8 +48,7 @@ from .seed import seed_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    ensure_schema_compatibility(engine)
+    # Base.metadata.create_all is removed; migrations should handle schema in production
     with SessionLocal() as db:
         seed_database(db)
     yield

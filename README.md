@@ -62,13 +62,40 @@ For deployment, set `VITE_API_URL` to your hosted backend URL.
 ## CRUD resources
 
 The backend provides CRUD APIs for:
+- patients, appointments, medical records, invoices, medicines, lab tests, staff, beds, and blood inventory.
 
-- patients
-- appointments
-- medical records
-- invoices
-- medicines
-- lab tests
-- staff
+## Production Ready Features
 
-There is also a dashboard stats endpoint at `/api/dashboard/stats`.
+This application is configured for production with:
+- **Gunicorn + Uvicorn**: High-performance process management.
+- **Docker**: Simple containerized deployment.
+- **Health Checks**: Automated monitoring of app availability.
+- **Structured Logging**: Consistent logs for monitoring and debugging.
+- **Database Migrations**: Managed via Alembic.
+- **Security Headers**: HSTS, CSP, X-Frame-Options, and more.
+
+## Testing
+
+To run the automated test suite:
+```bash
+pytest backend/tests
+```
+
+## Production Deployment (Docker)
+
+1. Build the image:
+```bash
+docker build -t hms-app .
+```
+
+2. Run the container:
+```bash
+docker run -p 8000:8000 -e HMS_SECRET_KEY=your-secure-key hms-app
+```
+
+## Render Deployment
+
+The app is pre-configured for [Render](https://render.com) using the `render.yaml` blueprint.
+- **Backend Service**: Port 8000, Python runtime.
+- **Frontend Service**: Static site, serves the built asset directory.
+- **Database**: Managed PostgreSQL.
