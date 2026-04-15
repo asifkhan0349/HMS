@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from ..auth_context import get_current_user_id
 from .. import crud, models, schemas
 from ..database import get_db
+from .common import PositiveId
 
 router = APIRouter(prefix="/medicines", tags=["medicines"])
 
@@ -19,17 +20,17 @@ def create_medicine(payload: schemas.MedicineCreate, db: Session = Depends(get_d
 
 
 @router.get("/{medicine_id}", response_model=schemas.MedicineRead)
-def get_medicine(medicine_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def get_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.get_entity_or_404(db, models.Medicine, medicine_id, current_user_id)
 
 
 @router.put("/{medicine_id}", response_model=schemas.MedicineRead)
-def update_medicine(medicine_id: int, payload: schemas.MedicineUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def update_medicine(medicine_id: PositiveId, payload: schemas.MedicineUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, current_user_id)
     return crud.update_entity(db, medicine, payload)
 
 
-@router.delete("/{medicine_id}")
-def delete_medicine(medicine_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+@router.delete("/{medicine_id}", response_model=schemas.MessageResponse)
+def delete_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, current_user_id)
     return crud.delete_entity(db, medicine)

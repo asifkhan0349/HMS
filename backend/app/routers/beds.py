@@ -1,11 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
 from ..auth_context import get_current_user_id
 from ..database import get_db
+from .common import PositiveId
 
 router = APIRouter(prefix="/beds", tags=["Beds"])
 
@@ -18,7 +17,7 @@ def list_beds(
     return crud.list_entities(db, models.Bed, user_id)
 
 
-@router.post("", response_model=schemas.BedRead)
+@router.post("", response_model=schemas.BedRead, status_code=status.HTTP_201_CREATED)
 def create_bed(
     payload: schemas.BedCreate,
     db: Session = Depends(get_db),
@@ -29,7 +28,7 @@ def create_bed(
 
 @router.put("/{bed_id}", response_model=schemas.BedRead)
 def update_bed(
-    bed_id: int,
+    bed_id: PositiveId,
     payload: schemas.BedUpdate,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
@@ -38,9 +37,9 @@ def update_bed(
     return crud.update_entity(db, bed, payload)
 
 
-@router.delete("/{bed_id}")
+@router.delete("/{bed_id}", response_model=schemas.MessageResponse)
 def delete_bed(
-    bed_id: int,
+    bed_id: PositiveId,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):

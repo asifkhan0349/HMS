@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body, BackgroundTasks, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from fastapi_mail import FastMail, ConnectionConfig, MessageSchema, MessageType
@@ -8,6 +8,7 @@ from .. import auth_context, models, schemas
 from ..database import get_db
 from ..security import create_access_token, hash_password, verify_password, create_reset_token, verify_reset_token
 from ..config import settings
+from .common import ResetToken
 
 # For rate limiting
 from ..limiter import limiter
@@ -125,10 +126,7 @@ def update_profile(
             updated = True
 
     if payload.full_name is not None:
-        full_name = payload.full_name.strip()
-        if not full_name:
-             raise HTTPException(status_code=400, detail="Full name cannot be empty.")
-        user.full_name = full_name
+        user.full_name = payload.full_name
         updated = True
 
     if updated:
@@ -139,7 +137,7 @@ def update_profile(
     return schemas.AuthResponse(message="Profile updated successfully.", user=user, token=token)
 
 
-@router.post("/change-password")
+@router.post("/change-password", response_model=schemas.MessageResponse)
 def change_password(
     payload: schemas.PasswordChange,
     db: Session = Depends(get_db),
@@ -152,15 +150,12 @@ def change_password(
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid current password.")
 
-    if payload.new_password == payload.current_password:
-        raise HTTPException(status_code=400, detail="New password must be different from current password.")
-
     user.password_hash = hash_password(payload.new_password)
     db.commit()
-    return {"message": "Password changed successfully. Please keep your new password safe."}
+    return schemas.MessageResponse(message="Password changed successfully. Please keep your new password safe.")
 
 
-@router.post("/forgot-password")
+@router.post("/forgot-password", response_model=schemas.MessageResponse)
 async def forgot_password(
     payload: schemas.ForgotPasswordRequest, 
     background_tasks: BackgroundTasks,
@@ -192,11 +187,11 @@ async def forgot_password(
             print(f"WARNING: FastMail failed to schedule/send email: {e}")
             
     # Always return success message to prevent email enumeration
-    return {"message": "If an account with that email exists, a password reset link has been sent."}
+    return schemas.MessageResponse(message="If an account with that email exists, a password reset link has been sent.")
 
 
-@router.post("/reset-password/{token}")
-def reset_password(token: str, payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
+@router.post("/reset-password/{token}", response_model=schemas.MessageResponse)
+def reset_password(token: ResetToken, payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
     email = verify_reset_token(token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
@@ -207,4 +202,4 @@ def reset_password(token: str, payload: schemas.ResetPasswordRequest, db: Sessio
         
     user.password_hash = hash_password(payload.new_password)
     db.commit()
-    return {"message": "Password has been successfully reset."}
+    return schemas.MessageResponse(message="Password has been successfully reset.")

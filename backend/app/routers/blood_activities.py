@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
 from ..auth_context import get_current_user_id
 from ..database import get_db
+from .common import PositiveId
 
 router = APIRouter(prefix="/blood_activities", tags=["Blood Bank"])
 
@@ -61,7 +62,7 @@ def list_blood_activities(
     return crud.list_entities(db, models.BloodActivity, user_id)
 
 
-@router.post("", response_model=schemas.BloodActivityRead)
+@router.post("", response_model=schemas.BloodActivityRead, status_code=status.HTTP_201_CREATED)
 def create_blood_activity(
     payload: schemas.BloodActivityCreate,
     db: Session = Depends(get_db),
@@ -77,7 +78,7 @@ def create_blood_activity(
 
 @router.put("/{act_id}", response_model=schemas.BloodActivityRead)
 def update_blood_activity(
-    act_id: int,
+    act_id: PositiveId,
     payload: schemas.BloodActivityUpdate,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
@@ -100,9 +101,9 @@ def update_blood_activity(
     return activity
 
 
-@router.delete("/{act_id}")
+@router.delete("/{act_id}", response_model=schemas.MessageResponse)
 def delete_blood_activity(
-    act_id: int,
+    act_id: PositiveId,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):

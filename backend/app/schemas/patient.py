@@ -1,8 +1,8 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import Field
 from enum import Enum
-from .base import ORMBase
+from .base import AppBaseModel, ORMBase
 
 
 class Gender(str, Enum):
@@ -22,7 +22,7 @@ class BloodGroup(str, Enum):
     O_MINUS = "O-"
 
 
-class PatientBase(BaseModel):
+class PatientBase(AppBaseModel):
     name: str = Field(..., min_length=2, max_length=120)
     age: int = Field(..., ge=0, le=130)
     gender: Gender
@@ -35,7 +35,7 @@ class PatientCreate(PatientBase):
     patient_code: Optional[str] = None
 
 
-class PatientUpdate(BaseModel):
+class PatientUpdate(AppBaseModel):
     patient_code: Optional[str] = None
     name: Optional[str] = Field(None, min_length=2, max_length=120)
     age: Optional[int] = Field(None, ge=0, le=130)

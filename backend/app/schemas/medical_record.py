@@ -1,10 +1,10 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel, Field
-from .base import ORMBase
+from pydantic import Field
+from .base import AppBaseModel, ORMBase
 
 
-class MedicalRecordBase(BaseModel):
+class MedicalRecordBase(AppBaseModel):
     clinical_id: Optional[str] = None
     record_date: date
     patient_name: str = Field(..., min_length=2, max_length=120)
@@ -17,7 +17,7 @@ class MedicalRecordCreate(MedicalRecordBase):
     record_code: Optional[str] = None
 
 
-class MedicalRecordUpdate(BaseModel):
+class MedicalRecordUpdate(AppBaseModel):
     record_code: Optional[str] = None
     clinical_id: Optional[str] = None
     record_date: Optional[date] = None

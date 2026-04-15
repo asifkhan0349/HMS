@@ -1,4 +1,4 @@
-from .base import ORMBase
+from .base import AppBaseModel, MessageResponse, ORMBase
 from .patient import PatientBase, PatientCreate, PatientUpdate, PatientRead, Gender, BloodGroup
 from .appointment import AppointmentBase, AppointmentCreate, AppointmentUpdate, AppointmentRead
 from .medical_record import MedicalRecordBase, MedicalRecordCreate, MedicalRecordUpdate, MedicalRecordRead

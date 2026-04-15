@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, field_serializer
-from .base import ORMBase
+from pydantic import Field, field_serializer
+from .base import AppBaseModel, ORMBase
 
 
-class AppointmentBase(BaseModel):
+class AppointmentBase(AppBaseModel):
     patient_name: str = Field(..., min_length=2, max_length=120)
     doctor_name: str = Field(..., min_length=2, max_length=120)
     scheduled_time: datetime
@@ -16,7 +16,7 @@ class AppointmentCreate(AppointmentBase):
     appointment_code: Optional[str] = None
 
 
-class AppointmentUpdate(BaseModel):
+class AppointmentUpdate(AppBaseModel):
     appointment_code: Optional[str] = None
     patient_name: Optional[str] = Field(None, min_length=2, max_length=120)
     doctor_name: Optional[str] = Field(None, min_length=2, max_length=120)

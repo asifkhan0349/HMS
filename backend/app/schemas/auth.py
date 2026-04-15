@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
-from .base import ORMBase
+
+from pydantic import Field, model_validator
+
+from .base import AppBaseModel, ORMBase
 
 
 class UserRead(ORMBase):
@@ -13,54 +15,51 @@ class UserRead(ORMBase):
     created_at: datetime
 
 
-class SignupRequest(BaseModel):
+class SignupRequest(AppBaseModel):
     full_name: str = Field(..., min_length=2, max_length=120)
     username: str = Field(..., min_length=3, max_length=50)
     email: str = Field(..., min_length=5, max_length=120)
     password: str = Field(..., min_length=8, max_length=128)
     role: str = Field(default="Admin", min_length=2, max_length=30)
 
-    @field_validator("full_name", "username", "email", "role")
-    @classmethod
-    def strip_text_fields(cls, value: str) -> str:
-        if isinstance(value, str):
-            return value.strip()
-        return value
 
-
-class LoginRequest(BaseModel):
+class LoginRequest(AppBaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=8, max_length=128)
 
-    @field_validator("username")
-    @classmethod
-    def strip_username(cls, value: str) -> str:
-        if isinstance(value, str):
-            return value.strip()
-        return value
 
-
-class AuthResponse(BaseModel):
+class AuthResponse(AppBaseModel):
     message: str
     user: UserRead
     token: str
 
 
-class ProfileUpdate(BaseModel):
+class ProfileUpdate(AppBaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=120)
     username: Optional[str] = Field(None, min_length=3, max_length=50)
     email: Optional[str] = Field(None, min_length=5, max_length=120)
 
+    @model_validator(mode="after")
+    def validate_any_field_present(self):
+        if not any(value is not None for value in (self.full_name, self.username, self.email)):
+            raise ValueError("At least one profile field must be provided.")
+        return self
 
-class PasswordChange(BaseModel):
+
+class PasswordChange(AppBaseModel):
     current_password: str = Field(..., min_length=8, max_length=128)
     new_password: str = Field(..., min_length=8, max_length=128)
 
+    @model_validator(mode="after")
+    def ensure_new_password_differs(self):
+        if self.new_password == self.current_password:
+            raise ValueError("New password must be different from current password.")
+        return self
 
-class ForgotPasswordRequest(BaseModel):
+
+class ForgotPasswordRequest(AppBaseModel):
     email: str = Field(..., min_length=5, max_length=120)
 
 
-class ResetPasswordRequest(BaseModel):
-    token: str
+class ResetPasswordRequest(AppBaseModel):
     new_password: str = Field(..., min_length=8, max_length=128)

@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
-from .base import ORMBase
+from pydantic import Field
+from .base import AppBaseModel, ORMBase
 
 
-class InventoryItemBase(BaseModel):
+class InventoryItemBase(AppBaseModel):
     item_code: Optional[str] = None
     name: str = Field(..., min_length=2, max_length=120)
     category: str = Field(..., min_length=2, max_length=100)
@@ -17,7 +17,7 @@ class InventoryItemCreate(InventoryItemBase):
     pass
 
 
-class InventoryItemUpdate(BaseModel):
+class InventoryItemUpdate(AppBaseModel):
     item_code: Optional[str] = None
     name: Optional[str] = Field(None, min_length=2, max_length=120)
     category: Optional[str] = Field(None, min_length=2, max_length=100)

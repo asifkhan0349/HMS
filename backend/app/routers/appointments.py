@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from ..auth_context import get_current_user_id
 from .. import crud, models, schemas
 from ..database import get_db
+from .common import PositiveId
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 
@@ -15,7 +16,6 @@ def list_appointments(db: Session = Depends(get_db), current_user_id: int = Depe
 
 @router.post("", response_model=schemas.AppointmentRead, status_code=status.HTTP_201_CREATED)
 def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends(get_db)):
-    print("DEBUG: create_appointment called")
     # Allow public appointment booking without an access token
     default_user = db.query(models.User).filter(models.User.role.ilike('%admin%')).first()
     if not default_user:
@@ -25,17 +25,17 @@ def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentRead)
-def get_appointment(appointment_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def get_appointment(appointment_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.get_entity_or_404(db, models.Appointment, appointment_id, current_user_id)
 
 
 @router.put("/{appointment_id}", response_model=schemas.AppointmentRead)
-def update_appointment(appointment_id: int, payload: schemas.AppointmentUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def update_appointment(appointment_id: PositiveId, payload: schemas.AppointmentUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, current_user_id)
     return crud.update_entity(db, appointment, payload)
 
 
-@router.delete("/{appointment_id}")
-def delete_appointment(appointment_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+@router.delete("/{appointment_id}", response_model=schemas.MessageResponse)
+def delete_appointment(appointment_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, current_user_id)
     return crud.delete_entity(db, appointment)
