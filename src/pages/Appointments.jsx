@@ -20,7 +20,6 @@ const createEmptyAppointmentForm = () => ({
   gender: 'Male',
   address: '',
   department: '',
-  doctor: '',
   type: 'New Consultation',
 });
 
@@ -55,7 +54,6 @@ const Appointments = () => {
     gender: 'Male',
     address: '',
     department: '',
-    doctor: '',
     type: 'New Consultation',
     status: 'Scheduled'
   });
@@ -88,7 +86,7 @@ const Appointments = () => {
     patient_gender: appointmentData.gender,
     patient_address: appointmentData.address.trim() || null,
     department: appointmentData.department.trim(),
-    doctor_name: appointmentData.doctor.trim(),
+    doctor_name: "",
     scheduled_time: parseDisplayTime(timeValue, appointmentData.preferredDate || baseTime),
     appointment_type: appointmentData.type,
     status,
@@ -144,7 +142,6 @@ const Appointments = () => {
       gender: app.patientGender || 'Male',
       address: app.patientAddress || '',
       department: app.department || '',
-      doctor: app.doctor,
       type: app.type,
       status: app.status
     });
@@ -234,7 +231,6 @@ const Appointments = () => {
               <tr>
                 <th className="px-4 py-3">Slot Time</th>
                 <th className="py-3">Patient Name</th>
-                <th className="py-3">Attending Doctor</th>
                 <th className="py-3">Visit Type</th>
                 <th className="py-3 text-center">Status</th>
                 <th className="px-4 py-3 text-end">Actions</th>
@@ -259,7 +255,6 @@ const Appointments = () => {
                     {app.time}
                   </td>
                   <td className="py-4 fw-bold">{app.patient}</td>
-                  <td className="py-4 text-muted small">{app.doctor}</td>
                   <td className="py-4">
                     <span
                       className="badge rounded-pill"
@@ -427,23 +422,6 @@ const Appointments = () => {
                   ))}
                 </datalist>
               </div>
-              <div className="col-md-6">
-                <label htmlFor="appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Doctor</label>
-                <input
-                  id="appointment-doctor"
-                  type="text"
-                  className="form-control"
-                  value={formData.doctor}
-                  onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-                  list="doctor-options"
-                  placeholder="Optional"
-                />
-                <datalist id="doctor-options">
-                  {doctorOptions.map((doctor) => (
-                    <option key={doctor} value={doctor} />
-                  ))}
-                </datalist>
-              </div>
               <div className="col-md-4">
                 <label htmlFor="appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Preferred Date</label>
                 <input
@@ -553,18 +531,6 @@ const Appointments = () => {
                     value={editFormData.department}
                     onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
                     list="department-options"
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="edit-appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2">Select Doctor</label>
-                  <input
-                    id="edit-appointment-doctor"
-                    type="text"
-                    className="form-control"
-                    value={editFormData.doctor}
-                    onChange={(e) => setEditFormData({ ...editFormData, doctor: e.target.value })}
-                    list="doctor-options"
-                    placeholder="Optional"
                   />
                 </div>
                 <div className="col-md-4">
