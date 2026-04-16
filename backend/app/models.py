@@ -36,6 +36,7 @@ class Appointment(Base):
     patient_address: Mapped[str | None] = mapped_column(String(255), nullable=True)
     appointment_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     appointment_type: Mapped[str] = mapped_column(String(50))
+    status: Mapped[str] = mapped_column(String(30), default="Pending", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 

@@ -2,12 +2,19 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 
-def list_entities(db: Session, model, owner_user_id: int):
-    return db.query(model).filter(model.owner_user_id == owner_user_id).order_by(model.id.desc()).all()
+def list_entities(db: Session, model, owner_id: int | None = None):
+    query = db.query(model)
+    if owner_id is not None:
+        query = query.filter(model.owner_user_id == owner_id)
+    return query.order_by(model.id.desc()).all()
 
 
-def get_entity_or_404(db: Session, model, entity_id: int, owner_user_id: int):
-    entity = db.query(model).filter(model.id == entity_id, model.owner_user_id == owner_user_id).first()
+def get_entity_or_404(db: Session, model, entity_id: int, owner_id: int | None = None):
+    query = db.query(model).filter(model.id == entity_id)
+    if owner_id is not None:
+        query = query.filter(model.owner_user_id == owner_id)
+    
+    entity = query.first()
     if entity is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

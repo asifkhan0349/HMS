@@ -8,7 +8,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity' },
     { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people' },
-    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event' },
+    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin'] },
     { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },
     { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt' },
     { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule' },
@@ -40,17 +40,25 @@ const Sidebar = ({ isOpen, onClose }) => {
       </div>
 
       <nav className="flex-grow-1 overflow-y-auto custom-scrollbar px-2" aria-label="Main Navigation">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-link-custom ${isActive ? 'active' : ''}`}
-            onClick={handleNavClick}
-          >
-            <i className={item.icon} aria-hidden="true"></i>
-            <span>{item.title}</span>
-          </NavLink>
-        ))}
+        {menuItems
+          .filter((item) => {
+            if (!item.allowedRoles) return true;
+            if (!user?.role) return false;
+            return item.allowedRoles.some(
+              (role) => role.toLowerCase() === user.role.toLowerCase()
+            );
+          })
+          .map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-link-custom ${isActive ? 'active' : ''}`}
+              onClick={handleNavClick}
+            >
+              <i className={item.icon} aria-hidden="true"></i>
+              <span>{item.title}</span>
+            </NavLink>
+          ))}
       </nav>
 
       <div className="p-4 mt-auto">

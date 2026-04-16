@@ -150,6 +150,15 @@ const Appointments = () => {
     }
   };
 
+  const handleStatusUpdate = async (app, newStatus) => {
+    try {
+      await updateAppointment(app.apiId, { status: newStatus });
+      showToast(`Appointment for ${app.patient} has been ${newStatus.toLowerCase()}.`);
+    } catch (error) {
+      showToast(error.message || `Unable to ${newStatus.toLowerCase()} the appointment.`, 'error');
+    }
+  };
+
   const handleDelete = async () => {
     try {
       await deleteAppointment(deletingApp.apiId);
@@ -203,13 +212,14 @@ const Appointments = () => {
                 <th className="py-3">Age / Gender</th>
                 <th className="py-3">Address</th>
                 <th className="py-3">Visit Type</th>
+                <th className="py-3">Status</th>
                 <th className="px-4 py-3 text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {appointments.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-0">
+                  <td colSpan="7" className="p-0">
                     <EmptyState
                       icon="bi-calendar-event"
                       title="No Appointments"
@@ -243,7 +253,48 @@ const Appointments = () => {
                       {app.type}
                     </span>
                   </td>
+                  <td className="py-4">
+                    <span 
+                      className="badge rounded-pill px-3 py-2 fw-medium"
+                      style={{
+                        backgroundColor: app.status === 'Approved' ? 'rgba(0, 191, 131, 0.1)' : 
+                                       app.status === 'Denied' ? 'rgba(255, 69, 58, 0.1)' : 
+                                       'rgba(255, 159, 10, 0.1)',
+                        color: app.status === 'Approved' ? '#00bf83' : 
+                               app.status === 'Denied' ? '#ff453a' : 
+                               '#ff9f0a',
+                        border: `1px solid ${app.status === 'Approved' ? 'rgba(0, 191, 131, 0.2)' : 
+                                            app.status === 'Denied' ? 'rgba(255, 69, 58, 0.2)' : 
+                                            'rgba(255, 159, 10, 0.2)'}`
+                      }}
+                    >
+                      <i className={`bi bi-${app.status === 'Approved' ? 'check-circle' : app.status === 'Denied' ? 'x-circle' : 'clock-history'} me-2`}></i>
+                      {app.status || 'Pending'}
+                    </span>
+                  </td>
                   <td className="px-4 py-4 text-end">
+                    {app.status === 'Pending' && (
+                      <div className="d-inline-flex gap-2 me-3 pe-3 border-end">
+                        <button
+                          className="btn btn-sm btn-glass p-0 text-success"
+                          style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 191, 131, 0.2)' }}
+                          onClick={() => handleStatusUpdate(app, 'Approved')}
+                          disabled={loading}
+                          title="Approve Appointment"
+                        >
+                          <i className="bi bi-check2" aria-hidden="true"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-glass p-0 text-danger"
+                          style={{ width: '32px', height: '32px', border: '1px solid rgba(255, 69, 58, 0.2)' }}
+                          onClick={() => handleStatusUpdate(app, 'Denied')}
+                          disabled={loading}
+                          title="Deny Appointment"
+                        >
+                          <i className="bi bi-x-lg" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    )}
                     <button
                       className="btn btn-sm btn-glass p-0 me-2"
                       style={{ width: '32px', height: '32px', border: '1px solid var(--accents-2)' }}

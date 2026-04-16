@@ -120,6 +120,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   patientAddress: appointment.patient_address || '',
   appointmentDate: appointment.appointment_date,
   type: appointment.appointment_type,
+  status: appointment.status,
 });
 
 export const mapRecordFromApi = (record) => ({

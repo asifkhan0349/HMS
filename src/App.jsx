@@ -58,7 +58,7 @@ function App() {
               {/* Protected Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-              <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
+              <Route path="/appointments" element={<ProtectedRoute allowedRoles={['Admin']}><Appointments /></ProtectedRoute>} />
               <Route path="/emr" element={<ProtectedRoute><EMR /></ProtectedRoute>} />
               <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
               <Route path="/pharmacy" element={<ProtectedRoute><Pharmacy /></ProtectedRoute>} />

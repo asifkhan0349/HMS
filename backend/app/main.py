@@ -48,9 +48,12 @@ from .seed import seed_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    with SessionLocal() as db:
-        seed_database(db)
+    # Only run automatic table creation in development. 
+    # Production should strictly use Alembic migrations.
+    if settings.ENV != "production":
+        Base.metadata.create_all(bind=engine)
+        with SessionLocal() as db:
+            seed_database(db)
     yield
 
 

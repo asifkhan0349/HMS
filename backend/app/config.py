@@ -46,8 +46,11 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Post-processing for production safety
-if settings.ENV == "production" and settings.HMS_SECRET_KEY == "dev-insecure-secret-change-me":
-    raise ValueError("HMS_SECRET_KEY must be a secure value in production!")
+if settings.ENV == "production":
+    if settings.HMS_SECRET_KEY == "dev-insecure-secret-change-me":
+        raise ValueError("HMS_SECRET_KEY must be a secure value in production!")
+    if len(settings.HMS_SECRET_KEY) < 32:
+        raise ValueError("HMS_SECRET_KEY must be at least 32 characters long for production security!")
 
 # Database URL adjustment for Postgres (Render compatibility)
 if settings.DATABASE_URL.startswith("postgres://"):

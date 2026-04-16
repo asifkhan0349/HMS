@@ -12,6 +12,7 @@ class AppointmentBase(AppBaseModel):
     patient_address: Optional[str] = Field(None, max_length=255)
     appointment_date: date
     appointment_type: str = Field(..., min_length=2, max_length=100)
+    status: str = "Pending"
 
     @model_validator(mode="after")
     def validate_age_or_dob(self):
@@ -32,6 +33,7 @@ class AppointmentUpdate(AppBaseModel):
     patient_address: Optional[str] = Field(None, max_length=255)
     appointment_date: Optional[date] = None
     appointment_type: Optional[str] = Field(None, min_length=2, max_length=100)
+    status: Optional[str] = None
 
 
 class AppointmentRead(ORMBase):
@@ -43,6 +45,7 @@ class AppointmentRead(ORMBase):
     patient_address: Optional[str] = Field(None, max_length=255)
     appointment_date: date
     appointment_type: str = Field(..., min_length=2, max_length=100)
+    status: str
     created_at: datetime
     
     @field_serializer("created_at")

@@ -4,8 +4,8 @@ services:
     name: hms-api
     rootDir: backend
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt && python -m alembic upgrade head
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT app.main:app
     healthCheckPath: /api/health
     envVars:
       - key: HMS_SECRET_KEY
