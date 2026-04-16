@@ -118,6 +118,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   patientAge: appointment.patient_age ?? '',
   patientGender: appointment.patient_gender || 'Male',
   patientAddress: appointment.patient_address || '',
+  appointmentDate: appointment.appointment_date,
   type: appointment.appointment_type,
 });
 

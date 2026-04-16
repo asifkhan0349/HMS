@@ -34,6 +34,7 @@ class Appointment(Base):
     patient_age: Mapped[int | None] = mapped_column(Integer, nullable=True)
     patient_gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
     patient_address: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    appointment_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     appointment_type: Mapped[str] = mapped_column(String(50))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 

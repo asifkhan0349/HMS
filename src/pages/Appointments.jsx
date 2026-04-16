@@ -17,6 +17,7 @@ const createEmptyAppointmentForm = () => ({
   age: '',
   gender: 'Male',
   address: '',
+  appointment_date: new Date().toISOString().split('T')[0],
   type: 'New Consultation',
 });
 
@@ -49,6 +50,7 @@ const Appointments = () => {
     age: '',
     gender: 'Male',
     address: '',
+    appointment_date: '',
     type: 'New Consultation',
   });
 
@@ -75,6 +77,7 @@ const Appointments = () => {
     patient_age: appointmentData.dateOfBirth ? null : Number(appointmentData.age),
     patient_gender: appointmentData.gender,
     patient_address: appointmentData.address.trim() || null,
+    appointment_date: appointmentData.appointment_date,
     appointment_type: appointmentData.type,
   });
 
@@ -117,6 +120,7 @@ const Appointments = () => {
       age: app.patientAge?.toString() || '',
       gender: app.patientGender || 'Male',
       address: app.patientAddress || '',
+      appointment_date: app.appointmentDate || '',
       type: app.type,
     });
     setIsEditModalOpen(true);
@@ -195,6 +199,7 @@ const Appointments = () => {
             <thead>
               <tr>
                 <th className="px-4 py-3">Patient Name</th>
+                <th className="py-3">Appt Date</th>
                 <th className="py-3">Age / Gender</th>
                 <th className="py-3">Address</th>
                 <th className="py-3">Visit Type</th>
@@ -204,7 +209,7 @@ const Appointments = () => {
             <tbody>
               {appointments.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-0">
+                  <td colSpan="6" className="p-0">
                     <EmptyState
                       icon="bi-calendar-event"
                       title="No Appointments"
@@ -217,6 +222,9 @@ const Appointments = () => {
               ) : appointments.map((app) => (
                 <tr key={app.id}>
                   <td className="px-4 py-4 fw-bold">{app.patient}</td>
+                  <td className="py-4 text-nowrap">
+                    {app.appointmentDate ? new Date(app.appointmentDate).toLocaleDateString() : '—'}
+                  </td>
                   <td className="py-4">
                     {app.patientAge || '—'} / {app.patientGender}
                   </td>
@@ -340,7 +348,18 @@ const Appointments = () => {
           <div className="mb-4">
             <h6 className="fw-bold mb-3">Appointment Details</h6>
             <div className="row g-3">
-              <div className="col-md-12">
+              <div className="col-md-6">
+                <label htmlFor="appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Date</label>
+                <input
+                  id="appointment-date"
+                  type="date"
+                  className="form-control"
+                  value={formData.appointment_date}
+                  onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="col-md-6">
                 <label htmlFor="appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Type</label>
                 <select
                   id="appointment-type"
@@ -430,7 +449,18 @@ const Appointments = () => {
               <div className="mb-4">
                 <h6 className="fw-bold mb-3">Appointment Details</h6>
                 <div className="row g-3">
-                  <div className="col-md-12">
+                  <div className="col-md-6">
+                    <label htmlFor="edit-appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Date</label>
+                    <input
+                      id="edit-appointment-date"
+                      type="date"
+                      className="form-control"
+                      value={editFormData.appointment_date}
+                      onChange={(e) => setEditFormData({ ...editFormData, appointment_date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="col-md-6">
                     <label htmlFor="edit-appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Type</label>
                     <select
                       id="edit-appointment-type"

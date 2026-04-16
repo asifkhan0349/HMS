@@ -10,6 +10,7 @@ class AppointmentBase(AppBaseModel):
     patient_age: Optional[int] = Field(None, ge=0, le=130)
     patient_gender: Optional[str] = Field(None, min_length=2, max_length=20)
     patient_address: Optional[str] = Field(None, max_length=255)
+    appointment_date: date
     appointment_type: str = Field(..., min_length=2, max_length=100)
 
     @model_validator(mode="after")
@@ -29,6 +30,7 @@ class AppointmentUpdate(AppBaseModel):
     patient_age: Optional[int] = Field(None, ge=0, le=130)
     patient_gender: Optional[str] = Field(None, min_length=2, max_length=20)
     patient_address: Optional[str] = Field(None, max_length=255)
+    appointment_date: Optional[date] = None
     appointment_type: Optional[str] = Field(None, min_length=2, max_length=100)
 
 
@@ -39,6 +41,7 @@ class AppointmentRead(ORMBase):
     patient_age: Optional[int] = Field(None, ge=0, le=130)
     patient_gender: Optional[str] = Field(None, min_length=2, max_length=20)
     patient_address: Optional[str] = Field(None, max_length=255)
+    appointment_date: date
     appointment_type: str = Field(..., min_length=2, max_length=100)
     created_at: datetime
     
