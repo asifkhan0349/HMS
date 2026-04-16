@@ -74,25 +74,8 @@ const QueueItem = memo(({ app }) => {
         }}
         onClick={() => showToast(`Reviewing status for: ${app.patient}`)}
       >
-        <div className="text-center me-3" style={{ minWidth: '60px' }}>
-          <span
-            className="d-block fw-bold"
-            style={{ color: 'var(--geist-foreground)', fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums' }}
-          >
-            {timePart}
-          </span>
-          <span className="d-block text-muted" style={{ fontSize: '0.65rem' }}>
-            {meridiem}
-          </span>
-        </div>
         <div className="flex-grow-1 overflow-hidden">
           <h6 className="mb-0 fw-bold text-truncate">{app.patient}</h6>
-          <small className="text-muted d-block text-truncate">
-            {app.doctor}{' '}
-            <span className="fw-bold" style={{ color: app.status === 'In Progress' ? 'var(--geist-success)' : 'var(--accents-5)' }}>
-              {app.status}
-            </span>
-          </small>
         </div>
       </div>
     </div>
@@ -199,8 +182,8 @@ const Dashboard = () => {
                 if (statsData.queue && statsData.queue.length > 0) {
                   autoTable(doc, {
                     startY: doc.lastAutoTable.finalY + 15,
-                    head: [['Time', 'Patient', 'Clinician', 'Status']],
-                    body: statsData.queue.map(a => [a.time, a.patient, a.doctor || '—', a.status]),
+                    head: [['Patient', 'Status']],
+                    body: statsData.queue.map(a => [a.patient, a.status]),
                     theme: 'grid',
                     headStyles: { fillColor: [60, 60, 60] },
                   });
