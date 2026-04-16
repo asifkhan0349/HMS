@@ -21,7 +21,6 @@ import uuid
 # Maps model names to their unique-code field names
 _CODE_FIELDS = {
     "Patient":       ("patient_code",      "PAT"),
-    "Appointment":   ("appointment_code",  "APT"),
     "MedicalRecord": ("record_code",       "REC"),
     "MedicalRecord": ("clinical_id",       "CLN"),
     "Invoice":       ("invoice_code",      "INV"),

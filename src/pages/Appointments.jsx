@@ -195,6 +195,8 @@ const Appointments = () => {
             <thead>
               <tr>
                 <th className="px-4 py-3">Patient Name</th>
+                <th className="py-3">Age / Gender</th>
+                <th className="py-3">Address</th>
                 <th className="py-3">Visit Type</th>
                 <th className="px-4 py-3 text-end">Actions</th>
               </tr>
@@ -202,7 +204,7 @@ const Appointments = () => {
             <tbody>
               {appointments.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-0">
+                  <td colSpan="5" className="p-0">
                     <EmptyState
                       icon="bi-calendar-event"
                       title="No Appointments"
@@ -215,6 +217,12 @@ const Appointments = () => {
               ) : appointments.map((app) => (
                 <tr key={app.id}>
                   <td className="px-4 py-4 fw-bold">{app.patient}</td>
+                  <td className="py-4">
+                    {app.patientAge || '—'} / {app.patientGender}
+                  </td>
+                  <td className="py-4 text-truncate" style={{ maxWidth: '200px' }}>
+                    {app.patientAddress || '—'}
+                  </td>
                   <td className="py-4">
                     <span
                       className="badge rounded-pill"

@@ -48,7 +48,7 @@ from .seed import seed_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Base.metadata.create_all is removed; migrations should handle schema in production
+    Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         seed_database(db)
     yield
