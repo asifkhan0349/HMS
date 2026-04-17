@@ -22,11 +22,12 @@ async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
 
     payload = {
         "status": status,
-        "telegram_chat_id": telegram_chat_id
+        "telegram_chat_id": str(telegram_chat_id) if telegram_chat_id is not None else None
     }
+    headers = {"Content-Type": "application/json"}
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, timeout=10.0)
+            response = await client.post(url, json=payload, headers=headers, timeout=10.0)
             response.raise_for_status()
             logger.info(f"Webhook sent to {url} successfully: {response.status_code}")
     except Exception as e:
