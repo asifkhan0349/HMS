@@ -37,6 +37,7 @@ class Appointment(Base):
     appointment_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     appointment_type: Mapped[str] = mapped_column(String(50))
     status: Mapped[str] = mapped_column(String(30), default="Pending", index=True)
+    telegram_chat_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 

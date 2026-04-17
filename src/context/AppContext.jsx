@@ -121,6 +121,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   appointmentDate: appointment.appointment_date,
   type: appointment.appointment_type,
   status: appointment.status,
+  telegramChatId: appointment.telegram_chat_id || '',
 });
 
 export const mapRecordFromApi = (record) => ({

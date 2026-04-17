@@ -19,6 +19,7 @@ const createEmptyAppointmentForm = () => ({
   address: '',
   appointment_date: new Date().toISOString().split('T')[0],
   type: 'New Consultation',
+  telegramChatId: '',
 });
 
 const Appointments = () => {
@@ -52,6 +53,7 @@ const Appointments = () => {
     address: '',
     appointment_date: '',
     type: 'New Consultation',
+    telegramChatId: '',
   });
 
   const syncPatientDetails = (name, currentData) => {
@@ -79,6 +81,7 @@ const Appointments = () => {
     patient_address: appointmentData.address.trim() || null,
     appointment_date: appointmentData.appointment_date,
     appointment_type: appointmentData.type,
+    telegram_chat_id: appointmentData.telegramChatId.trim() || null,
   });
 
   const appointmentSummary = useMemo(
@@ -122,6 +125,7 @@ const Appointments = () => {
       address: app.patientAddress || '',
       appointment_date: app.appointmentDate || '',
       type: app.type,
+      telegramChatId: app.telegramChatId || '',
     });
     setIsEditModalOpen(true);
   };
@@ -421,6 +425,17 @@ const Appointments = () => {
                   {APPOINTMENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
                 </select>
               </div>
+              <div className="col-md-12">
+                <label htmlFor="appointment-telegram" className="form-label text-muted fw-bold small text-uppercase mb-2">Telegram Chat ID</label>
+                <input
+                  id="appointment-telegram"
+                  type="text"
+                  className="form-control"
+                  placeholder="Optional: For appointment notifications"
+                  value={formData.telegramChatId}
+                  onChange={(e) => setFormData({ ...formData, telegramChatId: e.target.value })}
+                />
+              </div>
             </div>
           </div>
           <div className="d-flex gap-2 mt-5">
@@ -521,6 +536,17 @@ const Appointments = () => {
                     >
                       {APPOINTMENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
                     </select>
+                  </div>
+                  <div className="col-md-12">
+                    <label htmlFor="edit-appointment-telegram" className="form-label text-muted fw-bold small text-uppercase mb-2">Telegram Chat ID</label>
+                    <input
+                      id="edit-appointment-telegram"
+                      type="text"
+                      className="form-control"
+                      placeholder="Optional: For appointment notifications"
+                      value={editFormData.telegramChatId}
+                      onChange={(e) => setEditFormData({ ...editFormData, telegramChatId: e.target.value })}
+                    />
                   </div>
                 </div>
               </div>
