@@ -1,12 +1,36 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
+import httpx
+import logging
 
 from ..auth_context import get_current_user
 from .. import crud, models, schemas
 from ..database import get_db
+from ..config import settings
 from .common import PositiveId
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/appointments", tags=["appointments"])
+
+
+async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
+    url = settings.APPOINTMENT_WEBHOOK_URL
+    if not url or "your-webhook-path" in url:
+        logger.warning("Appointment webhook URL not configured correctly. Skipping.")
+        return
+
+    payload = {
+        "status": status,
+        "telegram_chat_id": telegram_chat_id
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, timeout=10.0)
+            response.raise_for_status()
+            logger.info(f"Webhook sent to {url} successfully: {response.status_code}")
+    except Exception as e:
+        logger.error(f"Failed to send webhook to {url}: {e}")
 
 
 @router.get("", response_model=list[schemas.AppointmentRead])
@@ -51,6 +75,7 @@ def get_appointment(
 def update_appointment(
     appointment_id: PositiveId, 
     payload: schemas.AppointmentUpdate, 
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)
 ):
@@ -60,7 +85,18 @@ def update_appointment(
             detail="Access denied. Only administrators can update appointments."
         )
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
-    return crud.update_entity(db, appointment, payload)
+    
+    old_status = appointment.status
+    updated_appointment = crud.update_entity(db, appointment, payload)
+    
+    if payload.status is not None and payload.status != old_status:
+        background_tasks.add_task(
+            send_appointment_webhook, 
+            updated_appointment.status, 
+            updated_appointment.telegram_chat_id
+        )
+        
+    return updated_appointment
 
 
 @router.delete("/{appointment_id}", response_model=schemas.MessageResponse)

@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     # Frontend
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # Webhook
+    APPOINTMENT_WEBHOOK_URL: str = "https://krishna863.app.n8n.cloud/webhook/your-webhook-path"
+
     @property
     def cors_origins(self) -> List[str]:
         if not self.ALLOWED_ORIGINS:
