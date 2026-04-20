@@ -78,6 +78,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 @app.middleware("http")
 async def set_secure_headers(request, call_next):
     # Skip security headers for documentation routes to ensure Swagger UI loads correctly
