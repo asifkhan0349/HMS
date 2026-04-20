@@ -25,18 +25,18 @@ export function SiteFooter() {
             <h4 className="font-black mb-8 text-white uppercase tracking-widest text-sm">Product</h4>
             <ul className="space-y-4 font-bold text-white/40 list-none p-0">
               <li><a href="#features" className="hover:text-white transition-colors no-underline">Features</a></li>
-              <li><a href="#solutions" className="hover:text-black transition-colors no-underline">Solutions</a></li>
+              <li><a href="#solutions" className="hover:text-white transition-colors no-underline">Solutions</a></li>
               <li><a href="#pricing" className="hover:text-white transition-colors no-underline">Pricing</a></li>
-              <li><a href="#" className="hover:text-white transition-colors no-underline">ROI Guide</a></li>
+              <li><a href="#roi-guide" className="hover:text-white transition-colors no-underline">ROI Guide</a></li>
             </ul>
           </div>
           
           <div className="col-span-1">
             <h4 className="font-black mb-8 text-white uppercase tracking-widest text-sm">Company</h4>
             <ul className="space-y-4 font-bold text-white/40 list-none p-0">
-              <li><a href="#" className="hover:text-white transition-colors no-underline">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors no-underline">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors no-underline">Blog</a></li>
+              <li><a href="#about" className="hover:text-white transition-colors no-underline">About</a></li>
+              <li><a href="#careers" className="hover:text-white transition-colors no-underline">Careers</a></li>
+              <li><a href="#blog" className="hover:text-white transition-colors no-underline">Blog</a></li>
               <li><a href="#contact" className="hover:text-white transition-colors no-underline">Contact</a></li>
             </ul>
           </div>
@@ -44,10 +44,10 @@ export function SiteFooter() {
           <div className="col-span-1">
             <h4 className="font-black mb-8 text-white uppercase tracking-widest text-sm">Legal</h4>
             <ul className="space-y-4 font-bold text-white/40 list-none p-0">
-              <li><a href="#" className="hover:text-white transition-colors no-underline">Privacy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors no-underline">Terms</a></li>
-              <li><a href="#" className="hover:text-white transition-colors no-underline">HIPAA</a></li>
-              <li><a href="#" className="hover:text-white transition-colors no-underline">Security</a></li>
+              <li><a href="#privacy" className="hover:text-white transition-colors no-underline">Privacy</a></li>
+              <li><a href="#terms" className="hover:text-white transition-colors no-underline">Terms</a></li>
+              <li><a href="#hipaa" className="hover:text-white transition-colors no-underline">HIPAA</a></li>
+              <li><a href="#security" className="hover:text-white transition-colors no-underline">Security</a></li>
             </ul>
           </div>
         </div>

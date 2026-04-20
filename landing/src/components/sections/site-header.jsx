@@ -7,9 +7,10 @@ import { useScrollPosition } from "../../hooks/use-scroll-position"
 
 const navItems = [
   { name: "Features", href: "#features" },
-  { name: "Interface", href: "#previews" },
   { name: "Solutions", href: "#solutions" },
-  { name: "Pricing", href: "#pricing" },
+  { name: "ROI Guide", href: "#roi-guide" },
+  { name: "About", href: "#about" },
+  { name: "Blog", href: "#blog" },
   { name: "Contact", href: "#contact" },
 ]
 

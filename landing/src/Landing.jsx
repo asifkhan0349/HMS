@@ -9,6 +9,11 @@ import { FaqSection } from './components/sections/faq-section';
 import { ContactSection } from './components/sections/contact-section';
 import { PricingSection } from './components/sections/pricing-section';
 import { AppPreviewSection } from './components/sections/app-preview-section';
+import { RoiSection } from './components/sections/roi-section';
+import { AboutCareersSection } from './components/sections/about-careers-section';
+import { BlogSection } from './components/sections/blog-section';
+import { TrustComplianceSection } from './components/sections/trust-compliance-section';
+import { LegalSection } from './components/sections/legal-section';
 import { SiteFooter } from './components/sections/site-footer';
 
 // Styles
@@ -47,8 +52,13 @@ const Landing = () => {
         <AppPreviewSection />
         <SolutionsSection />
         <PricingSection onAuthRedirect={handleAuthRedirect} />
+        <RoiSection />
         <TestimonialsSection />
+        <AboutCareersSection />
+        <BlogSection />
         <FaqSection />
+        <TrustComplianceSection />
+        <LegalSection />
         <ContactSection />
       </main>
 
