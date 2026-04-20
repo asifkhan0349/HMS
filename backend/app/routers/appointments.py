@@ -16,8 +16,8 @@ router = APIRouter(prefix="/appointments", tags=["appointments"])
 
 async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
     url = settings.APPOINTMENT_WEBHOOK_URL
-    if not url or "your-webhook-path" in url:
-        logger.warning("Appointment webhook URL not configured correctly. Skipping.")
+    if not url:
+        logger.warning("Appointment webhook URL not configured. Skipping.")
         return
 
     payload = {
