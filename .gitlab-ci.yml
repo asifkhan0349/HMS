@@ -77,14 +77,11 @@ backend:test:
     - pip list # Diagnostic: confirm installed packages and versions
     - pwd # Diagnostic: confirm current directory
   script:
-    # Improved sanity check with traceback reporting to diagnose import failures
+    # Sanity check: verify all modules import cleanly
     - |
       python -c "
-      import sys
-      import os
-      import traceback
+      import sys, os, traceback
       print(f'PYTHONPATH: {os.environ.get(\"PYTHONPATH\")}')
-      print(f'sys.path: {sys.path}')
       try:
           from app import main
           print('Backend sanity check passed')
@@ -92,8 +89,8 @@ backend:test:
           traceback.print_exc()
           sys.exit(1)
       "
-    # Add your test commands here (e.g., pytest) when tests are available
-    # - pytest
+    # Run the full test suite
+    - pytest tests/ -v --tb=short
   cache:
     key:
       files:

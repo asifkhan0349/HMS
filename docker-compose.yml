@@ -5,22 +5,28 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env          # Never committed — contains real secrets
     environment:
       - ENV=production
-      - DATABASE_URL=postgresql://hms_user:hms_pass@hms-db:5432/hms_db
-      - HMS_SECRET_KEY=production-secret-replace-me
-      - FRONTEND_URL=http://localhost:8000
     depends_on:
-      - hms-db
+      hms-db:
+        condition: service_healthy   # Wait until Postgres is actually ready
+    restart: unless-stopped
 
   hms-db:
     image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=hms_user
-      - POSTGRES_PASSWORD=hms_pass
-      - POSTGRES_DB=hms_db
+    env_file:
+      - ./backend/.env          # POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB loaded from here
     volumes:
       - hms-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
 volumes:
   hms-db-data:

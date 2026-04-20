@@ -1,19 +1,22 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+import uuid
 
 
-def list_entities(db: Session, model, owner_id: int | None = None):
+def list_entities(db: Session, model, owner_id: int | None = None,
+                  skip: int = 0, limit: int = 100):
+    """Return a paginated list of entities. Default: first 100 records."""
     query = db.query(model)
     if owner_id is not None:
         query = query.filter(model.owner_user_id == owner_id)
-    return query.order_by(model.id.desc()).all()
+    return query.order_by(model.id.desc()).offset(skip).limit(limit).all()
 
 
 def get_entity_or_404(db: Session, model, entity_id: int, owner_id: int | None = None):
     query = db.query(model).filter(model.id == entity_id)
     if owner_id is not None:
         query = query.filter(model.owner_user_id == owner_id)
-    
+
     entity = query.first()
     if entity is None:
         raise HTTPException(
@@ -23,22 +26,19 @@ def get_entity_or_404(db: Session, model, entity_id: int, owner_id: int | None =
     return entity
 
 
-import uuid
-
 # Maps model names to their unique-code field names
-_CODE_FIELDS = {
-    "Patient":       ("patient_code",      "PAT"),
-    "MedicalRecord": ("record_code",       "REC"),
-    "MedicalRecord": ("clinical_id",       "CLN"),
-    "Invoice":       ("invoice_code",      "INV"),
-    "Medicine":      ("medicine_code",     "MED"),
-    "LabTest":       ("test_code",         "TST"),
-    "Staff":         ("staff_code",        "STF"),
-    "InventoryItem": ("item_code",         "ITM"),
+# NOTE: MedicalRecord has TWO code fields — handled via _MULTI_CODE_FIELDS below.
+_CODE_FIELDS: dict[str, tuple[str, str]] = {
+    "Patient":       ("patient_code",   "PAT"),
+    "Invoice":       ("invoice_code",   "INV"),
+    "Medicine":      ("medicine_code",  "MED"),
+    "LabTest":       ("test_code",      "TST"),
+    "Staff":         ("staff_code",     "STF"),
+    "InventoryItem": ("item_code",      "ITM"),
 }
 
 # Models that have TWO code fields (record_code + clinical_id)
-_MULTI_CODE_FIELDS = {
+_MULTI_CODE_FIELDS: dict[str, list[tuple[str, str]]] = {
     "MedicalRecord": [("record_code", "REC"), ("clinical_id", "CLN")],
 }
 

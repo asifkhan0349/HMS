@@ -8,12 +8,15 @@ from .. import auth_context, models, schemas
 from ..database import get_db
 from ..security import create_access_token, hash_password, verify_password, create_reset_token, verify_reset_token
 from ..config import settings
+from ..auth_context import get_raw_token_data
+from ..token_blocklist import revoke_token
 from .common import ResetToken
 
 # For rate limiting
 from ..limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 # SMTP Configuration
 conf = ConnectionConfig(
@@ -93,6 +96,14 @@ def login(request: Request, payload: schemas.LoginRequest, db: Session = Depends
 
     token = create_access_token(user.id)
     return schemas.AuthResponse(message="Login successful.", user=user, token=token)
+
+
+@router.post("/logout", response_model=schemas.MessageResponse)
+def logout(token_info: tuple = Depends(get_raw_token_data)):
+    """Revoke the current JWT so it cannot be reused, even before natural expiry."""
+    jti, exp = token_info
+    revoke_token(jti, exp)
+    return schemas.MessageResponse(message="Logged out successfully.")
 
 
 @router.patch("/profile", response_model=schemas.AuthResponse)

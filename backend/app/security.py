@@ -2,7 +2,9 @@ import hashlib
 import hmac
 import os
 import secrets
+import uuid
 from datetime import datetime, timedelta, timezone
+from typing import NamedTuple
 
 from jose import JWTError, jwt
 
@@ -59,20 +61,29 @@ def verify_password(password: str, password_hash: str) -> bool:
 # JWT helpers
 # ---------------------------------------------------------------------------
 
+class TokenData(NamedTuple):
+    """Decoded token payload."""
+    user_id: int
+    jti: str
+    exp: int
+
+
 def create_access_token(user_id: int) -> str:
-    """Create a signed JWT containing the user ID as subject."""
+    """Create a signed JWT with a unique JTI claim for per-token revocation."""
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    payload = {"sub": str(user_id), "exp": expire}
+    jti = uuid.uuid4().hex
+    payload = {"sub": str(user_id), "exp": expire, "jti": jti}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def decode_access_token(token: str) -> int:
-    """Decode a JWT and return the user ID.  Raises JWTError on failure."""
+def decode_access_token(token: str) -> TokenData:
+    """Decode a JWT and return TokenData. Raises JWTError on failure."""
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     user_id_str: str | None = payload.get("sub")
-    if user_id_str is None:
-        raise JWTError("Token payload missing 'sub'.")
-    return int(user_id_str)
+    jti: str | None = payload.get("jti")
+    if user_id_str is None or jti is None:
+        raise JWTError("Token payload missing required claims.")
+    return TokenData(user_id=int(user_id_str), jti=jti, exp=int(payload["exp"]))
 
 
 def create_reset_token(email: str) -> str:

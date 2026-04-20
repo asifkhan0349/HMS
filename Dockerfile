@@ -33,10 +33,15 @@ ENV DEBUG_MODE=False
 ENV PYTHONPATH=/app/backend
 ENV PORT=8000
 
+# Run as non-root for container security
+RUN addgroup --system hms && adduser --system --ingroup hms hms
+RUN chown -R hms:hms /app
+USER hms
+
 EXPOSE 8000
 
 # Run with gunicorn for production reliability
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000", "--forwarded-allow-ips", "*", "--access-logfile", "-", "--error-logfile", "-"]
+CMD ["gunicorn", "-w", "${WEB_CONCURRENCY:-4}", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000", "--forwarded-allow-ips", "*", "--access-logfile", "-", "--error-logfile", "-"]

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 from .security import decode_access_token
+from .token_blocklist import is_token_revoked
 
 security = HTTPBearer(auto_error=False)
 
@@ -13,7 +14,8 @@ def get_current_user_id(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db)
 ) -> int:
-    """Extract and validate the JWT from the Authorization header, and verify user exists."""
+    """Extract and validate the JWT from the Authorization header, verify user exists,
+    and check against the revocation blocklist."""
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -24,22 +26,46 @@ def get_current_user_id(
     token = credentials.credentials
 
     try:
-        user_id = decode_access_token(token)
+        token_data = decode_access_token(token)
+
+        # Check if this specific token has been revoked (e.g., via logout)
+        if is_token_revoked(token_data.jti):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked. Please sign in again.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
         # Verify user still exists in the database
-        user = db.query(User).filter(User.id == user_id).first()
+        user = db.query(User).filter(User.id == token_data.user_id).first()
         if not user:
-             raise HTTPException(
+            raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="User account not found. Please sign in again.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return user_id
+        return token_data.user_id
+    except HTTPException:
+        raise
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token. Please sign in again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def get_raw_token_data(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+) -> tuple[str, int]:
+    """Return (jti, exp) from a valid JWT — used by the logout endpoint."""
+    if not credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated.")
+    try:
+        token_data = decode_access_token(credentials.credentials)
+        return token_data.jti, token_data.exp
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
 
 
 def get_current_user(
