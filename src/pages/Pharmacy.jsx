@@ -37,25 +37,48 @@ const Pharmacy = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.stock) {
-      showToast('Please specify medicine name and initial stock quantity.', 'warning');
+    
+    // Improved validation: Ensure all required fields are present
+    // Note: Allow stock to be 0
+    if (!formData.name) {
+      showToast('Please specify the medicine name.', 'warning');
       return;
     }
+    if (formData.stock === '') {
+      showToast('Please specify the initial stock quantity.', 'warning');
+      return;
+    }
+    if (!formData.batch) {
+      showToast('Please specify the Batch ID.', 'warning');
+      return;
+    }
+    if (!formData.expiry) {
+      showToast('Please specify the Expiration Date.', 'warning');
+      return;
+    }
+
     try {
-      const stock = parseInt(formData.stock, 10);
+      const stockValue = parseInt(formData.stock, 10);
+      if (isNaN(stockValue)) {
+        showToast('Invalid stock quantity. Please enter a number.', 'warning');
+        return;
+      }
+
       await addMedicine({
-        medicine_code: createCode('MED'),
+        // Removed frontend code generation; backend handles this more reliably
         name: formData.name,
         batch: formData.batch,
-        stock,
+        stock: stockValue,
         expiry_date: formData.expiry,
-        status: stock > 20 ? 'In Stock' : 'Low Stock',
+        status: stockValue > 20 ? 'In Stock' : (stockValue > 0 ? 'Low Stock' : 'Out of Stock'),
       });
-      showToast(`${formData.name} added to inventory.`);
+
+      showToast(`Successfully added ${formData.name} to pharmacy inventory.`);
       setIsModalOpen(false);
       setFormData({ name: '', batch: '', stock: '', expiry: '' });
     } catch (error) {
-      showToast(error.message || 'Unable to add the medicine.', 'error');
+      console.error('Add medicine failed:', error);
+      showToast(error.message || 'Unable to add the medicine to inventory. Please try again.', 'error');
     }
   };
 
