@@ -13,7 +13,7 @@ const StatCard = memo(({ stat }) => {
 
   return (
     <div
-      className="col-md-3"
+      className="col-12 col-md-6 col-lg-3"
       onClick={() => showToast(`Telemetry Insight: ${stat.title} is currently ${stat.trend}`)}
       style={{ cursor: 'pointer' }}
     >
@@ -139,7 +139,7 @@ const Dashboard = () => {
           <h2 className="fw-bold mb-1">Clinical Operations Center</h2>
           <p className="text-muted mb-0">Monitor hospital activity and manage patient workflows.</p>
         </div>
-        <div className="d-flex gap-2">
+        <div className="d-flex flex-column flex-sm-row gap-2 mt-3 mt-sm-0">
           <button
             className="btn btn-glass px-4 py-2 border d-flex align-items-center"
             onClick={async () => {
@@ -210,7 +210,7 @@ const Dashboard = () => {
       {!statsData ? (
         <div className="row g-4 mb-5" role="status" aria-label="Loading dashboard metrics...">
           {[0, 1, 2, 3].map((i) => (
-            <div className="col-md-3" key={i}>
+            <div className="col-12 col-md-6 col-lg-3" key={i}>
               <SkeletonStatCard />
             </div>
           ))}

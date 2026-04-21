@@ -21,10 +21,11 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from secure import Secure, ContentSecurityPolicy
 
-# Initialize secure headers with a policy that allows Swagger UI CDN assets
+# Initialize secure headers with a policy that allows CDN assets and fonts
 csp = ContentSecurityPolicy()
 csp.script_src("'self'", "'unsafe-inline'", "cdn.jsdelivr.net")
-csp.style_src("'self'", "'unsafe-inline'", "cdn.jsdelivr.net")
+csp.style_src("'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "fonts.googleapis.com")
+csp.font_src("'self'", "fonts.gstatic.com", "cdn.jsdelivr.net")
 csp.img_src("'self'", "data:", "cdn.jsdelivr.net")
 
 secure_headers = Secure(csp=csp)
@@ -128,19 +129,19 @@ def health_check():
     return {"status": "ok"}
 
 
-app.include_router(patients.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(patients.router, prefix=API_PREFIX)
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(appointments.router, prefix=API_PREFIX)
-app.include_router(records.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(invoices.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(medicines.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(tests.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(staff.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(dashboard.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(beds.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(blood_inventory.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(blood_activities.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
-app.include_router(inventory.router, prefix=API_PREFIX, dependencies=[Depends(get_current_user_id)])
+app.include_router(records.router, prefix=API_PREFIX)
+app.include_router(invoices.router, prefix=API_PREFIX)
+app.include_router(medicines.router, prefix=API_PREFIX)
+app.include_router(tests.router, prefix=API_PREFIX)
+app.include_router(staff.router, prefix=API_PREFIX)
+app.include_router(dashboard.router, prefix=API_PREFIX)
+app.include_router(beds.router, prefix=API_PREFIX)
+app.include_router(blood_inventory.router, prefix=API_PREFIX)
+app.include_router(blood_activities.router, prefix=API_PREFIX)
+app.include_router(inventory.router, prefix=API_PREFIX)
 
 # Serve static files
 # This resolves to the parent of the parent of 'app', which is the root project directory locally, or '/app' in Docker
@@ -151,7 +152,7 @@ if os.path.isdir(assets_dir):
     app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 @app.exception_handler(404)
-async def spa_fallback_handler(request, exc):
+def spa_fallback_handler(request, exc):
     """
     Handle 404 errors by serving the SPA index.html for non-API routes.
     This allows FastAPI's /docs, /redoc, and /openapi.json to work correctly.

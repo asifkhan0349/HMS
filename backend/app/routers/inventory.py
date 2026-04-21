@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
+from ..core.limiter import limiter
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
@@ -18,7 +19,9 @@ def list_inventory(
 
 
 @router.post("", response_model=schemas.InventoryItemRead, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 def create_inventory_item(
+    request: Request,
     payload: schemas.InventoryItemCreate,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
@@ -27,7 +30,9 @@ def create_inventory_item(
 
 
 @router.put("/{item_id}", response_model=schemas.InventoryItemRead)
+@limiter.limit("20/minute")
 def update_inventory_item(
+    request: Request,
     item_id: PositiveId,
     payload: schemas.InventoryItemUpdate,
     db: Session = Depends(get_db),
@@ -38,7 +43,9 @@ def update_inventory_item(
 
 
 @router.delete("/{item_id}", response_model=schemas.MessageResponse)
+@limiter.limit("5/minute")
 def delete_inventory_item(
+    request: Request,
     item_id: PositiveId,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),

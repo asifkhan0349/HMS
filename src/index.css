@@ -570,16 +570,14 @@ input.form-control:focus {
     margin-bottom: 1rem !important;
   }
 
-  /* Blood bank cards: 2 per row */
+  /* Blood bank cards: use responsive grid */
   .bloodbank-page .col-md-3 {
-    flex: 0 0 50%;
-    max-width: 50%;
+    /* removed forced 50% */
   }
 
-  /* Dashboard stat cards: 2 per row */
+  /* Dashboard stat cards: use responsive grid */
   .dashboard-page .col-md-3 {
-    flex: 0 0 50%;
-    max-width: 50%;
+    /* removed forced 50% */
   }
 
   /* Tables: horizontal scroll */

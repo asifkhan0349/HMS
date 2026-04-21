@@ -61,6 +61,13 @@ def create_entity(db, model, payload, owner_user_id: int):
         if not data.get(field):
             data[field] = _generate_code(prefix)
 
+    # Business Logic Validation: Prevent negative stock
+    if "stock" in data and isinstance(data["stock"], (int, float)) and data["stock"] < 0:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Stock cannot be negative.",
+        )
+
     entity = model(owner_user_id=owner_user_id, **data)
     db.add(entity)
     db.commit()
@@ -69,7 +76,13 @@ def create_entity(db, model, payload, owner_user_id: int):
 
 
 def update_entity(db: Session, entity, payload):
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    if "stock" in data and isinstance(data["stock"], (int, float)) and data["stock"] < 0:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Stock cannot be negative.",
+        )
+    for field, value in data.items():
         setattr(entity, field, value)
     db.commit()
     db.refresh(entity)

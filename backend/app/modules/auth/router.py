@@ -109,7 +109,7 @@ def change_password(
     return schemas.MessageResponse(message="Password changed successfully. Please keep your new password safe.")
 
 @router.post("/forgot-password", response_model=schemas.MessageResponse)
-async def forgot_password(
+def forgot_password(
     payload: schemas.ForgotPasswordRequest, 
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
