@@ -8,15 +8,15 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .auth_context import get_current_user_id
-from .config import API_PREFIX, CORS_ORIGINS, settings
-from .database import Base, SessionLocal, engine
-from .logging_config import setup_logging
+from .core.config import API_PREFIX, CORS_ORIGINS, settings
+from .core.database import Base, SessionLocal, engine
+from .core.logging_config import setup_logging
 
 # Initialize logging immediately
 setup_logging()
 
 # Production-ready Security and Rate Limiting
-from .limiter import limiter
+from .core.limiter import limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from secure import Secure, ContentSecurityPolicy

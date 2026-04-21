@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=str(Path(__file__).resolve().parent.parent / ".env"),
+        env_file=str(Path(__file__).resolve().parent.parent.parent / ".env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )
@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
 
     # Webhook
-    APPOINTMENT_WEBHOOK_URL: str = "https://krishnakanth950.app.n8n.cloud/webhook/your-webhook-path"
+    APPOINTMENT_WEBHOOK_URL: str = "https://krishnakanth950.app.n8n.cloud/webhook/hospital-appointment-confirmation"
 
     @property
     def cors_origins(self) -> List[str]:
@@ -59,7 +59,7 @@ if settings.ENV == "production":
 if settings.DATABASE_URL.startswith("postgres://"):
     settings.DATABASE_URL = settings.DATABASE_URL.replace("postgres://", "postgresql://", 1)
 elif not settings.DATABASE_URL:
-    BACKEND_DIR = Path(__file__).resolve().parent.parent
+    BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
     DATABASE_PATH = BACKEND_DIR / "hms.db"
     settings.DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
 

@@ -4,13 +4,13 @@ from fastapi_mail import FastMail, ConnectionConfig, MessageSchema, MessageType
 from sqlalchemy import func
 import os
 
-from app.database import get_db
-from app.config import settings
+from app.core.database import get_db
+from app.core.config import settings
 from app.auth_context import get_raw_token_data
 from app.token_blocklist import revoke_token
 from app.routers.common import ResetToken
-from app.limiter import limiter
-from app.security import hash_password, create_access_token, create_reset_token, verify_reset_token
+from app.core.limiter import limiter
+from app.core.security import hash_password, create_access_token, create_reset_token, verify_reset_token
 from app.auth_context import get_current_user_id
 
 from . import schemas, services, crud
@@ -96,7 +96,7 @@ def change_password(
     db: Session = Depends(get_db),
     current_user_id: int = Depends(get_current_user_id),
 ):
-    from app.security import verify_password
+    from app.core.security import verify_password
     user = crud.get_user_by_id(db, current_user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

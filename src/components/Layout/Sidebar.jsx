@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -18,7 +18,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line' },
     { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes' },
     { title: 'Emergency Blood Bank', path: '/bloodbank', icon: 'bi bi-droplet-half' },
-    { title: 'Account Settings', path: '/settings', icon: 'bi bi-gear' },
   ];
 
   const handleNavClick = () => {
@@ -70,14 +69,25 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {user?.role || 'No role'}
               </small>
             </div>
-            <button
-              className="btn btn-sm btn-link text-muted ms-auto p-0 hover-opacity-100"
-              onClick={logout}
-              title="Sign Out"
-              aria-label="Sign Out"
-            >
-              <i className="bi bi-box-arrow-right fs-5" aria-hidden="true"></i>
-            </button>
+            <div className="ms-auto d-flex align-items-center gap-2">
+              <Link
+                to="/settings"
+                className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
+                title="Account Settings"
+                aria-label="Account Settings"
+                onClick={handleNavClick}
+              >
+                <i className="bi bi-gear fs-5" aria-hidden="true"></i>
+              </Link>
+              <button
+                className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
+                onClick={logout}
+                title="Sign Out"
+                aria-label="Sign Out"
+              >
+                <i className="bi bi-box-arrow-right fs-5" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
 
           <div className="d-flex align-items-center mb-2">

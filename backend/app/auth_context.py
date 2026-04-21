@@ -3,9 +3,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
 from sqlalchemy.orm import Session
 
-from .database import get_db
+from .core.database import get_db
 from .models import User
-from .security import decode_access_token
+from .core.security import decode_access_token
 from .token_blocklist import is_token_revoked
 
 security = HTTPBearer(auto_error=False)

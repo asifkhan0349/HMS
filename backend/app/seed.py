@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
+from .core.database import get_db
+from .core.security import decode_access_token, hash_password
 from .models import (
     Appointment,
     Bed,
@@ -15,7 +17,7 @@ from .models import (
     Staff,
     User,
 )
-from .security import hash_password
+from .core.security import hash_password
 
 
 def seed_database(db: Session):

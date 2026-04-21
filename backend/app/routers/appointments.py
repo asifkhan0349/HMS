@@ -5,8 +5,8 @@ import logging
 
 from ..auth_context import get_current_user
 from .. import crud, models, schemas
-from ..database import get_db
-from ..config import settings
+from ..core.database import get_db
+from ..core.config import settings
 from .common import PositiveId
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..auth_context import get_current_user_id
 from .. import models, schemas
-from ..database import get_db
+from ..core.database import get_db
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 

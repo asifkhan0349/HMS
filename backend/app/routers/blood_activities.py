@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
 from ..auth_context import get_current_user_id
-from ..database import get_db
+from ..core.database import get_db
 from .common import PositiveId
 
 router = APIRouter(prefix="/blood_activities", tags=["Blood Bank"])

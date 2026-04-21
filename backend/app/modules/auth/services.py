@@ -5,7 +5,7 @@ from fastapi import HTTPException, status, BackgroundTasks
 from fastapi_mail import FastMail, MessageSchema, MessageType
 
 from . import crud, schemas, models
-from app.security import hash_password, verify_password, create_access_token
+from app.core.security import hash_password, verify_password, create_access_token
 
 logger = logging.getLogger(__name__)
 
