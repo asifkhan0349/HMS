@@ -216,7 +216,19 @@ const Patients = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPatients.length === 0 ? (
+              {patients.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-0">
+                    <EmptyState 
+                      icon="bi-people"
+                      title="No patients registered yet"
+                      description="Your patient registry is currently empty. Start by registering a new patient profile to track clinical outcomes."
+                      actionText="Register Patient"
+                      onAction={() => setIsModalOpen(true)}
+                    />
+                  </td>
+                </tr>
+              ) : filteredPatients.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-0">
                     <EmptyState 
