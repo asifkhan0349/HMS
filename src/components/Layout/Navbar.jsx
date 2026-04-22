@@ -75,25 +75,7 @@ const Navbar = ({ onToggleSidebar }) => {
 
         {/* Right side actions */}
         <div className="d-flex align-items-center gap-2 ms-auto">
-          {/* Dark Mode Toggle */}
-          <button
-            className="btn d-flex align-items-center justify-content-center"
-            onClick={toggleTheme}
-            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-            aria-label="Toggle theme"
-            style={{ 
-              width: '38px', 
-              height: '38px', 
-              borderRadius: '8px',
-              padding: 0,
-              border: '1px solid var(--accents-2)',
-              background: 'var(--accents-1)',
-              color: 'var(--geist-foreground)',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <i className={`bi ${theme === 'light' ? 'bi-moon-stars-fill' : 'bi-sun-fill'}`} style={{ fontSize: '1rem', color: 'var(--geist-foreground)' }} aria-hidden="true"></i>
-          </button>
+          {/* Right side actions - Toggle removed */}
         </div>
       </div>
     </header>
