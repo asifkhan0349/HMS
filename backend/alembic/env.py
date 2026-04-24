@@ -10,9 +10,9 @@ import os
 import sys
 sys.path.insert(0, os.path.realpath(os.path.join(os.getcwd(), "..")))
 
-from app.database import Base
+from app.core.database import Base
 from app import models
-from app.config import DATABASE_URL
+from app.core.config import DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

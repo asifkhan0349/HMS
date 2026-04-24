@@ -10,10 +10,10 @@ RUN npm run build
 FROM python:3.11-slim
 WORKDIR /app
 
-# Install runtime dependencies for psycopg2 and health checks
+# Install runtime dependencies for health checks and bash
 RUN apt-get update && apt-get install -y \
-    libpq5 \
     curl \
+    bash \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
@@ -24,6 +24,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend /app/backend
 WORKDIR /app/backend
 
+# Ensure entrypoint is executable
+RUN chmod +x entrypoint.sh
+
 # Copy the built React app
 COPY --from=frontend-builder /app/dist /app/dist
 
@@ -32,6 +35,7 @@ ENV ENV=production
 ENV DEBUG_MODE=False
 ENV PYTHONPATH=/app/backend
 ENV PORT=8000
+ENV DATABASE_URL=""
 
 # Run as non-root for container security
 RUN addgroup --system hms && adduser --system --ingroup hms hms
@@ -40,8 +44,10 @@ USER hms
 
 EXPOSE 8000
 
-# Run with gunicorn for production reliability
+# Healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["gunicorn", "-w", "${WEB_CONCURRENCY:-4}", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000", "--forwarded-allow-ips", "*", "--access-logfile", "-", "--error-logfile", "-"]
+# Use entrypoint script to run migrations then start server
+ENTRYPOINT ["./entrypoint.sh"]
+
