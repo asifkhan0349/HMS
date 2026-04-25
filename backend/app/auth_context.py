@@ -80,3 +80,15 @@ def get_current_user(
             detail="User not found.",
         )
     return user
+
+
+def require_role(allowed_roles: list[str]):
+    """Dependency factory to restrict access to specific roles."""
+    def role_checker(user: User = Depends(get_current_user)):
+        if user.role.lower() not in [role.lower() for role in allowed_roles]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access Denied: You do not have the required permissions. Required roles: {', '.join(allowed_roles)}"
+            )
+        return user
+    return role_checker

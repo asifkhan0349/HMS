@@ -2,11 +2,15 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id
+from ..auth_context import get_current_user_id, require_role
 from ..core.database import get_db
 from .common import PositiveId
 
-router = APIRouter(prefix="/beds", tags=["Beds"])
+router = APIRouter(
+    prefix="/beds", 
+    tags=["beds"],
+    dependencies=[Depends(require_role(["Admin", "Nurse"]))]
+)
 
 
 @router.get("", response_model=list[schemas.BedRead])

@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     if (!hasRole) {
       // Small timeout to ensure context is ready or to handle concurrent state updates
       showToast('Access Denied: You do not have permission to view this page.', 'error');
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/" replace />;
     }
   }
 

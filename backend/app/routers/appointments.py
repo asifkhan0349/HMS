@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import httpx
 import logging
 
-from ..auth_context import get_current_user
+from ..auth_context import get_current_user, require_role
 from .. import crud, models, schemas
 from ..core.database import get_db
 from ..core.config import settings
@@ -11,7 +11,11 @@ from .common import PositiveId
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/appointments", tags=["appointments"])
+router = APIRouter(
+    prefix="/appointments", 
+    tags=["appointments"],
+    dependencies=[Depends(require_role(["Admin"]))]
+)
 
 
 async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
@@ -39,12 +43,7 @@ def list_appointments(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)
 ):
-    if current_user.role.lower() != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Only administrators can view appointments."
-        )
-    # Admins can see all appointments (owner_id=None)
+    # Authorized via router dependencies
     return crud.list_entities(db, models.Appointment, owner_id=None)
 
 
@@ -64,11 +63,6 @@ def get_appointment(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)
 ):
-    if current_user.role.lower() != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Only administrators can view appointment details."
-        )
     return crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
 
 
@@ -80,11 +74,6 @@ def update_appointment(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)
 ):
-    if current_user.role.lower() != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Only administrators can update appointments."
-        )
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
     
     old_status = appointment.status
@@ -106,10 +95,5 @@ def delete_appointment(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)
 ):
-    if current_user.role.lower() != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Only administrators can delete appointments."
-        )
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
     return crud.delete_entity(db, appointment)

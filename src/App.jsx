@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
@@ -40,6 +40,26 @@ const Placeholder = ({ title }) => (
   </div>
 );
 
+// Role-based landing page logic
+const RootRedirect = () => {
+  const { user } = useApp();
+  if (!user) return <Navigate to="/login" replace />;
+  const userRole = user.role?.toLowerCase();
+  
+  // Role-based landing page logic
+  if (userRole === 'doctor' || userRole === 'nurse') {
+    return <Navigate to="/patients" replace />;
+  }
+  if (userRole === 'reception') {
+    return <Navigate to="/billing" replace />;
+  }
+  if (userRole === 'patient') {
+    return <Navigate to="/patients" replace />;
+  }
+  
+  return <Navigate to="/dashboard" replace />;
+};
+
 function App() {
   return (
     <Router>
@@ -52,23 +72,23 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* Redirect root to dashboard */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Dynamic root redirect based on user role */}
+              <Route path="/" element={<RootRedirect />} />
 
               {/* Protected Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><Dashboard /></ProtectedRoute>} />
+              <Route path="/patients" element={<ProtectedRoute allowedRoles={['Admin', 'Doctor', 'Nurse', 'Patient']}><Patients /></ProtectedRoute>} />
               <Route path="/appointments" element={<ProtectedRoute allowedRoles={['Admin']}><Appointments /></ProtectedRoute>} />
-              <Route path="/emr" element={<ProtectedRoute><EMR /></ProtectedRoute>} />
-              <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-              <Route path="/pharmacy" element={<ProtectedRoute><Pharmacy /></ProtectedRoute>} />
-              <Route path="/lab" element={<ProtectedRoute><Lab /></ProtectedRoute>} />
-              <Route path="/beds" element={<ProtectedRoute><Beds /></ProtectedRoute>} />
-              <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-              <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-              <Route path="/bloodbank" element={<ProtectedRoute><BloodBank /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/emr" element={<ProtectedRoute allowedRoles={['Admin', 'Doctor', 'Nurse', 'Patient']}><EMR /></ProtectedRoute>} />
+              <Route path="/billing" element={<ProtectedRoute allowedRoles={['Admin', 'Reception', 'Patient']}><Billing /></ProtectedRoute>} />
+              <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><Pharmacy /></ProtectedRoute>} />
+              <Route path="/lab" element={<ProtectedRoute allowedRoles={['Admin', 'Doctor', 'Nurse', 'Patient']}><Lab /></ProtectedRoute>} />
+              <Route path="/beds" element={<ProtectedRoute allowedRoles={['Admin', 'Nurse']}><Beds /></ProtectedRoute>} />
+              <Route path="/staff" element={<ProtectedRoute allowedRoles={['Admin']}><Staff /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute allowedRoles={['Admin']}><Reports /></ProtectedRoute>} />
+              <Route path="/inventory" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><Inventory /></ProtectedRoute>} />
+              <Route path="/blood-bank" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><BloodBank /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><Settings /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />

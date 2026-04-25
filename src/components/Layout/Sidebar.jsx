@@ -4,20 +4,21 @@ import { useApp } from '../../context/AppContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useApp();
+  const STAFF_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
 
   const menuItems = [
-    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity' },
-    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people' },
+    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', allowedRoles: ['Admin'] },
+    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
     { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin'] },
-    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },
-    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt' },
-    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule' },
-    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse' },
-    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital' },
-    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge' },
-    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line' },
-    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes' },
-    { title: 'Emergency Blood Bank', path: '/bloodbank', icon: 'bi bi-droplet-half' },
+    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
+    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception', 'Patient'] },
+    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', allowedRoles: ['Admin', 'Reception'] },
+    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
+    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', allowedRoles: ['Admin', 'Nurse'] },
+    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', allowedRoles: ['Admin'] },
+    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', allowedRoles: ['Admin'] },
+    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Reception'] },
+    { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Reception'] },
   ];
 
   const handleNavClick = () => {
@@ -70,15 +71,17 @@ const Sidebar = ({ isOpen, onClose }) => {
               </small>
             </div>
             <div className="ms-auto d-flex align-items-center gap-2">
-              <Link
-                to="/settings"
-                className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
-                title="Account Settings"
-                aria-label="Account Settings"
-                onClick={handleNavClick}
-              >
-                <i className="bi bi-gear fs-5" aria-hidden="true"></i>
-              </Link>
+              {user?.role?.toLowerCase() !== 'doctor' && user?.role?.toLowerCase() !== 'nurse' && (
+                <Link
+                  to="/settings"
+                  className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
+                  title="Account Settings"
+                  aria-label="Account Settings"
+                  onClick={handleNavClick}
+                >
+                  <i className="bi bi-gear fs-5" aria-hidden="true"></i>
+                </Link>
+              )}
               <button
                 className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
                 onClick={logout}

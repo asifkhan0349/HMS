@@ -19,12 +19,12 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || '/';
 
   useEffect(() => {
     // If user is already logged in, they should not see the login page
     if (user) {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 
@@ -60,7 +60,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
       if (mode === 'login') {
         await login(username, password);
         showToast('Login successful!', 'success');
-        const target = location.state?.from?.pathname || '/dashboard';
+        const target = location.state?.from?.pathname || '/';
         navigate(target, { replace: true });
         if (isModal && onClose) onClose();
       } else {
@@ -235,6 +235,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
                   <option>Doctor</option>
                   <option>Nurse</option>
                   <option>Reception</option>
+                  <option>Patient</option>
                 </select>
               </div>
             </>
