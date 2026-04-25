@@ -9,7 +9,7 @@ from .common import PositiveId
 router = APIRouter(
     prefix="/blood_inventory",
     tags=["Blood Bank"],
-    dependencies=[Depends(require_role(["Admin", "Reception"]))]
+    dependencies=[Depends(require_role("blood_bank"))]
 )
 
 

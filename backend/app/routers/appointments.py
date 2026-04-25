@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/appointments", 
     tags=["appointments"],
-    dependencies=[Depends(require_role(["Admin"]))]
+    dependencies=[Depends(require_role("appointments"))]
 )
 
 

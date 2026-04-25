@@ -9,7 +9,7 @@ from .common import PositiveId
 router = APIRouter(
     prefix="/invoices",
     tags=["invoices"],
-    dependencies=[Depends(require_role(["Admin", "Reception", "Patient"]))]
+    dependencies=[Depends(require_role("billing"))]
 )
 
 

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AppProvider, useApp } from './context/AppContext';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import { isAuthorized, RESOURCE_PERMISSIONS } from './lib/permissions';
 
 // Lazy load page components for better performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -44,20 +45,14 @@ const Placeholder = ({ title }) => (
 const RootRedirect = () => {
   const { user } = useApp();
   if (!user) return <Navigate to="/login" replace />;
-  const userRole = user.role?.toLowerCase();
+  const userRole = user.role;
   
-  // Role-based landing page logic
-  if (userRole === 'doctor' || userRole === 'nurse') {
-    return <Navigate to="/patients" replace />;
-  }
-  if (userRole === 'reception') {
-    return <Navigate to="/billing" replace />;
-  }
-  if (userRole === 'patient') {
-    return <Navigate to="/patients" replace />;
-  }
+  if (isAuthorized(userRole, 'dashboard')) return <Navigate to="/dashboard" replace />;
+  if (isAuthorized(userRole, 'patients')) return <Navigate to="/patients" replace />;
+  if (isAuthorized(userRole, 'billing')) return <Navigate to="/billing" replace />;
   
-  return <Navigate to="/dashboard" replace />;
+  // Fallback to login if no authorized landing page found
+  return <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -76,19 +71,19 @@ function App() {
               <Route path="/" element={<RootRedirect />} />
 
               {/* Protected Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><Dashboard /></ProtectedRoute>} />
-              <Route path="/patients" element={<ProtectedRoute allowedRoles={['Admin', 'Doctor', 'Nurse', 'Patient']}><Patients /></ProtectedRoute>} />
-              <Route path="/appointments" element={<ProtectedRoute allowedRoles={['Admin']}><Appointments /></ProtectedRoute>} />
-              <Route path="/emr" element={<ProtectedRoute allowedRoles={['Admin', 'Doctor', 'Nurse', 'Patient']}><EMR /></ProtectedRoute>} />
-              <Route path="/billing" element={<ProtectedRoute allowedRoles={['Admin', 'Reception', 'Patient']}><Billing /></ProtectedRoute>} />
-              <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><Pharmacy /></ProtectedRoute>} />
-              <Route path="/lab" element={<ProtectedRoute allowedRoles={['Admin', 'Doctor', 'Nurse', 'Patient']}><Lab /></ProtectedRoute>} />
-              <Route path="/beds" element={<ProtectedRoute allowedRoles={['Admin', 'Nurse']}><Beds /></ProtectedRoute>} />
-              <Route path="/staff" element={<ProtectedRoute allowedRoles={['Admin']}><Staff /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute allowedRoles={['Admin']}><Reports /></ProtectedRoute>} />
-              <Route path="/inventory" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><Inventory /></ProtectedRoute>} />
-              <Route path="/blood-bank" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><BloodBank /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute allowedRoles={['Admin', 'Reception']}><Settings /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.dashboard}><Dashboard /></ProtectedRoute>} />
+              <Route path="/patients" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.patients}><Patients /></ProtectedRoute>} />
+              <Route path="/appointments" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.appointments}><Appointments /></ProtectedRoute>} />
+              <Route path="/emr" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.emr}><EMR /></ProtectedRoute>} />
+              <Route path="/billing" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.billing}><Billing /></ProtectedRoute>} />
+              <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.pharmacy}><Pharmacy /></ProtectedRoute>} />
+              <Route path="/lab" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.lab}><Lab /></ProtectedRoute>} />
+              <Route path="/beds" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.beds}><Beds /></ProtectedRoute>} />
+              <Route path="/staff" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.staff}><Staff /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.reports}><Reports /></ProtectedRoute>} />
+              <Route path="/inventory" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.inventory}><Inventory /></ProtectedRoute>} />
+              <Route path="/blood-bank" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.blood_bank}><BloodBank /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.settings}><Settings /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />

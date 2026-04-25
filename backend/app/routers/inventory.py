@@ -10,7 +10,7 @@ from .common import PositiveId
 router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"],
-    dependencies=[Depends(require_role(["Admin", "Reception"]))]
+    dependencies=[Depends(require_role("inventory"))]
 )
 
 

@@ -13,7 +13,7 @@ router = APIRouter(
     tags=["patients"]
 )
 
-@router.get("", response_model=list[schemas.PatientRead], dependencies=[Depends(require_role(["Admin", "Doctor", "Nurse", "Reception", "Patient"]))])
+@router.get("", response_model=list[schemas.PatientRead], dependencies=[Depends(require_role("patients"))])
 def list_patients(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.list_patients(db, current_user_id)
 
@@ -23,7 +23,7 @@ def create_patient(request: Request, payload: schemas.PatientCreate, db: Session
     return crud.create_patient(db, payload, current_user_id)
 
 @router.get("/{patient_id}", response_model=schemas.PatientRead)
-def get_patient(patient_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id), _=Depends(require_role(["Admin", "Doctor", "Nurse", "Reception", "Patient"]))):
+def get_patient(patient_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id), _=Depends(require_role("patients"))):
     return crud.get_patient_or_404(db, patient_id, current_user_id)
 
 @router.put("/{patient_id}", response_model=schemas.PatientRead)

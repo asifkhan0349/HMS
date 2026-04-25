@@ -1,24 +1,25 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { isAuthorized } from '../../lib/permissions';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useApp();
   const STAFF_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
 
   const menuItems = [
-    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', allowedRoles: ['Admin'] },
-    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
-    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin'] },
-    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
-    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception', 'Patient'] },
-    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', allowedRoles: ['Admin', 'Reception'] },
-    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
-    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', allowedRoles: ['Admin', 'Nurse'] },
-    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', allowedRoles: ['Admin'] },
-    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', allowedRoles: ['Admin'] },
-    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Reception'] },
-    { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Reception'] },
+    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', resource: 'dashboard' },
+    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', resource: 'patients' },
+    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', resource: 'appointments' },
+    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', resource: 'emr' },
+    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', resource: 'billing' },
+    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', resource: 'pharmacy' },
+    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', resource: 'lab' },
+    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', resource: 'beds' },
+    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', resource: 'staff' },
+    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', resource: 'reports' },
+    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', resource: 'inventory' },
+    { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', resource: 'blood_bank' },
   ];
 
   const handleNavClick = () => {
@@ -41,13 +42,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       <nav className="flex-grow-1 overflow-y-auto custom-scrollbar px-2" aria-label="Main Navigation">
         {menuItems
-          .filter((item) => {
-            if (!item.allowedRoles) return true;
-            if (!user?.role) return false;
-            return item.allowedRoles.some(
-              (role) => role.toLowerCase() === user.role.toLowerCase()
-            );
-          })
+          .filter((item) => isAuthorized(user?.role, item.resource))
           .map((item) => (
             <NavLink
               key={item.path}
