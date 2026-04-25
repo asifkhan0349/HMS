@@ -1,12 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 
-export const useCrud = (apiClient, mapFromApi) => {
+export const useCrud = (apiClient, mapFromApi, options = {}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useApp();
+  const { enabled = true } = options;
 
   const loadData = useCallback(async () => {
+    if (!enabled) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await apiClient.list();
@@ -16,7 +23,7 @@ export const useCrud = (apiClient, mapFromApi) => {
     } finally {
       setLoading(false);
     }
-  }, [apiClient, mapFromApi, showToast]);
+  }, [apiClient, enabled, mapFromApi, showToast]);
 
   useEffect(() => {
     loadData();

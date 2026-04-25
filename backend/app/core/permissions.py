@@ -10,7 +10,7 @@ RESOURCE_PERMISSIONS = {
     "pharmacy": ["Admin", "Reception"],
     "lab": ["Admin", "Doctor", "Nurse", "Patient"],
     "beds": ["Admin", "Nurse"],
-    "staff": ["Admin"],
+    "staff": ["Admin", "Doctor", "Nurse", "Patient"],
     "inventory": ["Admin", "Reception"],
     "blood_bank": ["Admin", "Reception"],
 }

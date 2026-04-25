@@ -8,7 +8,8 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const Lab = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isPatient = user?.role?.toLowerCase() === 'patient';
   const { 
     data: tests, 
     loading, 
@@ -18,7 +19,7 @@ const Lab = () => {
   } = useCrud(testsApi, mapTestFromApi);
   
   const { data: patients, loading: loadingPatients } = useCrud(patientsApi, mapPatientFromApi);
-  const { data: staff, loading: loadingStaff } = useCrud(staffApi, mapStaffFromApi);
+  const { data: staff, loading: loadingStaff } = useCrud(staffApi, mapStaffFromApi, { enabled: !isPatient });
   
   const doctorOptions = useMemo(() => 
     [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))], 
@@ -120,9 +121,11 @@ const Lab = () => {
           <h2 className="fw-bold mb-0">Diagnostic Laboratory</h2>
           <p className="text-white opacity-75 mb-0">Monitor clinical pathology and bio-telemetry results.</p>
         </div>
-        <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
-          <i className="bi bi-plus-square me-2"></i>Order New Test
-        </button>
+        {!isPatient && (
+          <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
+            <i className="bi bi-plus-square me-2"></i>Order New Test
+          </button>
+        )}
       </div>
 
       <div className="glass-card p-0 overflow-hidden shadow-lg border-0">
@@ -151,8 +154,8 @@ const Lab = () => {
                        icon="bi-thermometer-half"
                        title="No Lab Tests"
                        description="The diagnostic queue is currently empty. Place an order for pathology or radiology tests."
-                       actionText="Order New Test"
-                       onAction={() => setIsModalOpen(true)}
+                       actionText={isPatient ? undefined : "Order New Test"}
+                       onAction={isPatient ? undefined : () => setIsModalOpen(true)}
                      />
                   </td>
                 </tr>
@@ -184,29 +187,33 @@ const Lab = () => {
                   </td>
                   <td className="px-4 py-4 text-end">
                     <div className="d-flex justify-content-end gap-2">
-                      <button
-                        className="btn btn-sm btn-glass text-primary px-3"
-                        onClick={() => openEditModal(test)}
-                        title="Edit Order"
-                      >
-                        <i className="bi bi-pencil"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-glass text-danger px-3"
-                        onClick={() => {
-                          setDeletingTest(test);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        title="Cancel/Delete"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-glass text-white opacity-50 px-3"
-                        onClick={() => showToast(`Executing diagnostic processing for Lab ID ${test.id}...`)}
-                      >
-                        PROCESS
-                      </button>
+                      {!isPatient && (
+                        <>
+                          <button
+                            className="btn btn-sm btn-glass text-primary px-3"
+                            onClick={() => openEditModal(test)}
+                            title="Edit Order"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-glass text-danger px-3"
+                            onClick={() => {
+                              setDeletingTest(test);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            title="Cancel/Delete"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-glass text-white opacity-50 px-3"
+                            onClick={() => showToast(`Executing diagnostic processing for Lab ID ${test.id}...`)}
+                          >
+                            PROCESS
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

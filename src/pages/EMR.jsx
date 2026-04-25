@@ -16,7 +16,8 @@ const EMR = () => {
     clinicalId: createCode('CID'),
   });
 
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isPatient = user?.role?.toLowerCase() === 'patient';
   const { 
     data: records, 
     loading, 
@@ -26,7 +27,7 @@ const EMR = () => {
   } = useCrud(recordsApi, mapRecordFromApi);
   
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
-  const { data: staff } = useCrud(staffApi, mapStaffFromApi);
+  const { data: staff } = useCrud(staffApi, mapStaffFromApi, { enabled: !isPatient });
   const doctorOptions = [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))];
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -124,9 +125,11 @@ const EMR = () => {
           <h2 className="fw-bold mb-0">Electronic Medical Records</h2>
           <p className="text-white opacity-75 mb-0">Encrypted clinical history and diagnostic telemetry.</p>
         </div>
-        <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
-          <i className="bi bi-file-earmark-plus me-2"></i>New EMR Entry
-        </button>
+        {!isPatient && (
+          <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
+            <i className="bi bi-file-earmark-plus me-2"></i>New EMR Entry
+          </button>
+        )}
       </div>
 
       <div className="glass-card p-0 overflow-hidden shadow-lg border-0">
@@ -156,8 +159,8 @@ const EMR = () => {
                       icon="bi-file-earmark-medical"
                       title="No Clinical Records"
                       description="Electronic health history is currently empty for the selected clinical scope."
-                      actionText="New EMR Entry"
-                      onAction={() => setIsModalOpen(true)}
+                      actionText={isPatient ? undefined : "New EMR Entry"}
+                      onAction={isPatient ? undefined : () => setIsModalOpen(true)}
                     />
                   </td>
                 </tr>
@@ -172,23 +175,27 @@ const EMR = () => {
                     <span className="badge-soft-success px-3 py-1 rounded-pill">{record.diagnosis}</span>
                   </td>
                   <td className="px-4 py-4 text-end">
-                    <button
-                      className="btn btn-sm btn-glass me-2"
-                      onClick={() => openEditModal(record)}
-                      title="Edit Record"
-                    >
-                      <i className="bi bi-pencil-square"></i>
-                    </button>
-                    <button
-                      className="btn btn-sm btn-glass text-danger"
-                      onClick={() => {
-                        setDeletingRecord(record);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      title="Delete Record"
-                    >
-                      <i className="bi bi-trash3"></i>
-                    </button>
+                    {!isPatient && (
+                      <>
+                        <button
+                          className="btn btn-sm btn-glass me-2"
+                          onClick={() => openEditModal(record)}
+                          title="Edit Record"
+                        >
+                          <i className="bi bi-pencil-square"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-glass text-danger"
+                          onClick={() => {
+                            setDeletingRecord(record);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          title="Delete Record"
+                        >
+                          <i className="bi bi-trash3"></i>
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -89,12 +89,12 @@ def require_role(allowed_roles: list[str] | str):
     Dependency factory to restrict access to specific roles.
     Can take a list of roles or a resource name string for centralized lookup.
     """
-    if isinstance(allowed_roles, str):
-        roles_list = get_allowed_roles(allowed_roles)
-    else:
-        roles_list = allowed_roles
-
     def role_checker(user: User = Depends(get_current_user)):
+        if isinstance(allowed_roles, str):
+            roles_list = get_allowed_roles(allowed_roles)
+        else:
+            roles_list = allowed_roles
+
         if user.role.lower() not in [role.lower() for role in roles_list]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
