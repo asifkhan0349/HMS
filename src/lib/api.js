@@ -113,7 +113,7 @@ const request = async (endpoint, options = {}) => {
 
 export const authApi = {
   login: (credentials) => request('/auth/login', { method: 'POST', body: credentials }),
-  signup: (userData) => request('/auth/signup', { method: 'POST', body: userData }),
+  createUser: (userData) => request('/auth/create-user', { method: 'POST', body: userData, isProtected: true }),
   updateProfile: (profileData) => 
     request('/auth/profile', { method: 'PATCH', body: profileData, isProtected: true }),
   changePassword: (passwordData) => 

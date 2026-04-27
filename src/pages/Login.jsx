@@ -100,67 +100,11 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
         </button>
       )}
       <div className="text-center mb-5">
-          <h3 className="fw-bold mb-2">{mode === 'login' ? 'Sign In' : 'Create Account'}</h3>
+          <h3 className="fw-bold mb-2">Sign In</h3>
           <p className="text-muted small mb-0">Elite Hospital Management System</p>
         </div>
 
-        <div
-          className="d-flex rounded-pill p-1 mb-4"
-          style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}
-        >
-          <button
-            type="button"
-            className={`btn btn-sm rounded-pill flex-fill ${
-              mode === 'login' ? 'btn-primary' : 'btn-link text-muted text-decoration-none'
-            }`}
-            onClick={() => switchMode('login')}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            className={`btn btn-sm rounded-pill flex-fill ${
-              mode === 'signup' ? 'btn-primary' : 'btn-link text-muted text-decoration-none'
-            }`}
-            onClick={() => switchMode('signup')}
-          >
-            Sign Up
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} noValidate>
-          {mode === 'signup' && (
-            <>
-              <div className="mb-4">
-                <label htmlFor="signup-full-name" className="form-label text-muted small text-uppercase fw-bold mb-2">Full Name</label>
-                <input
-                  id="signup-full-name"
-                  type="text"
-                  className="form-control py-2"
-                  placeholder="Jane Admin"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  autoComplete="name"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="signup-email" className="form-label text-muted small text-uppercase fw-bold mb-2">Email</label>
-                <input
-                  id="signup-email"
-                  type="email"
-                  className="form-control py-2"
-                  placeholder="name@hospital.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
-              </div>
-            </>
-          )}
-
           <div className="mb-4">
             <label htmlFor="auth-username" className="form-label text-muted small text-uppercase fw-bold mb-2">Username</label>
             <input
@@ -179,14 +123,12 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
           <div className="mb-4">
             <div className="d-flex justify-content-between mb-2">
               <label htmlFor="auth-password" className="form-label text-muted small text-uppercase fw-bold mb-0">Password</label>
-              {mode === 'login' && (
-                <Link
-                  to="/forgot-password"
-                  className="btn btn-link p-0 text-muted small text-decoration-none"
-                >
-                  Forgot?
-                </Link>
-              )}
+              <Link
+                to="/forgot-password"
+                className="btn btn-link p-0 text-muted small text-decoration-none"
+              >
+                Forgot?
+              </Link>
             </div>
             <div className="position-relative">
               <input
@@ -197,7 +139,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                autoComplete="current-password"
                 style={{ paddingRight: '42px' }}
               />
               <button
@@ -212,49 +154,13 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
             </div>
           </div>
 
-          {mode === 'signup' && (
-            <>
-              <div className="mb-4">
-                <label htmlFor="signup-confirm-password" className="form-label text-muted small text-uppercase fw-bold mb-2">Confirm Password</label>
-                <input
-                  id="signup-confirm-password"
-                  type={showPassword ? 'text' : 'password'}
-                  className="form-control py-2"
-                  placeholder="Confirm password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  autoComplete="new-password"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="signup-role" className="form-label text-muted small text-uppercase fw-bold mb-2">Role</label>
-                <select id="signup-role" className="form-select py-2" value={role} onChange={(e) => setRole(e.target.value)}>
-                  <option>Admin</option>
-                  <option>Doctor</option>
-                  <option>Nurse</option>
-                  <option>Reception</option>
-                  <option>Patient</option>
-                </select>
-              </div>
-            </>
-          )}
-
           <button type="submit" className="btn btn-primary w-100 py-2 mt-2" disabled={isSubmitting}>
-            {isSubmitting ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            {isSubmitting ? 'Please wait...' : 'Sign In'}
           </button>
         </form>
 
         <p className="text-center text-muted small mt-4 mb-0">
-          {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button
-            type="button"
-            className="btn btn-link btn-sm p-0 align-baseline text-decoration-none"
-            onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-          >
-            {mode === 'login' ? 'Sign up here' : 'Sign in here'}
-          </button>
+          Access restricted to authorized personnel only.
         </p>
       </div>
   );

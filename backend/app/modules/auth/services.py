@@ -33,6 +33,14 @@ def register_user(
     normalized_username = normalize_username(payload.username)
     normalized_email = normalize_email(payload.email)
 
+    # 1. Enforce strict single Admin policy
+    if payload.role == "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: Cannot create additional Admin accounts.",
+        )
+
+    # 2. Check for existing user
     existing_user = crud.get_user_by_username_or_email(
         db, normalized_username, normalized_email
     )
@@ -42,6 +50,7 @@ def register_user(
             detail="A user with that username or email already exists.",
         )
 
+    # 3. Create the user
     user = crud.create_user(
         db=db,
         full_name=payload.full_name,
@@ -55,7 +64,11 @@ def register_user(
     background_tasks.add_task(send_welcome_email, user.email, user.full_name)
 
     token = create_access_token(user.id)
-    return schemas.AuthResponse(message="Signup successful.", user=user, token=token)
+    return schemas.AuthResponse(
+        message=f"{user.role} account created successfully.", 
+        user=user, 
+        token=token
+    )
 
 
 def authenticate_user(db: Session, payload: schemas.LoginRequest) -> schemas.AuthResponse:

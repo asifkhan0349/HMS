@@ -239,27 +239,22 @@ const Lab = () => {
             <label htmlFor="lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
               Subject Identity
             </label>
-            <select
+            <input
               id="lab-patient"
-              className="form-select"
+              type="text"
+              className="form-control"
+              placeholder="Enter patient name..."
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-            >
-              {loadingPatients ? (
-                <option value="">Querying patient database...</option>
-              ) : patients.length === 0 ? (
-                <option value="">No registered patients found</option>
-              ) : (
-                <>
-                  <option value="">Select a registered patient profile...</option>
-                  {patients.map((p) => (
-                    <option key={p.id} value={p.name}>
-                      {p.name} ({p.id})
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
+              list="patient-datalist"
+            />
+            <datalist id="patient-datalist">
+              {patients.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.id}
+                </option>
+              ))}
+            </datalist>
           </div>
           <div className="mb-4">
             <label htmlFor="lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
@@ -309,18 +304,15 @@ const Lab = () => {
         <form onSubmit={handleEditSubmit}>
           <div className="mb-4">
             <label htmlFor="edit-lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2">Subject Identity</label>
-            <select
+            <input
               id="edit-lab-patient"
-              className="form-select"
+              type="text"
+              className="form-control"
+              placeholder="Enter patient name..."
               value={editFormData.patient}
               onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-            >
-              {patients.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.name} ({p.id})
-                </option>
-              ))}
-            </select>
+              list="patient-datalist"
+            />
           </div>
           <div className="mb-4">
             <label htmlFor="edit-lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2">Diagnostic Test</label>

@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 
 const menuItems = [
   { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity' },
+  { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
   { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people' },
   { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event' },
   { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },
@@ -24,6 +25,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     if (onClose) onClose();
   };
 
+  const filteredMenuItems = menuItems.filter(item => !item.adminOnly || user?.role === 'Admin');
+
   return (
     <aside className={`sidebar d-flex flex-column border-end ${isOpen ? 'sidebar-open' : ''}`}>
       <button className="sidebar-close-btn" onClick={onClose} aria-label="Close menu">
@@ -39,7 +42,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       </div>
 
       <nav className="flex-grow-1 overflow-y-auto custom-scrollbar px-2" aria-label="Main Navigation">
-        {menuItems.map((item) => (
+        {filteredMenuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

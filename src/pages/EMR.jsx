@@ -217,19 +217,22 @@ const EMR = () => {
             <label htmlFor="emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
               Patient Identity
             </label>
-            <select
+            <input
               id="emr-patient"
-              className="form-select"
+              type="text"
+              className="form-control"
+              placeholder="Enter patient name..."
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-            >
-              <option value="">Select an active patient profile...</option>
+              list="patient-datalist"
+            />
+            <datalist id="patient-datalist">
               {patients.map((p) => (
                 <option key={p.id} value={p.name}>
-                  {p.name} ({p.id})
+                  {p.id}
                 </option>
               ))}
-            </select>
+            </datalist>
           </div>
           <div className="mb-4">
             <label htmlFor="emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
@@ -303,19 +306,15 @@ const EMR = () => {
               <label htmlFor="edit-emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
                 Patient Identity
               </label>
-              <select
+              <input
                 id="edit-emr-patient"
-                className="form-select"
+                type="text"
+                className="form-control"
+                placeholder="Enter patient name..."
                 value={editFormData.patient}
                 onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-              >
-                <option value="">Select an active patient profile...</option>
-                {patients.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name} ({p.id})
-                  </option>
-                ))}
-              </select>
+                list="patient-datalist"
+              />
             </div>
             <div className="mb-4">
               <label htmlFor="edit-emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>

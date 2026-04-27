@@ -11,7 +11,7 @@ from app.token_blocklist import revoke_token
 from app.routers.common import ResetToken
 from app.core.limiter import limiter
 from app.core.security import hash_password, create_access_token, create_reset_token, verify_reset_token
-from app.auth_context import get_current_user_id
+from app.auth_context import get_current_user_id, require_admin
 
 from . import schemas, services, crud
 
@@ -30,10 +30,18 @@ conf = ConnectionConfig(
     VALIDATE_CERTS=True
 )
 
-@router.post("/signup", response_model=schemas.AuthResponse, status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/minute")
-def signup(request: Request, payload: schemas.SignupRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    # Delegated business logic to service layer
+@router.post("/create-user", response_model=schemas.AuthResponse, status_code=status.HTTP_201_CREATED)
+def create_user(
+    request: Request, 
+    payload: schemas.SignupRequest, 
+    background_tasks: BackgroundTasks, 
+    db: Session = Depends(get_db),
+    admin: schemas.UserRead = Depends(require_admin)
+):
+    """
+    Endpoint for Admin to create new users. 
+    Public signup is disabled as per system requirements.
+    """
     return services.register_user(db=db, payload=payload, background_tasks=background_tasks)
 
 @router.post("/login", response_model=schemas.AuthResponse)

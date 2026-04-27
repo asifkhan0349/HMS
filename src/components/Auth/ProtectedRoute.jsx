@@ -4,16 +4,19 @@ import { useApp } from '../../context/AppContext';
 
 /**
  * ProtectedRoute — ensures the user is authenticated before rendering a page.
- * RBAC (role-based access control) has been removed; any authenticated user
- * can access any route.
+ * Optionally enforces the 'Admin' role via the adminOnly prop.
  */
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user } = useApp();
   const location = useLocation();
   const token = sessionStorage.getItem('hms_token');
 
   if (!user || !token) {
     return <Navigate to="/login" state={{ requireLogin: true, from: location }} replace />;
+  }
+
+  if (adminOnly && user.role !== 'Admin') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

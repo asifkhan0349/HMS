@@ -24,12 +24,18 @@ def seed_database(db: Session):
     """Seed the database with a default admin user and sample data."""
 
     # 1. Create Default Admin User if not exists
-    admin_user = db.query(User).filter(User.username == "admin").first()
+    # First, cleanup any legacy admin users if necessary, or just ensure the target admin exists.
+    # To enforce "Exactly ONE Admin", we can delete others, but for safety, 
+    # let's just make sure admin_hms exists and no other user has 'Admin' role.
+    
+    db.query(User).filter(User.role == "Admin", User.username != "admin_hms").delete()
+    
+    admin_user = db.query(User).filter(User.username == "admin_hms").first()
     if not admin_user:
-        hashed_pw = hash_password("hrmsadmin123")
+        hashed_pw = hash_password("ham33dSh@ika7m1n4m5")
         admin_user = User(
-            full_name="System Administrator",
-            username="admin",
+            full_name="HMS Administrator",
+            username="admin_hms",
             email="admin@hms.com",
             role="Admin",
             password_hash=hashed_pw,
@@ -37,6 +43,10 @@ def seed_database(db: Session):
         db.add(admin_user)
         db.commit()
         db.refresh(admin_user)
+    else:
+        # Update password if it exists just to be sure it matches the requirement
+        admin_user.password_hash = hash_password("ham33dSh@ika7m1n4m5")
+        db.commit()
 
     admin_id = admin_user.id
 

@@ -18,6 +18,7 @@ const Reports = lazy(() => import('./pages/Reports'));
 const Inventory = lazy(() => import('./pages/Inventory'));
 const BloodBank = lazy(() => import('./pages/BloodBank'));
 const Settings = lazy(() => import('./pages/Settings'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
 const Login = lazy(() => import('./pages/Login'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -67,6 +68,7 @@ function App() {
               <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
               <Route path="/blood-bank" element={<ProtectedRoute><BloodBank /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/user-management" element={<ProtectedRoute adminOnly><UserManagement /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />

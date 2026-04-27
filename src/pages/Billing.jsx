@@ -217,19 +217,22 @@ const Billing = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Patient Name</label>
-            <select
+            <input
               id="invoice-patient"
-              className="form-select"
+              type="text"
+              className="form-control"
+              placeholder="Enter patient name..."
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-            >
-              <option value="">Select a patient...</option>
+              list="patient-datalist"
+            />
+            <datalist id="patient-datalist">
               {patients.map((p) => (
                 <option key={p.id} value={p.name}>
-                  {p.name} ({p.id})
+                  {p.id}
                 </option>
               ))}
-            </select>
+            </datalist>
           </div>
           <div className="mb-4">
             <label htmlFor="invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
@@ -268,19 +271,15 @@ const Billing = () => {
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
               <label htmlFor="edit-invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Patient Name</label>
-              <select
+              <input
                 id="edit-invoice-patient"
-                className="form-select"
+                type="text"
+                className="form-control"
+                placeholder="Enter patient name..."
                 value={editFormData.patient}
                 onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-              >
-                <option value="">Select a patient...</option>
-                {patients.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name} ({p.id})
-                  </option>
-                ))}
-              </select>
+                list="patient-datalist"
+              />
             </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
