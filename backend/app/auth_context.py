@@ -82,7 +82,7 @@ def get_current_user(
     return user
 
 
-from .core.permissions import get_allowed_roles
+from .core.permissions import get_allowed_roles, has_permission
 
 def require_role(allowed_roles: list[str] | str):
     """
@@ -92,10 +92,12 @@ def require_role(allowed_roles: list[str] | str):
     def role_checker(user: User = Depends(get_current_user)):
         if isinstance(allowed_roles, str):
             roles_list = get_allowed_roles(allowed_roles)
+            is_allowed = has_permission(user.role, allowed_roles)
         else:
             roles_list = allowed_roles
+            is_allowed = user.role.lower() in [role.lower() for role in roles_list]
 
-        if user.role.lower() not in [role.lower() for role in roles_list]:
+        if not is_allowed:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Access Denied: You do not have the required permissions. Required roles: {', '.join(roles_list)}"

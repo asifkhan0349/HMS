@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useApp, mapRecordFromApi, mapPatientFromApi, mapStaffFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
 import { recordsApi, patientsApi, staffApi } from '../lib/api';
+import { isAuthorized, MODULES } from '../lib/permissions';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -18,6 +19,7 @@ const EMR = () => {
 
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
+  const canReadStaff = isAuthorized(user?.role, MODULES.HUMAN_CAPITAL);
   const { 
     data: records, 
     loading, 
@@ -27,8 +29,13 @@ const EMR = () => {
   } = useCrud(recordsApi, mapRecordFromApi);
   
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
-  const { data: staff } = useCrud(staffApi, mapStaffFromApi, { enabled: !isPatient });
-  const doctorOptions = [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))];
+  const { data: staff } = useCrud(staffApi, mapStaffFromApi, { enabled: canReadStaff });
+  const doctorOptions = [
+    ...new Set([
+      ...staff.filter((s) => s.role === 'Doctor').map((s) => s.name),
+      ...(!canReadStaff && user?.role?.toLowerCase() === 'doctor' ? [user.name] : []),
+    ].filter(Boolean)),
+  ];
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

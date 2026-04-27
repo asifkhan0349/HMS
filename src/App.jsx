@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AppProvider, useApp } from './context/AppContext';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
-import { isAuthorized, RESOURCE_PERMISSIONS } from './lib/permissions';
+import { isAuthorized, MODULES, ROUTE_MODULES } from './lib/permissions';
 
 // Lazy load page components for better performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -47,9 +47,9 @@ const RootRedirect = () => {
   if (!user) return <Navigate to="/login" replace />;
   const userRole = user.role;
   
-  if (isAuthorized(userRole, 'dashboard')) return <Navigate to="/dashboard" replace />;
-  if (isAuthorized(userRole, 'patients')) return <Navigate to="/patients" replace />;
-  if (isAuthorized(userRole, 'billing')) return <Navigate to="/billing" replace />;
+  if (isAuthorized(userRole, MODULES.COMMAND_CENTER)) return <Navigate to="/dashboard" replace />;
+  if (isAuthorized(userRole, MODULES.PATIENT_DIRECTORY)) return <Navigate to="/patients" replace />;
+  if (isAuthorized(userRole, MODULES.REVENUE_CYCLE)) return <Navigate to="/billing" replace />;
   
   // Fallback to login if no authorized landing page found
   return <Navigate to="/login" replace />;
@@ -71,19 +71,19 @@ function App() {
               <Route path="/" element={<RootRedirect />} />
 
               {/* Protected Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.dashboard}><Dashboard /></ProtectedRoute>} />
-              <Route path="/patients" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.patients}><Patients /></ProtectedRoute>} />
-              <Route path="/appointments" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.appointments}><Appointments /></ProtectedRoute>} />
-              <Route path="/emr" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.emr}><EMR /></ProtectedRoute>} />
-              <Route path="/billing" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.billing}><Billing /></ProtectedRoute>} />
-              <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.pharmacy}><Pharmacy /></ProtectedRoute>} />
-              <Route path="/lab" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.lab}><Lab /></ProtectedRoute>} />
-              <Route path="/beds" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.beds}><Beds /></ProtectedRoute>} />
-              <Route path="/staff" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.staff}><Staff /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.reports}><Reports /></ProtectedRoute>} />
-              <Route path="/inventory" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.inventory}><Inventory /></ProtectedRoute>} />
-              <Route path="/blood-bank" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.blood_bank}><BloodBank /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute allowedRoles={RESOURCE_PERMISSIONS.settings}><Settings /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute module={ROUTE_MODULES['/dashboard']}><Dashboard /></ProtectedRoute>} />
+              <Route path="/patients" element={<ProtectedRoute module={ROUTE_MODULES['/patients']}><Patients /></ProtectedRoute>} />
+              <Route path="/appointments" element={<ProtectedRoute module={ROUTE_MODULES['/appointments']}><Appointments /></ProtectedRoute>} />
+              <Route path="/emr" element={<ProtectedRoute module={ROUTE_MODULES['/emr']}><EMR /></ProtectedRoute>} />
+              <Route path="/billing" element={<ProtectedRoute module={ROUTE_MODULES['/billing']}><Billing /></ProtectedRoute>} />
+              <Route path="/pharmacy" element={<ProtectedRoute module={ROUTE_MODULES['/pharmacy']}><Pharmacy /></ProtectedRoute>} />
+              <Route path="/lab" element={<ProtectedRoute module={ROUTE_MODULES['/lab']}><Lab /></ProtectedRoute>} />
+              <Route path="/beds" element={<ProtectedRoute module={ROUTE_MODULES['/beds']}><Beds /></ProtectedRoute>} />
+              <Route path="/staff" element={<ProtectedRoute module={ROUTE_MODULES['/staff']}><Staff /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute module={ROUTE_MODULES['/reports']}><Reports /></ProtectedRoute>} />
+              <Route path="/inventory" element={<ProtectedRoute module={ROUTE_MODULES['/inventory']}><Inventory /></ProtectedRoute>} />
+              <Route path="/blood-bank" element={<ProtectedRoute module={ROUTE_MODULES['/blood-bank']}><BloodBank /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute module={ROUTE_MODULES['/settings']}><Settings /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />

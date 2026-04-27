@@ -60,6 +60,20 @@ h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
 
+.text-gradient-danger {
+  background: linear-gradient(135deg, #ff4d4d 0%, #ee0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #0070f3 0%, #0056b3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Vercel Layout Components */
 .glass-card {
   background: var(--geist-background);

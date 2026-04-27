@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useApp, mapTestFromApi, mapPatientFromApi, mapStaffFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
 import { testsApi, patientsApi, staffApi } from '../lib/api';
+import { isAuthorized, MODULES } from '../lib/permissions';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -10,6 +11,9 @@ import { Skeleton } from 'boneyard-js/react';
 const Lab = () => {
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
+  const userRole = user?.role;
+  const userName = user?.name;
+  const canReadStaff = isAuthorized(userRole, MODULES.HUMAN_CAPITAL);
   const { 
     data: tests, 
     loading, 
@@ -19,11 +23,16 @@ const Lab = () => {
   } = useCrud(testsApi, mapTestFromApi);
   
   const { data: patients, loading: loadingPatients } = useCrud(patientsApi, mapPatientFromApi);
-  const { data: staff, loading: loadingStaff } = useCrud(staffApi, mapStaffFromApi, { enabled: !isPatient });
+  const { data: staff, loading: loadingStaff } = useCrud(staffApi, mapStaffFromApi, { enabled: canReadStaff });
   
   const doctorOptions = useMemo(() => 
-    [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))], 
-    [staff]
+    [
+      ...new Set([
+        ...staff.filter((s) => s.role === 'Doctor').map((s) => s.name),
+        ...(!canReadStaff && userRole?.toLowerCase() === 'doctor' ? [userName] : []),
+      ].filter(Boolean)),
+    ], 
+    [canReadStaff, staff, userName, userRole]
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -8,12 +8,13 @@ from .common import PositiveId
 
 router = APIRouter(
     prefix="/staff",
-    tags=["staff"]
+    tags=["staff"],
+    dependencies=[Depends(require_role("staff"))]
 )
 
 
 @router.get("", response_model=list[schemas.StaffRead])
-def list_staff(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id), _=Depends(require_role("staff"))):
+def list_staff(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.list_entities(db, models.Staff, current_user_id)
 
 
@@ -23,7 +24,7 @@ def create_staff_member(payload: schemas.StaffCreate, db: Session = Depends(get_
 
 
 @router.get("/{staff_id}", response_model=schemas.StaffRead)
-def get_staff_member(staff_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id), _=Depends(require_role("staff"))):
+def get_staff_member(staff_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
 
 

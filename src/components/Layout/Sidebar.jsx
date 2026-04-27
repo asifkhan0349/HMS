@@ -1,25 +1,24 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { isAuthorized } from '../../lib/permissions';
+import { isAuthorized, MODULES } from '../../lib/permissions';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useApp();
-  const STAFF_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
 
   const menuItems = [
-    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', resource: 'dashboard' },
-    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', resource: 'patients' },
-    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', resource: 'appointments' },
-    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', resource: 'emr' },
-    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', resource: 'billing' },
-    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', resource: 'pharmacy' },
-    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', resource: 'lab' },
-    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', resource: 'beds' },
-    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', resource: 'staff' },
-    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', resource: 'reports' },
-    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', resource: 'inventory' },
-    { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', resource: 'blood_bank' },
+    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', module: MODULES.COMMAND_CENTER },
+    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', module: MODULES.PATIENT_DIRECTORY },
+    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', module: MODULES.SCHEDULING },
+    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', module: MODULES.MEDICAL_RECORDS },
+    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', module: MODULES.REVENUE_CYCLE },
+    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', module: MODULES.PHARMACY },
+    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', module: MODULES.DIAGNOSTICS_LAB },
+    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', module: MODULES.FACILITY_MANAGEMENT },
+    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', module: MODULES.HUMAN_CAPITAL },
+    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', module: MODULES.INTELLIGENCE },
+    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', module: MODULES.HOSPITAL_LOGISTICS },
+    { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', module: MODULES.EMERGENCY_BLOOD_BANK },
   ];
 
   const handleNavClick = () => {
@@ -42,7 +41,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       <nav className="flex-grow-1 overflow-y-auto custom-scrollbar px-2" aria-label="Main Navigation">
         {menuItems
-          .filter((item) => isAuthorized(user?.role, item.resource))
+          .filter((item) => isAuthorized(user?.role, item.module))
           .map((item) => (
             <NavLink
               key={item.path}
@@ -66,7 +65,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               </small>
             </div>
             <div className="ms-auto d-flex align-items-center gap-2">
-              {user?.role?.toLowerCase() !== 'doctor' && user?.role?.toLowerCase() !== 'nurse' && (
+              {isAuthorized(user?.role, MODULES.ACCOUNT_SETTINGS) && (
                 <Link
                   to="/settings"
                   className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"

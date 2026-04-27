@@ -5,10 +5,14 @@ from ..auth_context import get_current_user_id, require_role
 from .. import models, schemas
 from ..core.database import get_db
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+router = APIRouter(
+    prefix="/dashboard", 
+    tags=["dashboard"],
+    dependencies=[Depends(require_role("dashboard"))]
+)
 
 
-@router.get("/stats", response_model=schemas.DashboardStats, dependencies=[Depends(require_role("dashboard"))])
+@router.get("/stats", response_model=schemas.DashboardStats)
 def get_dashboard_stats(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return schemas.DashboardStats(
         patients=db.query(models.Patient).filter(models.Patient.owner_user_id == current_user_id).count(),
