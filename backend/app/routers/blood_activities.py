@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_role
+from ..auth_context import get_current_user_id
 from ..core.database import get_db
 from .common import PositiveId
 
 router = APIRouter(
     prefix="/blood_activities",
     tags=["Blood Bank"],
-    dependencies=[Depends(require_role("blood_bank"))]
+    dependencies=[Depends(get_current_user_id)]
 )
 
 
@@ -51,7 +51,7 @@ def sync_activity_to_inventory(db: Session, user_id: int, blood_group: str, unit
         elif activity_type in ["Usage", "Transfer"]:
             # If creating usage/transfer, subtract units. If reverting, add them.
             inv.units += (-impact if not revert else impact)
-        
+
         # Guard against negatives
         inv.units = max(0, inv.units)
         refresh_inventory_status(inv)
@@ -88,18 +88,18 @@ def update_blood_activity(
     user_id: int = Depends(get_current_user_id),
 ):
     activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, user_id)
-    
+
     # 1. Revert OLD impact completely
     sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type, revert=True)
 
     # 2. Update the activity record fields
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(activity, field, value)
-    db.flush() # Ensure the new group/units reflect in the object
-        
+    db.flush()  # Ensure the new group/units reflect in the object
+
     # 3. Apply NEW impact
     sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type, revert=False)
-    
+
     db.commit()
     db.refresh(activity)
     return activity

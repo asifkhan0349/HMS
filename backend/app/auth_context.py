@@ -80,27 +80,3 @@ def get_current_user(
             detail="User not found.",
         )
     return user
-
-
-from .core.permissions import get_allowed_roles, has_permission
-
-def require_role(allowed_roles: list[str] | str):
-    """
-    Dependency factory to restrict access to specific roles.
-    Can take a list of roles or a resource name string for centralized lookup.
-    """
-    def role_checker(user: User = Depends(get_current_user)):
-        if isinstance(allowed_roles, str):
-            roles_list = get_allowed_roles(allowed_roles)
-            is_allowed = has_permission(user.role, allowed_roles)
-        else:
-            roles_list = allowed_roles
-            is_allowed = user.role.lower() in [role.lower() for role in roles_list]
-
-        if not is_allowed:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access Denied: You do not have the required permissions. Required roles: {', '.join(roles_list)}"
-            )
-        return user
-    return role_checker

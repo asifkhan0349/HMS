@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useApp, mapTestFromApi, mapPatientFromApi, mapStaffFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
 import { testsApi, patientsApi, staffApi } from '../lib/api';
-import { isAuthorized, MODULES } from '../lib/permissions';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -13,7 +12,7 @@ const Lab = () => {
   const isPatient = user?.role?.toLowerCase() === 'patient';
   const userRole = user?.role;
   const userName = user?.name;
-  const canReadStaff = isAuthorized(userRole, MODULES.HUMAN_CAPITAL);
+  const canReadStaff = true;
   const { 
     data: tests, 
     loading, 

@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_role
+from ..auth_context import get_current_user_id
 from ..core.database import get_db
 from .common import PositiveId
 
 router = APIRouter(
     prefix="/blood_inventory",
     tags=["Blood Bank"],
-    dependencies=[Depends(require_role("blood_bank"))]
+    dependencies=[Depends(get_current_user_id)]
 )
 
 

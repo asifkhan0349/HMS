@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useApp, mapRecordFromApi, mapPatientFromApi, mapStaffFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
 import { recordsApi, patientsApi, staffApi } from '../lib/api';
-import { isAuthorized, MODULES } from '../lib/permissions';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -19,7 +18,7 @@ const EMR = () => {
 
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
-  const canReadStaff = isAuthorized(user?.role, MODULES.HUMAN_CAPITAL);
+  const canReadStaff = true;
   const { 
     data: records, 
     loading, 

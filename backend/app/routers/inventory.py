@@ -3,14 +3,14 @@ from ..core.limiter import limiter
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_role
+from ..auth_context import get_current_user_id
 from ..core.database import get_db
 from .common import PositiveId
 
 router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"],
-    dependencies=[Depends(require_role("inventory"))]
+    dependencies=[Depends(get_current_user_id)]
 )
 
 

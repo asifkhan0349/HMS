@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import httpx
 import logging
 
-from ..auth_context import get_current_user, require_role
+from ..auth_context import get_current_user, get_current_user_id
 from .. import crud, models, schemas
 from ..core.database import get_db
 from ..core.config import settings
@@ -12,9 +12,9 @@ from .common import PositiveId
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/appointments", 
+    prefix="/appointments",
     tags=["appointments"],
-    dependencies=[Depends(require_role("appointments"))]
+    dependencies=[Depends(get_current_user_id)]
 )
 
 
@@ -40,10 +40,9 @@ async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
 
 @router.get("", response_model=list[schemas.AppointmentRead])
 def list_appointments(
-    db: Session = Depends(get_db), 
+    db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Authorized via router dependencies
     return crud.list_entities(db, models.Appointment, owner_id=None)
 
 
@@ -59,8 +58,8 @@ def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentRead)
 def get_appointment(
-    appointment_id: PositiveId, 
-    db: Session = Depends(get_db), 
+    appointment_id: PositiveId,
+    db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     return crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
@@ -68,31 +67,31 @@ def get_appointment(
 
 @router.put("/{appointment_id}", response_model=schemas.AppointmentRead)
 def update_appointment(
-    appointment_id: PositiveId, 
-    payload: schemas.AppointmentUpdate, 
+    appointment_id: PositiveId,
+    payload: schemas.AppointmentUpdate,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db), 
+    db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
-    
+
     old_status = appointment.status
     updated_appointment = crud.update_entity(db, appointment, payload)
-    
+
     if payload.status is not None and payload.status != old_status:
         background_tasks.add_task(
-            send_appointment_webhook, 
-            updated_appointment.status, 
+            send_appointment_webhook,
+            updated_appointment.status,
             updated_appointment.telegram_chat_id
         )
-        
+
     return updated_appointment
 
 
 @router.delete("/{appointment_id}", response_model=schemas.MessageResponse)
 def delete_appointment(
-    appointment_id: PositiveId, 
-    db: Session = Depends(get_db), 
+    appointment_id: PositiveId,
+    db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)

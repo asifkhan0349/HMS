@@ -1,25 +1,24 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { isAuthorized, MODULES } from '../../lib/permissions';
+
+const menuItems = [
+  { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity' },
+  { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people' },
+  { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event' },
+  { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },
+  { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt' },
+  { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule' },
+  { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse' },
+  { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital' },
+  { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge' },
+  { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line' },
+  { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes' },
+  { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half' },
+];
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useApp();
-
-  const menuItems = [
-    { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', module: MODULES.COMMAND_CENTER },
-    { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', module: MODULES.PATIENT_DIRECTORY },
-    { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', module: MODULES.SCHEDULING },
-    { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', module: MODULES.MEDICAL_RECORDS },
-    { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', module: MODULES.REVENUE_CYCLE },
-    { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', module: MODULES.PHARMACY },
-    { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', module: MODULES.DIAGNOSTICS_LAB },
-    { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', module: MODULES.FACILITY_MANAGEMENT },
-    { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', module: MODULES.HUMAN_CAPITAL },
-    { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', module: MODULES.INTELLIGENCE },
-    { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', module: MODULES.HOSPITAL_LOGISTICS },
-    { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', module: MODULES.EMERGENCY_BLOOD_BANK },
-  ];
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -40,19 +39,17 @@ const Sidebar = ({ isOpen, onClose }) => {
       </div>
 
       <nav className="flex-grow-1 overflow-y-auto custom-scrollbar px-2" aria-label="Main Navigation">
-        {menuItems
-          .filter((item) => isAuthorized(user?.role, item.module))
-          .map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => `nav-link-custom ${isActive ? 'active' : ''}`}
-              onClick={handleNavClick}
-            >
-              <i className={item.icon} aria-hidden="true"></i>
-              <span>{item.title}</span>
-            </NavLink>
-          ))}
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-link-custom ${isActive ? 'active' : ''}`}
+            onClick={handleNavClick}
+          >
+            <i className={item.icon} aria-hidden="true"></i>
+            <span>{item.title}</span>
+          </NavLink>
+        ))}
       </nav>
 
       <div className="p-4 mt-auto">
@@ -65,17 +62,15 @@ const Sidebar = ({ isOpen, onClose }) => {
               </small>
             </div>
             <div className="ms-auto d-flex align-items-center gap-2">
-              {isAuthorized(user?.role, MODULES.ACCOUNT_SETTINGS) && (
-                <Link
-                  to="/settings"
-                  className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
-                  title="Account Settings"
-                  aria-label="Account Settings"
-                  onClick={handleNavClick}
-                >
-                  <i className="bi bi-gear fs-5" aria-hidden="true"></i>
-                </Link>
-              )}
+              <Link
+                to="/settings"
+                className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
+                title="Account Settings"
+                aria-label="Account Settings"
+                onClick={handleNavClick}
+              >
+                <i className="bi bi-gear fs-5" aria-hidden="true"></i>
+              </Link>
               <button
                 className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
                 onClick={logout}

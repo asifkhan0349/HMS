@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AppProvider, useApp } from './context/AppContext';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
-import { isAuthorized, MODULES, ROUTE_MODULES } from './lib/permissions';
 
 // Lazy load page components for better performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -32,27 +31,11 @@ const PageLoader = () => (
   </div>
 );
 
-// Placeholder Pages for other modules
-const Placeholder = ({ title }) => (
-  <div className="glass-card p-5 text-center">
-    <i className="bi bi-tools text-primary opacity-50" style={{ fontSize: '3rem' }}></i>
-    <h3 className="mt-4 fw-bold">{title} Module</h3>
-    <p className="text-muted">This module is currently under development according to the PRD Phase 1.</p>
-  </div>
-);
-
-// Role-based landing page logic
+// Redirect authenticated users to the dashboard, otherwise to login
 const RootRedirect = () => {
   const { user } = useApp();
   if (!user) return <Navigate to="/login" replace />;
-  const userRole = user.role;
-  
-  if (isAuthorized(userRole, MODULES.COMMAND_CENTER)) return <Navigate to="/dashboard" replace />;
-  if (isAuthorized(userRole, MODULES.PATIENT_DIRECTORY)) return <Navigate to="/patients" replace />;
-  if (isAuthorized(userRole, MODULES.REVENUE_CYCLE)) return <Navigate to="/billing" replace />;
-  
-  // Fallback to login if no authorized landing page found
-  return <Navigate to="/login" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 function App() {
@@ -67,23 +50,23 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* Dynamic root redirect based on user role */}
+              {/* Root redirect */}
               <Route path="/" element={<RootRedirect />} />
 
-              {/* Protected Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute module={ROUTE_MODULES['/dashboard']}><Dashboard /></ProtectedRoute>} />
-              <Route path="/patients" element={<ProtectedRoute module={ROUTE_MODULES['/patients']}><Patients /></ProtectedRoute>} />
-              <Route path="/appointments" element={<ProtectedRoute module={ROUTE_MODULES['/appointments']}><Appointments /></ProtectedRoute>} />
-              <Route path="/emr" element={<ProtectedRoute module={ROUTE_MODULES['/emr']}><EMR /></ProtectedRoute>} />
-              <Route path="/billing" element={<ProtectedRoute module={ROUTE_MODULES['/billing']}><Billing /></ProtectedRoute>} />
-              <Route path="/pharmacy" element={<ProtectedRoute module={ROUTE_MODULES['/pharmacy']}><Pharmacy /></ProtectedRoute>} />
-              <Route path="/lab" element={<ProtectedRoute module={ROUTE_MODULES['/lab']}><Lab /></ProtectedRoute>} />
-              <Route path="/beds" element={<ProtectedRoute module={ROUTE_MODULES['/beds']}><Beds /></ProtectedRoute>} />
-              <Route path="/staff" element={<ProtectedRoute module={ROUTE_MODULES['/staff']}><Staff /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute module={ROUTE_MODULES['/reports']}><Reports /></ProtectedRoute>} />
-              <Route path="/inventory" element={<ProtectedRoute module={ROUTE_MODULES['/inventory']}><Inventory /></ProtectedRoute>} />
-              <Route path="/blood-bank" element={<ProtectedRoute module={ROUTE_MODULES['/blood-bank']}><BloodBank /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute module={ROUTE_MODULES['/settings']}><Settings /></ProtectedRoute>} />
+              {/* Protected Routes — authentication required, no role restrictions */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+              <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
+              <Route path="/emr" element={<ProtectedRoute><EMR /></ProtectedRoute>} />
+              <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+              <Route path="/pharmacy" element={<ProtectedRoute><Pharmacy /></ProtectedRoute>} />
+              <Route path="/lab" element={<ProtectedRoute><Lab /></ProtectedRoute>} />
+              <Route path="/beds" element={<ProtectedRoute><Beds /></ProtectedRoute>} />
+              <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+              <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+              <Route path="/blood-bank" element={<ProtectedRoute><BloodBank /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />
