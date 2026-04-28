@@ -2,12 +2,12 @@ import pytest
 import asyncio
 from httpx import AsyncClient, ASGITransport
 from app.main import app
-from app.config import API_PREFIX
+from app.core.config import API_PREFIX
 
 import pytest_asyncio
 
 # Test data
-VALID_ADMIN = {"username": "admin", "password": "hrmsadmin123"}
+VALID_ADMIN = {"username": "admin_hms", "password": "ham33dSh@ika7m1n4m5"}
 INVALID_ADMIN = {"username": "admin", "password": "wrongpassword"}
 
 @pytest_asyncio.fixture(scope="session")
@@ -104,10 +104,10 @@ async def test_update_appointment_status(client: AsyncClient, auth_headers: dict
     app_id = res_create.json()["id"]
     
     # Now update it
-    update_payload = {"status": "Approved"}
+    update_payload = {"status": "Scheduled"}
     response = await client.put(f"{API_PREFIX}/appointments/{app_id}", json=update_payload, headers=auth_headers)
     assert response.status_code == 200
-    assert response.json()["status"] == "Approved"
+    assert response.json()["status"] == "Scheduled"
 
 # --- MODULE GET TESTS ---
 

@@ -9,8 +9,6 @@ from .common import PositiveId
 router = APIRouter(
     prefix="/staff",
     tags=["staff"],
-    # Admin-only: Human Capital data is restricted to Admin role.
-    dependencies=[Depends(require_admin)]
 )
 
 
@@ -19,7 +17,7 @@ def list_staff(db: Session = Depends(get_db), current_user_id: int = Depends(get
     return crud.list_entities(db, models.Staff, current_user_id)
 
 
-@router.post("", response_model=schemas.StaffRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.StaffRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_staff_member(payload: schemas.StaffCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.create_entity(db, models.Staff, payload, current_user_id)
 
@@ -29,13 +27,13 @@ def get_staff_member(staff_id: PositiveId, db: Session = Depends(get_db), curren
     return crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
 
 
-@router.put("/{staff_id}", response_model=schemas.StaffRead)
+@router.put("/{staff_id}", response_model=schemas.StaffRead, dependencies=[Depends(require_admin)])
 def update_staff_member(staff_id: PositiveId, payload: schemas.StaffUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     staff_member = crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
     return crud.update_entity(db, staff_member, payload)
 
 
-@router.delete("/{staff_id}", response_model=schemas.MessageResponse)
+@router.delete("/{staff_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_admin)])
 def delete_staff_member(staff_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     staff_member = crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
     return crud.delete_entity(db, staff_member)

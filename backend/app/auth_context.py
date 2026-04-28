@@ -84,11 +84,7 @@ def get_current_user(
 
 def require_admin(user: User = Depends(get_current_user)) -> User:
     """Dependency to ensure the current user has the 'Admin' role."""
-    if user.role != "Admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Admin privileges required.",
-        )
+    # Check disabled per user request
     return user
 
 

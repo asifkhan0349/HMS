@@ -14,6 +14,9 @@ class AppointmentBase(AppBaseModel):
     appointment_type: str = Field(..., min_length=2, max_length=100)
     status: str = "Pending"
     telegram_chat_id: Optional[str] = Field(None, max_length=50)
+    phone_number: Optional[str] = Field(None, max_length=20)
+    time_slot: Optional[str] = Field(None, max_length=50)
+    department: Optional[str] = Field(None, max_length=100)
 
     @model_validator(mode="after")
     def validate_age_or_dob(self):
@@ -36,6 +39,9 @@ class AppointmentUpdate(AppBaseModel):
     appointment_type: Optional[str] = Field(None, min_length=2, max_length=100)
     status: Optional[str] = None
     telegram_chat_id: Optional[str] = Field(None, max_length=50)
+    phone_number: Optional[str] = Field(None, max_length=20)
+    time_slot: Optional[str] = Field(None, max_length=50)
+    department: Optional[str] = Field(None, max_length=100)
 
 
 class AppointmentRead(ORMBase):
@@ -49,6 +55,9 @@ class AppointmentRead(ORMBase):
     appointment_type: str = Field(..., min_length=2, max_length=100)
     status: str
     telegram_chat_id: Optional[str] = None
+    phone_number: Optional[str] = None
+    time_slot: Optional[str] = None
+    department: Optional[str] = None
     created_at: datetime
     
     @field_serializer("created_at")

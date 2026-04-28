@@ -11,7 +11,7 @@ from . import crud, schemas
 
 # Roles permitted to access the Patient Directory — must stay in sync with
 # PATIENT_DIR_ROLES in src/App.jsx and the allowedRoles list in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Patient"]
+_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Patient", "Reception"]
 
 router = APIRouter(
     prefix="/patients",

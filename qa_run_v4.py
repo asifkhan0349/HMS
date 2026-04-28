@@ -2,7 +2,7 @@ import asyncio
 import httpx
 import sys
 
-BASE_URL = "http://127.0.0.1:8000/api"
+BASE_URL = "http://127.0.0.1:8001/api"
 USERNAME = "testuser0349"
 PASSWORD = "7357U536@349"
 
@@ -73,7 +73,7 @@ async def test_crud_workflow():
                 
                 # Test Webhook Trigger via status update
                 resp = await client.put(f"{BASE_URL}/appointments/{state['appointment_id']}", json={
-                    "status": "Approved"
+                    "status": "Scheduled"
                 }, headers=headers)
                 assert resp.status_code in [200, 201], f"Edit failed: {resp.text}"
                 print("[+] Edited Appointment (Webhook triggered if implemented)")

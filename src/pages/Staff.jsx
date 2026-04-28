@@ -18,7 +18,18 @@ const Staff = () => {
   } = useCrud(staffApi, mapStaffFromApi);
   
   const staffRoleOptions = [...new Set(staff.map((member) => member.role).filter(Boolean))];
-  const departmentOptions = [...new Set(staff.map((member) => member.dept).filter(Boolean))];
+  const departmentOptions = [
+    'General Medicine',
+    'Cardiology',
+    'Orthopedics',
+    'Dermatology',
+    'Pediatrics',
+    'Gynecology',
+    'ENT (Ear, Nose, Throat)',
+    'Neurology',
+    'Psychiatry',
+    'Emergency / Casualty'
+  ];
   const shiftOptions = [...new Set(staff.map((member) => member.shift).filter(Boolean))];
   
   const [isModalOpen, setIsModalOpen] = useState(false);

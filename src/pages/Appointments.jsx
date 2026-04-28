@@ -19,7 +19,9 @@ const createEmptyAppointmentForm = () => ({
   address: '',
   appointment_date: new Date().toISOString().split('T')[0],
   type: 'New Consultation',
-  telegramChatId: '',
+  phoneNumber: '',
+  timeSlot: '',
+  department: '',
 });
 
 const Appointments = () => {
@@ -35,7 +37,18 @@ const Appointments = () => {
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff } = useCrud(staffApi, mapStaffFromApi);
   const doctorOptions = [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))];
-  const departmentOptions = [...new Set(staff.map((member) => member.dept).filter(Boolean))];
+  const departmentOptions = [
+    'General Medicine',
+    'Cardiology',
+    'Orthopedics',
+    'Dermatology',
+    'Pediatrics',
+    'Gynecology',
+    'ENT (Ear, Nose, Throat)',
+    'Neurology',
+    'Psychiatry',
+    'Emergency / Casualty'
+  ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -53,7 +66,9 @@ const Appointments = () => {
     address: '',
     appointment_date: '',
     type: 'New Consultation',
-    telegramChatId: '',
+    phoneNumber: '',
+    timeSlot: '',
+    department: '',
   });
 
   const syncPatientDetails = (name, currentData) => {
@@ -81,7 +96,9 @@ const Appointments = () => {
     patient_address: appointmentData.address.trim() || null,
     appointment_date: appointmentData.appointment_date,
     appointment_type: appointmentData.type,
-    telegram_chat_id: appointmentData.telegramChatId.trim() || null,
+    phone_number: appointmentData.phoneNumber.trim() || null,
+    time_slot: appointmentData.timeSlot.trim() || null,
+    department: appointmentData.department.trim() || null,
   });
 
   const appointmentSummary = useMemo(
@@ -125,7 +142,9 @@ const Appointments = () => {
       address: app.patientAddress || '',
       appointment_date: app.appointmentDate || '',
       type: app.type,
-      telegramChatId: app.telegramChatId || '',
+      phoneNumber: app.phoneNumber || '',
+      timeSlot: app.timeSlot || '',
+      department: app.department || '',
     });
     setIsEditModalOpen(true);
   };
@@ -212,9 +231,9 @@ const Appointments = () => {
             <thead>
               <tr>
                 <th className="px-4 py-3">Patient Name</th>
-                <th className="py-3">Appt Date</th>
+                <th className="py-3">Appt Date / Time</th>
                 <th className="py-3">Age / Gender</th>
-                <th className="py-3">Address</th>
+                <th className="py-3">Department</th>
                 <th className="py-3">Visit Type</th>
                 <th className="py-3">Status</th>
                 <th className="px-4 py-3 text-end">Actions</th>
@@ -235,15 +254,19 @@ const Appointments = () => {
                 </tr>
               ) : appointments.map((app) => (
                 <tr key={app.id}>
-                  <td className="px-4 py-4 fw-bold">{app.patient}</td>
+                  <td className="px-4 py-4">
+                    <div className="fw-bold">{app.patient}</div>
+                    <small className="text-muted">{app.phoneNumber || '—'}</small>
+                  </td>
                   <td className="py-4 text-nowrap">
-                    {app.appointmentDate ? new Date(app.appointmentDate).toLocaleDateString() : '—'}
+                    <div className="fw-bold">{app.appointmentDate ? new Date(app.appointmentDate).toLocaleDateString() : '—'}</div>
+                    <small className="text-muted">{app.timeSlot || 'Anytime'}</small>
                   </td>
                   <td className="py-4">
                     {app.patientAge || '—'} / {app.patientGender}
                   </td>
-                  <td className="py-4 text-truncate" style={{ maxWidth: '200px' }}>
-                    {app.patientAddress || '—'}
+                  <td className="py-4 text-truncate" style={{ maxWidth: '150px' }}>
+                    <span className="badge bg-light text-dark border">{app.department || 'General'}</span>
                   </td>
                   <td className="py-4">
                     <span
@@ -261,42 +284,46 @@ const Appointments = () => {
                     <span 
                       className="badge rounded-pill px-3 py-2 fw-medium"
                       style={{
-                        backgroundColor: app.status === 'Approved' ? 'rgba(0, 191, 131, 0.1)' : 
-                                       app.status === 'Scheduled Later' ? 'rgba(255, 159, 10, 0.1)' : 
+                        backgroundColor: app.status === 'Scheduled' ? 'rgba(0, 191, 131, 0.1)' : 
+                                       app.status === 'Scheduled Later' ? 'rgba(0, 122, 255, 0.1)' : 
                                        'rgba(255, 159, 10, 0.1)',
-                        color: app.status === 'Approved' ? '#00bf83' : 
-                               app.status === 'Scheduled Later' ? '#ff9f0a' : 
+                        color: app.status === 'Scheduled' ? '#00bf83' : 
+                               app.status === 'Scheduled Later' ? '#007aff' : 
                                '#ff9f0a',
-                        border: `1px solid ${app.status === 'Approved' ? 'rgba(0, 191, 131, 0.2)' : 
-                                            app.status === 'Scheduled Later' ? 'rgba(255, 159, 10, 0.2)' : 
+                        border: `1px solid ${app.status === 'Scheduled' ? 'rgba(0, 191, 131, 0.2)' : 
+                                            app.status === 'Scheduled Later' ? 'rgba(0, 122, 255, 0.2)' : 
                                             'rgba(255, 159, 10, 0.2)'}`
                       }}
                     >
-                      <i className={`bi bi-${app.status === 'Approved' ? 'check-circle' : app.status === 'Scheduled Later' ? 'clock' : 'clock-history'} me-2`}></i>
+                      <i className={`bi bi-${app.status === 'Scheduled' ? 'check-circle' : app.status === 'Scheduled Later' ? 'calendar-event' : 'clock-history'} me-2`}></i>
                       {app.status || 'Pending'}
                     </span>
                   </td>
                   <td className="px-4 py-4 text-end">
-                    {app.status === 'Pending' && user?.role === 'Admin' && (
+                    {user?.role === 'Admin' && (
                       <div className="d-inline-flex gap-2 me-3 pe-3 border-end">
-                        <button
-                          className="btn btn-sm btn-glass p-0 text-success"
-                          style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 191, 131, 0.2)' }}
-                          onClick={() => handleStatusUpdate(app, 'Approved')}
-                          disabled={loading}
-                          title="Approve Appointment"
-                        >
-                          <i className="bi bi-check2" aria-hidden="true"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-glass p-0 text-danger"
-                          style={{ width: '32px', height: '32px', border: '1px solid rgba(255, 69, 58, 0.2)' }}
-                          onClick={() => handleStatusUpdate(app, 'Scheduled Later')}
-                          disabled={loading}
-                          title="Deny Appointment"
-                        >
-                          <i className="bi bi-x-lg" aria-hidden="true"></i>
-                        </button>
+                        {app.status !== 'Scheduled' && (
+                          <button
+                            className="btn btn-sm btn-glass p-0 text-success"
+                            style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 191, 131, 0.2)' }}
+                            onClick={() => handleStatusUpdate(app, 'Scheduled')}
+                            disabled={loading}
+                            title="Set to Scheduled"
+                          >
+                            <i className="bi bi-calendar-check" aria-hidden="true"></i>
+                          </button>
+                        )}
+                        {app.status !== 'Scheduled Later' && (
+                          <button
+                            className="btn btn-sm btn-glass p-0 text-primary"
+                            style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 122, 255, 0.2)' }}
+                            onClick={() => handleStatusUpdate(app, 'Scheduled Later')}
+                            disabled={loading}
+                            title="Set to Scheduled Later"
+                          >
+                            <i className="bi bi-clock" aria-hidden="true"></i>
+                          </button>
+                        )}
                       </div>
                     )}
                     <button
@@ -425,16 +452,43 @@ const Appointments = () => {
                   {APPOINTMENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
                 </select>
               </div>
-              <div className="col-md-12">
-                <label htmlFor="appointment-telegram" className="form-label text-muted fw-bold small text-uppercase mb-2">Telegram Chat ID</label>
+              <div className="col-md-6">
+                <label htmlFor="appointment-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
                 <input
-                  id="appointment-telegram"
+                  id="appointment-phone"
+                  type="tel"
+                  className="form-control"
+                  placeholder="e.g. +1 234 567 8900"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
+                <input
+                  id="appointment-timeslot"
                   type="text"
                   className="form-control"
-                  placeholder="Optional: For appointment notifications"
-                  value={formData.telegramChatId}
-                  onChange={(e) => setFormData({ ...formData, telegramChatId: e.target.value })}
+                  placeholder="e.g. 10:30 AM"
+                  value={formData.timeSlot}
+                  onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
                 />
+              </div>
+              <div className="col-md-12">
+                <label htmlFor="appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2">Department</label>
+                <select
+                  id="appointment-dept"
+                  className="form-select"
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                >
+                  <option value="">Select Department</option>
+                  {departmentOptions.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -537,16 +591,43 @@ const Appointments = () => {
                       {APPOINTMENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
                     </select>
                   </div>
-                  <div className="col-md-12">
-                    <label htmlFor="edit-appointment-telegram" className="form-label text-muted fw-bold small text-uppercase mb-2">Telegram Chat ID</label>
+                  <div className="col-md-6">
+                    <label htmlFor="edit-appointment-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
                     <input
-                      id="edit-appointment-telegram"
+                      id="edit-appointment-phone"
+                      type="tel"
+                      className="form-control"
+                      placeholder="e.g. +1 234 567 8900"
+                      value={editFormData.phoneNumber}
+                      onChange={(e) => setEditFormData({ ...editFormData, phoneNumber: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="edit-appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
+                    <input
+                      id="edit-appointment-timeslot"
                       type="text"
                       className="form-control"
-                      placeholder="Optional: For appointment notifications"
-                      value={editFormData.telegramChatId}
-                      onChange={(e) => setEditFormData({ ...editFormData, telegramChatId: e.target.value })}
+                      placeholder="e.g. 10:30 AM"
+                      value={editFormData.timeSlot}
+                      onChange={(e) => setEditFormData({ ...editFormData, timeSlot: e.target.value })}
                     />
+                  </div>
+                  <div className="col-md-12">
+                    <label htmlFor="edit-appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2">Department</label>
+                    <select
+                      id="edit-appointment-dept"
+                      className="form-select"
+                      value={editFormData.department}
+                      onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                    >
+                      <option value="">Select Department</option>
+                      {departmentOptions.map((dept) => (
+                        <option key={dept} value={dept}>
+                          {dept}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
