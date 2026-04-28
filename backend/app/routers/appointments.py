@@ -79,11 +79,11 @@ def update_appointment(
 ):
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
 
-    # Only Admin may approve or deny an appointment.
-    if payload.status is not None and current_user.role != "Admin":
+    # Only Admin may edit or update an appointment.
+    if current_user.role != "Admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Only Admin can approve or deny appointments.",
+            detail="Access denied. Only Admin can edit appointments.",
         )
 
     old_status = appointment.status
@@ -105,5 +105,11 @@ def delete_appointment(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    # Only Admin may delete an appointment.
+    if current_user.role != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Only Admin can delete appointments.",
+        )
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
     return crud.delete_entity(db, appointment)
