@@ -16,23 +16,25 @@ const UserManagement = () => {
     password: '',
     role: 'Doctor',
   });
+  const [statusMessage, setStatusMessage] = useState(null); // { type: 'success' | 'error' | 'warning', text: string }
+  const [showPassword, setShowPassword] = useState(false);
 
   const roles = ['Doctor', 'Nurse', 'Receptionist', 'Patient'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatusMessage(null);
     
     if (!formData.full_name || !formData.email || !formData.username || !formData.password) {
-      showToast('All fields are required to register a new user.', 'warning');
+      setStatusMessage({ type: 'warning', text: 'All fields are required to register a new user.' });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // We'll use authApi.createUser which we'll define in lib/api.js
       await authApi.createUser(formData);
-      showToast(`${formData.role} account created successfully.`, 'success');
-      setIsModalOpen(false);
+      setStatusMessage({ type: 'success', text: `${formData.role} account created successfully.` });
+      // Clear form on success
       setFormData({
         full_name: '',
         email: '',
@@ -41,10 +43,21 @@ const UserManagement = () => {
         role: 'Doctor',
       });
     } catch (error) {
-      showToast(error.message || 'System error: Unable to create user account.', 'error');
+      setStatusMessage({ type: 'error', text: error.message || 'System error: Unable to create user account.' });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    if (statusMessage) setStatusMessage(null);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setStatusMessage(null);
+    setShowPassword(false);
   };
 
   return (
@@ -126,7 +139,7 @@ const UserManagement = () => {
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Account Provisioning Protocol">
+      <Modal isOpen={isModalOpen} onClose={closeModal} title="Account Provisioning Protocol">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="form-label text-accent fw-bold small text-uppercase mb-2">Legal Full Name</label>
@@ -135,7 +148,7 @@ const UserManagement = () => {
               className="form-control"
               placeholder="e.g. Dr. Marcus Holloway"
               value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              onChange={(e) => handleInputChange('full_name', e.target.value)}
               required
             />
           </div>
@@ -148,7 +161,7 @@ const UserManagement = () => {
                 className="form-control"
                 placeholder="marcus@hms-elite.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 required
               />
             </div>
@@ -159,7 +172,7 @@ const UserManagement = () => {
                 className="form-control"
                 placeholder="dr_marcus"
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                onChange={(e) => handleInputChange('username', e.target.value)}
                 required
               />
             </div>
@@ -168,21 +181,31 @@ const UserManagement = () => {
           <div className="row g-3 mb-4">
             <div className="col-md-6">
               <label className="form-label text-accent fw-bold small text-uppercase mb-2">Temporary Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
+              <div className="input-group">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control border-end-0"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  required
+                />
+                <button 
+                  className="btn btn-outline-secondary border-start-0 bg-white" 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ borderColor: '#dee2e6' }}
+                >
+                  <i className={`bi bi-eye${showPassword ? '-slash' : ''} text-muted`}></i>
+                </button>
+              </div>
             </div>
             <div className="col-md-6">
               <label className="form-label text-accent fw-bold small text-uppercase mb-2">Role Assignment</label>
               <select 
                 className="form-select"
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) => handleInputChange('role', e.target.value)}
               >
                 {roles.map(role => (
                   <option key={role} value={role}>{role}</option>
@@ -191,15 +214,22 @@ const UserManagement = () => {
             </div>
           </div>
 
-          <div className="alert alert-info border-0 bg-primary bg-opacity-10 d-flex mb-4">
-            <i className="bi bi-info-square-fill text-primary me-3 mt-1"></i>
-            <small className="text-primary-emphasis">
-              Provisioning a new account will generate a unique user ID and grant immediate access based on the selected role.
-            </small>
-          </div>
+          {statusMessage ? (
+            <div className={`alert alert-${statusMessage.type === 'error' ? 'danger' : statusMessage.type} border-0 d-flex mb-4 animate__animated animate__fadeIn`}>
+              <i className={`bi bi-${statusMessage.type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-3 mt-1`}></i>
+              <small className="fw-bold">{statusMessage.text}</small>
+            </div>
+          ) : (
+            <div className="alert alert-info border-0 bg-primary bg-opacity-10 d-flex mb-4">
+              <i className="bi bi-info-square-fill text-primary me-3 mt-1"></i>
+              <small className="text-primary-emphasis">
+                Provisioning a new account will generate a unique user ID and grant immediate access based on the selected role.
+              </small>
+            </div>
+          )}
 
           <div className="d-flex gap-3">
-            <button type="button" className="btn btn-glass w-100 py-3" onClick={() => setIsModalOpen(false)}>
+            <button type="button" className="btn btn-glass w-100 py-3" onClick={closeModal}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary w-100 py-3" disabled={isSubmitting}>

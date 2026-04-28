@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id
+from ..auth_context import get_current_user_id, require_admin
 from .. import crud, models, schemas
 from ..core.database import get_db
 from .common import PositiveId
@@ -9,7 +9,8 @@ from .common import PositiveId
 router = APIRouter(
     prefix="/staff",
     tags=["staff"],
-    dependencies=[Depends(get_current_user_id)]
+    # Admin-only: Human Capital data is restricted to Admin role.
+    dependencies=[Depends(require_admin)]
 )
 
 

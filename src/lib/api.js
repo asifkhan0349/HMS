@@ -113,6 +113,15 @@ const request = async (endpoint, options = {}) => {
 
 export const authApi = {
   login: (credentials) => request('/auth/login', { method: 'POST', body: credentials }),
+  /**
+   * Verify the stored JWT is still valid and hasn't been revoked.
+   * Returns the user object on success; throws on 401/403.
+   */
+  me: () => request('/auth/me', { isProtected: true }),
+  /**
+   * Revoke the current JWT server-side so it cannot be replayed after logout.
+   */
+  logout: () => request('/auth/logout', { method: 'POST', isProtected: true }),
   createUser: (userData) => request('/auth/create-user', { method: 'POST', body: userData, isProtected: true }),
   updateProfile: (profileData) => 
     request('/auth/profile', { method: 'PATCH', body: profileData, isProtected: true }),

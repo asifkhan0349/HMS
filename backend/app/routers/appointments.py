@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import httpx
 import logging
 
-from ..auth_context import get_current_user, get_current_user_id
+from ..auth_context import get_current_user, get_current_user_id, require_roles, require_admin
 from .. import crud, models, schemas
 from ..core.database import get_db
 from ..core.config import settings
@@ -11,10 +11,14 @@ from .common import PositiveId
 
 logger = logging.getLogger(__name__)
 
+# Roles permitted to access Scheduling — must stay in sync with
+# SCHEDULING_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
+_ALLOWED_ROLES = ["Admin", "Doctor", "Patient"]
+
 router = APIRouter(
     prefix="/appointments",
     tags=["appointments"],
-    dependencies=[Depends(get_current_user_id)]
+    dependencies=[Depends(require_roles(_ALLOWED_ROLES))]
 )
 
 
@@ -74,6 +78,13 @@ def update_appointment(
     current_user: models.User = Depends(get_current_user)
 ):
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
+
+    # Only Admin may approve or deny an appointment.
+    if payload.status is not None and current_user.role != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Only Admin can approve or deny appointments.",
+        )
 
     old_status = appointment.status
     updated_appointment = crud.update_entity(db, appointment, payload)

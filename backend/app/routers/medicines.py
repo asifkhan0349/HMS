@@ -1,15 +1,19 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id
+from ..auth_context import get_current_user_id, require_roles
 from .. import crud, models, schemas
 from ..core.database import get_db
 from .common import PositiveId
 
+# Roles permitted to access Pharmacy — must stay in sync with
+# PHARMACY_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
+_ALLOWED_ROLES = ["Admin", "Nurse", "Reception"]
+
 router = APIRouter(
     prefix="/medicines",
     tags=["medicines"],
-    dependencies=[Depends(get_current_user_id)]
+    dependencies=[Depends(require_roles(_ALLOWED_ROLES))]
 )
 
 

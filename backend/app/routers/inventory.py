@@ -3,14 +3,18 @@ from ..core.limiter import limiter
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id
+from ..auth_context import get_current_user_id, require_roles
 from ..core.database import get_db
 from .common import PositiveId
+
+# Roles permitted to access Hospital Logistics — must stay in sync with
+# INVENTORY_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
+_ALLOWED_ROLES = ["Admin", "Nurse", "Reception"]
 
 router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"],
-    dependencies=[Depends(get_current_user_id)]
+    dependencies=[Depends(require_roles(_ALLOWED_ROLES))]
 )
 
 

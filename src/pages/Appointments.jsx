@@ -23,7 +23,7 @@ const createEmptyAppointmentForm = () => ({
 });
 
 const Appointments = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
   const { 
     data: appointments, 
     loading, 
@@ -262,22 +262,22 @@ const Appointments = () => {
                       className="badge rounded-pill px-3 py-2 fw-medium"
                       style={{
                         backgroundColor: app.status === 'Approved' ? 'rgba(0, 191, 131, 0.1)' : 
-                                       app.status === 'Denied' ? 'rgba(255, 69, 58, 0.1)' : 
+                                       app.status === 'Scheduled Later' ? 'rgba(255, 159, 10, 0.1)' : 
                                        'rgba(255, 159, 10, 0.1)',
                         color: app.status === 'Approved' ? '#00bf83' : 
-                               app.status === 'Denied' ? '#ff453a' : 
+                               app.status === 'Scheduled Later' ? '#ff9f0a' : 
                                '#ff9f0a',
                         border: `1px solid ${app.status === 'Approved' ? 'rgba(0, 191, 131, 0.2)' : 
-                                            app.status === 'Denied' ? 'rgba(255, 69, 58, 0.2)' : 
+                                            app.status === 'Scheduled Later' ? 'rgba(255, 159, 10, 0.2)' : 
                                             'rgba(255, 159, 10, 0.2)'}`
                       }}
                     >
-                      <i className={`bi bi-${app.status === 'Approved' ? 'check-circle' : app.status === 'Denied' ? 'x-circle' : 'clock-history'} me-2`}></i>
+                      <i className={`bi bi-${app.status === 'Approved' ? 'check-circle' : app.status === 'Scheduled Later' ? 'clock' : 'clock-history'} me-2`}></i>
                       {app.status || 'Pending'}
                     </span>
                   </td>
                   <td className="px-4 py-4 text-end">
-                    {app.status === 'Pending' && (
+                    {app.status === 'Pending' && user?.role === 'Admin' && (
                       <div className="d-inline-flex gap-2 me-3 pe-3 border-end">
                         <button
                           className="btn btn-sm btn-glass p-0 text-success"
@@ -291,7 +291,7 @@ const Appointments = () => {
                         <button
                           className="btn btn-sm btn-glass p-0 text-danger"
                           style={{ width: '32px', height: '32px', border: '1px solid rgba(255, 69, 58, 0.2)' }}
-                          onClick={() => handleStatusUpdate(app, 'Denied')}
+                          onClick={() => handleStatusUpdate(app, 'Scheduled Later')}
                           disabled={loading}
                           title="Deny Appointment"
                         >

@@ -2,14 +2,18 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id
+from ..auth_context import get_current_user_id, require_roles
 from ..core.database import get_db
 from .common import PositiveId
+
+# Roles permitted to access Emergency Blood Bank — must stay in sync with
+# BLOOD_BANK_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
+_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Reception"]
 
 router = APIRouter(
     prefix="/blood_inventory",
     tags=["Blood Bank"],
-    dependencies=[Depends(get_current_user_id)]
+    dependencies=[Depends(require_roles(_ALLOWED_ROLES))]
 )
 
 

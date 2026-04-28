@@ -3,19 +3,19 @@ import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 
 const menuItems = [
-  { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity' },
+  { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', adminOnly: true },
   { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
-  { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people' },
-  { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event' },
+  { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
+  { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin', 'Doctor', 'Patient'] },
   { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },
-  { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt' },
-  { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule' },
-  { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse' },
-  { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital' },
-  { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge' },
-  { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line' },
-  { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes' },
-  { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half' },
+  { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception', 'Patient'] },
+  { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
+  { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
+  { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
+  { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', adminOnly: true },
+  { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', adminOnly: true },
+  { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
+  { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Reception'] },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -25,7 +25,11 @@ const Sidebar = ({ isOpen, onClose }) => {
     if (onClose) onClose();
   };
 
-  const filteredMenuItems = menuItems.filter(item => !item.adminOnly || user?.role === 'Admin');
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.adminOnly) return user?.role === 'Admin';
+    if (item.allowedRoles) return item.allowedRoles.includes(user?.role);
+    return true; // no restriction — show to all authenticated users
+  });
 
   return (
     <aside className={`sidebar d-flex flex-column border-end ${isOpen ? 'sidebar-open' : ''}`}>

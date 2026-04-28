@@ -1,14 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id
+from ..auth_context import get_current_user_id, require_admin
 from .. import models, schemas
 from ..core.database import get_db
 
 router = APIRouter(
     prefix="/dashboard",
     tags=["dashboard"],
-    dependencies=[Depends(get_current_user_id)]
+    # Require a valid JWT *and* Admin role for every endpoint in this router.
+    # require_admin internally calls get_current_user which calls get_current_user_id,
+    # so listing only require_admin here is sufficient — no double dependency needed.
+    dependencies=[Depends(require_admin)]
 )
 
 

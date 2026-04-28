@@ -90,3 +90,26 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
             detail="Access denied. Admin privileges required.",
         )
     return user
+
+
+def require_roles(allowed: list[str]):
+    """
+    Factory that returns a FastAPI dependency enforcing a role whitelist.
+
+    Usage::
+
+        @router.get("/", dependencies=[Depends(require_roles(['Admin', 'Doctor']))])
+        def my_endpoint(): ...
+
+    Or as a router-level dependency::
+
+        router = APIRouter(dependencies=[Depends(require_roles(['Admin', 'Nurse']))])
+    """
+    def _check(user: User = Depends(get_current_user)) -> User:
+        if user.role not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Allowed roles: {', '.join(allowed)}.",
+            )
+        return user
+    return _check
