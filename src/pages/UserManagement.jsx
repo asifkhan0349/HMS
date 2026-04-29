@@ -19,7 +19,7 @@ const UserManagement = () => {
   const [statusMessage, setStatusMessage] = useState(null); // { type: 'success' | 'error' | 'warning', text: string }
   const [showPassword, setShowPassword] = useState(false);
 
-  const roles = ['Doctor', 'Nurse', 'Receptionist', 'Patient'];
+  const roles = ['Doctor', 'Nurse', 'Reception', 'Patient'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();

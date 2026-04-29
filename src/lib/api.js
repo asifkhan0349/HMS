@@ -1,5 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
-const DEV_BACKEND_URL = 'http://127.0.0.1:8000';
+const DEV_BACKEND_URL = API_URL.startsWith('http')
+  ? API_URL.replace(/\/api\/?$/, '')
+  : 'http://127.0.0.1:8001';
 
 const getAuthHeaders = () => {
   const token = sessionStorage.getItem('hms_token');

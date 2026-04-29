@@ -242,6 +242,8 @@ const BloodBank = () => {
           const group = bloodGroups.find(g => g.type === type) || { 
             type, units: 0, status: 'Empty', trend: 'Stable' 
           };
+          const displayStatus = group.units === 0 ? 'Empty' : group.status;
+          const displayTrend = group.units === 0 ? 'No stock' : (group.trend || 'Stable');
           return (
             <div key={type} className="col-md-3">
               <div className="glass-card p-4 transition-all hover-translate-y position-relative h-100 d-flex flex-column">
@@ -262,13 +264,13 @@ const BloodBank = () => {
                       className="px-2 py-1 rounded-pill small fw-bold"
                       style={{ 
                         fontSize: '0.65rem',
-                        background: group.status === 'Stable' ? 'rgba(0, 112, 243, 0.1)' : 
-                                   group.status === 'Low' ? 'rgba(245, 166, 35, 0.1)' : 'rgba(238, 0, 0, 0.1)',
-                        color: group.status === 'Stable' ? 'var(--geist-success)' : 
-                               group.status === 'Low' ? 'var(--geist-warning)' : 'var(--geist-error)',
+                        background: displayStatus === 'Stable' ? 'rgba(0, 112, 243, 0.1)' : 
+                                   displayStatus === 'Low' ? 'rgba(245, 166, 35, 0.1)' : 'rgba(238, 0, 0, 0.1)',
+                        color: displayStatus === 'Stable' ? 'var(--geist-success)' : 
+                               displayStatus === 'Low' ? 'var(--geist-warning)' : 'var(--geist-error)',
                       }}
                     >
-                      {group.status.toUpperCase()}
+                      {displayStatus.toUpperCase()}
                     </span>
                     {group.apiId && (
                       <div className="dropdown">
@@ -288,7 +290,7 @@ const BloodBank = () => {
                   </div>
                 </div>
                 <h3 className="fw-bold mb-1 fs-2 mt-auto" style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{group.units} Units</h3>
-                <p className="small text-muted mb-0 fw-medium">Stock Trend: <span className={group.trend?.includes('+') ? 'text-success fw-bold' : 'text-danger fw-bold'}>{group.trend}</span> today</p>
+                <p className="small text-muted mb-0 fw-medium">Stock Trend: <span className={displayTrend?.includes('+') ? 'text-success fw-bold' : 'text-danger fw-bold'}>{displayTrend}</span>{group.units === 0 ? '' : ' today'}</p>
                 {group.units === 0 && <div className="text-warning small mt-3 fw-bold"><i className="bi bi-exclamation-triangle me-1"></i>Inventory Empty</div>}
               </div>
             </div>

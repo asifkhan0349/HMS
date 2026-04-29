@@ -46,7 +46,7 @@ def update_inventory_item(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    item = crud.get_entity_or_404(db, models.InventoryItem, item_id, user_id)
+    item = crud.get_entity_or_404(db, models.InventoryItem, item_id)
     return crud.update_entity(db, item, payload)
 
 
@@ -58,5 +58,5 @@ def delete_inventory_item(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    item = crud.get_entity_or_404(db, models.InventoryItem, item_id, user_id)
+    item = crud.get_entity_or_404(db, models.InventoryItem, item_id)
     return crud.delete_entity(db, item)

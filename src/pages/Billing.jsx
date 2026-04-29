@@ -28,13 +28,14 @@ const Billing = () => {
   const [formData, setFormData] = useState({
     patient: '',
     amount: '',
+    method: 'Cash',
   });
 
   const [editFormData, setEditFormData] = useState({
     patient: '',
     amount: '',
     status: 'Pending',
-    method: 'Unpaid'
+    method: 'Cash'
   });
 
   const handleSubmit = async (e) => {
@@ -50,12 +51,12 @@ const Billing = () => {
         invoice_date: new Date().toISOString().slice(0, 10),
         amount: Number(formData.amount),
         status: 'Pending',
-        payment_method: 'Unpaid',
+        payment_method: formData.method,
         invoice_code: createCode('INV'),
       });
       showToast(`Invoice for ${formData.patient} generated and queued.`);
       setIsModalOpen(false);
-      setFormData({ patient: '', amount: '' });
+      setFormData({ patient: '', amount: '', method: 'Cash' });
     } catch (error) {
       showToast(error.message || 'Unable to generate the invoice.', 'error');
     }
@@ -255,6 +256,20 @@ const Billing = () => {
               />
             </div>
           </div>
+          <div className="mb-4">
+            <label htmlFor="invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2">Payment Method</label>
+            <select
+              id="invoice-method"
+              className="form-select"
+              value={formData.method}
+              onChange={(e) => setFormData({ ...formData, method: e.target.value })}
+            >
+              <option>Cash</option>
+              <option>Card</option>
+              <option>Insurance</option>
+              <option>UPI</option>
+            </select>
+          </div>
           <div className="p-3 rounded-3 mb-5" style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}>
             <div className="d-flex align-items-center">
               <i className="bi bi-info-circle text-muted me-2" aria-hidden="true"></i>
@@ -321,7 +336,6 @@ const Billing = () => {
                 value={editFormData.method}
                 onChange={(e) => setEditFormData({ ...editFormData, method: e.target.value })}
               >
-                <option>Unpaid</option>
                 <option>Cash</option>
                 <option>Card</option>
                 <option>Insurance</option>

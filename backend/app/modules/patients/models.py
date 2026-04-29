@@ -16,6 +16,8 @@ class Patient(Base):
     age: Mapped[int] = mapped_column(Integer)
     gender: Mapped[str] = mapped_column(String(20))
     blood_group: Mapped[str] = mapped_column(String(5))
+    phone_number: Mapped[str] = mapped_column(String(20))
+    email: Mapped[str | None] = mapped_column(String(120), nullable=True)
     last_visit: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(String(30), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

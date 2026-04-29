@@ -8,6 +8,7 @@ from .core.security import decode_access_token, hash_password
 from .models import (
     Appointment,
     Bed,
+    BloodActivity,
     BloodInventory,
     InventoryItem,
     Invoice,
@@ -59,12 +60,30 @@ def seed_database(db: Session):
                 BloodInventory(
                     owner_user_id=admin_id,
                     blood_group=bg,
-                    units=10,
-                    status="Available",
+                    units=0,
+                    status="Empty",
                     trend="Stable",
                 )
             )
         db.commit()
+    else:
+        # Repair the legacy demo seed that created eight fake 10-unit rows
+        # even when the installation had no blood bank activity data yet.
+        existing_inventory = db.query(BloodInventory).all()
+        inventory_looks_seeded = (
+            len(existing_inventory) == len(blood_groups)
+            and {item.blood_group for item in existing_inventory} == set(blood_groups)
+            and all(item.units == 10 for item in existing_inventory)
+            and all(item.status == "Available" for item in existing_inventory)
+            and db.query(BloodActivity).count() == 0
+        )
+
+        if inventory_looks_seeded:
+            for item in existing_inventory:
+                item.units = 0
+                item.status = "Empty"
+                item.trend = "Stable"
+            db.commit()
 
     # 3. Sample Patients
     if db.query(Patient).count() == 0:

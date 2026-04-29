@@ -262,20 +262,17 @@ const Staff = () => {
               <label htmlFor="staff-department" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
                 Clinical Department
               </label>
-              <input
+              <select
                 id="staff-department"
-                type="text"
-                className="form-control"
+                className="form-select"
                 value={formData.dept}
                 onChange={(e) => setFormData({ ...formData, dept: e.target.value })}
-                list="department-options"
-                placeholder="Enter department"
-              />
-              <datalist id="department-options">
+              >
+                <option value="">Select department</option>
                 {departmentOptions.map((department) => (
-                  <option key={department} value={department} />
+                  <option key={department} value={department}>{department}</option>
                 ))}
-              </datalist>
+              </select>
             </div>
           </div>
           <div className="mb-4">

@@ -3,6 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { authApi } from '../lib/api';
 
 const AppContext = createContext();
+const WS_RECONNECT_DELAY_MS = 2000;
+const WS_HEARTBEAT_MS = 30000;
+
+const getWebSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || '/api';
+
+  if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+    return apiUrl
+      .replace(/^http/, 'ws')
+      .replace(/\/api\/?$/, '/api/ws');
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}/api/ws`;
+};
 
 const formatDate = (value, options = { day: '2-digit', month: 'short', year: 'numeric' }) => {
   if (!value) {
@@ -105,6 +120,8 @@ export const mapPatientFromApi = (patient) => ({
   age: patient.age,
   gender: patient.gender,
   bloodGroup: patient.blood_group,
+  phoneNumber: patient.phone_number || '',
+  email: patient.email || '',
   lastVisit: formatDate(patient.last_visit),
   rawLastVisit: patient.last_visit ? patient.last_visit.split('T')[0] : '',
   status: patient.status,
@@ -240,12 +257,38 @@ export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user?.id) {
+      return undefined;
+    }
+
     let ws;
-    if (user?.id) {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/ws`;
-      ws = new WebSocket(wsUrl);
-      
+    let reconnectTimeout;
+    let heartbeatInterval;
+    let disposed = false;
+
+    const clearTimers = () => {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
+      }
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+      }
+    };
+
+    const connectWebSocket = () => {
+      clearTimers();
+      ws = new WebSocket(getWebSocketUrl());
+
+      ws.onopen = () => {
+        heartbeatInterval = setInterval(() => {
+          if (ws?.readyState === WebSocket.OPEN) {
+            ws.send('ping');
+          }
+        }, WS_HEARTBEAT_MS);
+      };
+
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -253,12 +296,29 @@ export const AppProvider = ({ children }) => {
             setGlobalRefreshTime(Date.now());
           }
         } catch (e) {
-          console.error("WebSocket message parse error:", e);
+          console.error('WebSocket message parse error:', e);
         }
       };
-    }
-    
+
+      ws.onclose = () => {
+        clearTimers();
+        if (!disposed) {
+          reconnectTimeout = setTimeout(connectWebSocket, WS_RECONNECT_DELAY_MS);
+        }
+      };
+
+      ws.onerror = () => {
+        if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+          ws.close();
+        }
+      };
+    };
+
+    connectWebSocket();
+
     return () => {
+      disposed = true;
+      clearTimers();
       if (ws) ws.close();
     };
   }, [user?.id]);

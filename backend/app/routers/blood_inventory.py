@@ -41,7 +41,7 @@ def update_blood_inventory(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, user_id)
+    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id)
     return crud.update_entity(db, item, payload)
 
 
@@ -51,5 +51,5 @@ def delete_blood_inventory(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, user_id)
+    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id)
     return crud.delete_entity(db, item)

@@ -41,7 +41,7 @@ def update_bed(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    bed = crud.get_entity_or_404(db, models.Bed, bed_id, user_id)
+    bed = crud.get_entity_or_404(db, models.Bed, bed_id)
     return crud.update_entity(db, bed, payload)
 
 
@@ -51,5 +51,5 @@ def delete_bed(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    bed = crud.get_entity_or_404(db, models.Bed, bed_id, user_id)
+    bed = crud.get_entity_or_404(db, models.Bed, bed_id)
     return crud.delete_entity(db, bed)

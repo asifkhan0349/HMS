@@ -28,6 +28,12 @@ const PatientRow = memo(({ patient, onEdit, onDelete, isPatient }) => {
           {patient.bloodGroup}
         </span>
       </td>
+      <td className="py-4 text-muted small" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        {patient.phoneNumber || '-'}
+      </td>
+      <td className="py-4 text-muted small">
+        {patient.email || '-'}
+      </td>
       <td className="py-4 text-muted small" style={{ fontVariantNumeric: 'tabular-nums' }}>{patient.lastVisit}</td>
       <td className="py-4">
         <span className={`badge rounded-pill px-3 py-1 border`} style={{ 
@@ -90,16 +96,16 @@ const Patients = () => {
   const [deletingPatient, setDeletingPatient] = useState(null);
   
   const [formData, setFormData] = useState({
-    name: '', age: '', gender: 'Male', bloodGroup: 'O+', status: 'Outpatient'
+    name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient'
   });
 
   const [editFormData, setEditFormData] = useState({
-    name: '', age: '', gender: 'Male', bloodGroup: 'O+', status: 'Outpatient'
+    name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient'
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.age) {
+    if (!formData.name || !formData.age || !formData.phoneNumber) {
       showToast('Please fill in all clinical identifiers.', 'warning');
       return;
     }
@@ -109,6 +115,8 @@ const Patients = () => {
         age: parseInt(formData.age),
         gender: formData.gender,
         blood_group: formData.bloodGroup,
+        phone_number: formData.phoneNumber,
+        email: formData.email.trim() || null,
         patient_code: createCode('P'),
         status: formData.status,
         last_visit: new Date().toISOString().split('T')[0]
@@ -116,7 +124,7 @@ const Patients = () => {
       await addPatient(payload);
       showToast(`Patient ${formData.name} registered successfully.`);
       setIsModalOpen(false);
-      setFormData({ name: '', age: '', gender: 'Male', bloodGroup: 'O+', status: 'Outpatient' });
+      setFormData({ name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient' });
     } catch (error) {
       showToast(error.message || 'Unable to register the patient.', 'error');
     }
@@ -130,6 +138,8 @@ const Patients = () => {
         age: parseInt(editFormData.age),
         gender: editFormData.gender,
         blood_group: editFormData.bloodGroup,
+        phone_number: editFormData.phoneNumber,
+        email: editFormData.email.trim() || null,
         status: editFormData.status
       };
       await updatePatient(editingPatient.apiId, payload);
@@ -159,6 +169,8 @@ const Patients = () => {
       age: p.age,
       gender: p.gender,
       bloodGroup: p.bloodGroup,
+      phoneNumber: p.phoneNumber,
+      email: p.email,
       status: p.status
     });
     setIsEditModalOpen(true);
@@ -217,6 +229,8 @@ const Patients = () => {
                 <th className="px-4 py-3">ID</th>
                 <th className="py-3">Patient Name</th>
                 <th className="py-3">Blood Group</th>
+                <th className="py-3">Phone Number</th>
+                <th className="py-3">Email</th>
                 <th className="py-3">Last Visit</th>
                 <th className="py-3">Status</th>
                 {!isPatient && <th className="px-4 py-3 text-end">Actions</th>}
@@ -225,7 +239,7 @@ const Patients = () => {
             <tbody>
               {patients.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-0">
+                  <td colSpan={isPatient ? 7 : 8} className="p-0">
                     <EmptyState 
                       icon="bi-people"
                       title="No patients registered yet"
@@ -237,7 +251,7 @@ const Patients = () => {
                 </tr>
               ) : filteredPatients.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-0">
+                  <td colSpan={isPatient ? 7 : 8} className="p-0">
                     <EmptyState 
                       icon="bi-person-x"
                       title="No matching patients found"
@@ -333,6 +347,33 @@ const Patients = () => {
               </select>
             </div>
             <div className="col-md-6">
+              <label htmlFor="patient-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
+              <input
+                id="patient-phone"
+                type="tel"
+                className="form-control"
+                placeholder="e.g. +91 98765 43210"
+                value={formData.phoneNumber}
+                onChange={e => setFormData({...formData, phoneNumber: e.target.value})}
+                autoComplete="tel"
+                required
+              />
+            </div>
+          </div>
+          <div className="row g-3 mb-4">
+            <div className="col-md-6">
+              <label htmlFor="patient-email" className="form-label text-muted fw-bold small text-uppercase mb-2">Email</label>
+              <input
+                id="patient-email"
+                type="email"
+                className="form-control"
+                placeholder="e.g. john.doe@example.com"
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
+                autoComplete="email"
+              />
+            </div>
+            <div className="col-md-6">
               <label htmlFor="patient-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Admission Status</label>
               <select 
                 id="patient-status"
@@ -409,6 +450,31 @@ const Patients = () => {
                 <option>O+</option><option>O-</option>
                 <option>AB+</option><option>AB-</option>
               </select>
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="edit-patient-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
+              <input
+                id="edit-patient-phone"
+                type="tel"
+                className="form-control"
+                value={editFormData.phoneNumber}
+                onChange={e => setEditFormData({...editFormData, phoneNumber: e.target.value})}
+                autoComplete="tel"
+                required
+              />
+            </div>
+          </div>
+          <div className="row g-3 mb-4">
+            <div className="col-md-6">
+              <label htmlFor="edit-patient-email" className="form-label text-muted fw-bold small text-uppercase mb-2">Email</label>
+              <input
+                id="edit-patient-email"
+                type="email"
+                className="form-control"
+                value={editFormData.email}
+                onChange={e => setEditFormData({...editFormData, email: e.target.value})}
+                autoComplete="email"
+              />
             </div>
             <div className="col-md-6">
               <label htmlFor="edit-patient-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Admission Status</label>

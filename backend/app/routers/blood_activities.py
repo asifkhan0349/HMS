@@ -27,6 +27,20 @@ def refresh_inventory_status(inventory_item):
         inventory_item.status = "Stable"
 
 
+def resolve_shared_blood_owner_id(db: Session, current_user_id: int, blood_group: str) -> int:
+    existing_inventory = db.query(models.BloodInventory).filter(
+        models.BloodInventory.blood_group == blood_group
+    ).first()
+    if existing_inventory:
+        return existing_inventory.owner_user_id
+
+    admin_user = db.query(models.User).filter(models.User.role == "Admin").order_by(models.User.id.asc()).first()
+    if admin_user:
+        return admin_user.id
+
+    return current_user_id
+
+
 def sync_activity_to_inventory(db: Session, user_id: int, blood_group: str, units: int, activity_type: str, revert: bool = False):
     """
     Adjusts inventory for a specific activity.
@@ -76,9 +90,10 @@ def create_blood_activity(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    activity = models.BloodActivity(**payload.model_dump(), owner_user_id=user_id)
+    owner_user_id = resolve_shared_blood_owner_id(db, user_id, payload.blood_group)
+    activity = models.BloodActivity(**payload.model_dump(), owner_user_id=owner_user_id)
     db.add(activity)
-    sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type)
+    sync_activity_to_inventory(db, owner_user_id, activity.blood_group, activity.units, activity.type)
     db.commit()
     db.refresh(activity)
     return activity
@@ -91,10 +106,11 @@ def update_blood_activity(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, user_id)
+    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id)
+    inventory_owner_id = activity.owner_user_id
 
     # 1. Revert OLD impact completely
-    sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type, revert=True)
+    sync_activity_to_inventory(db, inventory_owner_id, activity.blood_group, activity.units, activity.type, revert=True)
 
     # 2. Update the activity record fields
     for field, value in payload.model_dump(exclude_unset=True).items():
@@ -102,7 +118,7 @@ def update_blood_activity(
     db.flush()  # Ensure the new group/units reflect in the object
 
     # 3. Apply NEW impact
-    sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type, revert=False)
+    sync_activity_to_inventory(db, inventory_owner_id, activity.blood_group, activity.units, activity.type, revert=False)
 
     db.commit()
     db.refresh(activity)
@@ -115,8 +131,8 @@ def delete_blood_activity(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, user_id)
-    sync_activity_to_inventory(db, user_id, activity.blood_group, activity.units, activity.type, revert=True)
+    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id)
+    sync_activity_to_inventory(db, activity.owner_user_id, activity.blood_group, activity.units, activity.type, revert=True)
     db.delete(activity)
     db.commit()
     return {"message": "Activity deleted successfully"}
