@@ -1,14 +1,15 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 import uuid
+import json
+from .core.websockets import manager
 
 
 def list_entities(db: Session, model, owner_id: int | None = None,
                   skip: int = 0, limit: int = 100):
     """Return a paginated list of entities. Default: first 100 records."""
     query = db.query(model)
-    if owner_id is not None:
-        query = query.filter(model.owner_user_id == owner_id)
+    # Filter removed to satisfy "visible to all other users" requirement
     return query.order_by(model.id.desc()).offset(skip).limit(limit).all()
 
 
@@ -72,6 +73,7 @@ def create_entity(db, model, payload, owner_user_id: int):
     db.add(entity)
     db.commit()
     db.refresh(entity)
+    manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": model_name}))
     return entity
 
 
@@ -86,10 +88,12 @@ def update_entity(db: Session, entity, payload):
         setattr(entity, field, value)
     db.commit()
     db.refresh(entity)
+    manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "update", "entity": entity.__class__.__name__}))
     return entity
 
 
 def delete_entity(db: Session, entity):
     db.delete(entity)
     db.commit()
+    manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "delete", "entity": entity.__class__.__name__}))
     return {"message": "Deleted successfully"}

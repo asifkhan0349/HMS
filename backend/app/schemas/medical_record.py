@@ -9,8 +9,8 @@ class MedicalRecordBase(AppBaseModel):
     record_date: date
     patient_name: str = Field(..., min_length=2, max_length=120)
     doctor_name: str = Field("", max_length=120)
-    diagnosis: str = Field(..., min_length=1)
-    prescription: str = Field(..., min_length=1)
+    diagnosis: str = Field("", min_length=0)
+    prescription: str = Field("", min_length=0)
 
 
 class MedicalRecordCreate(MedicalRecordBase):
@@ -23,8 +23,8 @@ class MedicalRecordUpdate(AppBaseModel):
     record_date: Optional[date] = None
     patient_name: Optional[str] = Field(None, min_length=2, max_length=120)
     doctor_name: Optional[str] = Field(None, min_length=2, max_length=120)
-    diagnosis: Optional[str] = Field(None, min_length=2)
-    prescription: Optional[str] = Field(None, min_length=2)
+    diagnosis: Optional[str] = Field(None, min_length=0)
+    prescription: Optional[str] = Field(None, min_length=0)
 
 
 class MedicalRecordRead(MedicalRecordBase, ORMBase):

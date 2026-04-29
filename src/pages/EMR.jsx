@@ -154,13 +154,13 @@ const EMR = () => {
                 <th className="py-4">Patient Identity</th>
                 <th className="py-4">Clinician</th>
                 <th className="py-4">Primary Diagnosis</th>
-                <th className="px-4 py-4 text-end">Electronic Validation</th>
+                {!isPatient && <th className="px-4 py-4 text-end">Electronic Validation</th>}
               </tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-0">
+                  <td colSpan={isPatient ? "6" : "7"} className="p-0">
                     <EmptyState 
                       icon="bi-file-earmark-medical"
                       title="No Clinical Records"
@@ -180,29 +180,27 @@ const EMR = () => {
                   <td className="py-4">
                     <span className="badge-soft-success px-3 py-1 rounded-pill">{record.diagnosis}</span>
                   </td>
-                  <td className="px-4 py-4 text-end">
-                    {!isPatient && (
-                      <>
-                        <button
-                          className="btn btn-sm btn-glass me-2"
-                          onClick={() => openEditModal(record)}
-                          title="Edit Record"
-                        >
-                          <i className="bi bi-pencil-square"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-glass text-danger"
-                          onClick={() => {
-                            setDeletingRecord(record);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          title="Delete Record"
-                        >
-                          <i className="bi bi-trash3"></i>
-                        </button>
-                      </>
-                    )}
-                  </td>
+                  {!isPatient && (
+                    <td className="px-4 py-4 text-end">
+                      <button
+                        className="btn btn-sm btn-glass me-2"
+                        onClick={() => openEditModal(record)}
+                        title="Edit Record"
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-glass text-danger"
+                        onClick={() => {
+                          setDeletingRecord(record);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        title="Delete Record"
+                      >
+                        <i className="bi bi-trash3"></i>
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

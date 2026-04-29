@@ -236,7 +236,32 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => localStorage.getItem('hms_theme') || 'light');
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [globalRefreshTime, setGlobalRefreshTime] = useState(Date.now());
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let ws;
+    if (user?.id) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/api/ws`;
+      ws = new WebSocket(wsUrl);
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'data_updated') {
+            setGlobalRefreshTime(Date.now());
+          }
+        } catch (e) {
+          console.error("WebSocket message parse error:", e);
+        }
+      };
+    }
+    
+    return () => {
+      if (ws) ws.close();
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -330,6 +355,7 @@ export const AppProvider = ({ children }) => {
     toast,
     showToast,
     isAppLoading,
+    globalRefreshTime,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

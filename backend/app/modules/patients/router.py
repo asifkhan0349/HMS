@@ -3,7 +3,7 @@ from app.core.limiter import limiter
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.auth_context import get_current_user, require_roles
+from app.auth_context import get_current_user, require_roles, exclude_roles
 from app.modules.auth.models import User
 from app.routers.common import PositiveId
 
@@ -30,7 +30,7 @@ def list_patients(
 ):
     return crud.list_patients(db, current_user.id)
 
-@router.post("", response_model=schemas.PatientRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.PatientRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
 @limiter.limit("5/minute")
 def create_patient(
     request: Request,
@@ -48,7 +48,7 @@ def get_patient(
 ):
     return crud.get_patient_or_404(db, patient_id, current_user.id)
 
-@router.put("/{patient_id}", response_model=schemas.PatientRead)
+@router.put("/{patient_id}", response_model=schemas.PatientRead, dependencies=[Depends(exclude_roles(["Patient"]))])
 @limiter.limit("10/minute")
 def update_patient(
     request: Request,
@@ -60,7 +60,7 @@ def update_patient(
     patient = crud.get_patient_or_404(db, patient_id, current_user.id)
     return crud.update_patient(db, patient, payload)
 
-@router.delete("/{patient_id}", response_model=schemas.MessageResponse)
+@router.delete("/{patient_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient"]))])
 @limiter.limit("5/minute")
 def delete_patient(
     request: Request,

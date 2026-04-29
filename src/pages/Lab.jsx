@@ -151,13 +151,13 @@ const Lab = () => {
                 <th className="py-4">Diagnostic Test</th>
                 <th className="py-4">Ordering Clinician</th>
                 <th className="py-4 text-center">Protocol Status</th>
-                <th className="px-4 py-4 text-end">Actions</th>
+                {!isPatient && <th className="px-4 py-4 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {tests.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-0">
+                  <td colSpan={isPatient ? "5" : "6"} className="p-0">
                      <EmptyState 
                        icon="bi-thermometer-half"
                        title="No Lab Tests"
@@ -193,37 +193,35 @@ const Lab = () => {
                       {test.status}
                     </span>
                   </td>
-                  <td className="px-4 py-4 text-end">
-                    <div className="d-flex justify-content-end gap-2">
-                      {!isPatient && (
-                        <>
-                          <button
-                            className="btn btn-sm btn-glass text-primary px-3"
-                            onClick={() => openEditModal(test)}
-                            title="Edit Order"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-glass text-danger px-3"
-                            onClick={() => {
-                              setDeletingTest(test);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            title="Cancel/Delete"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-glass text-white opacity-50 px-3"
-                            onClick={() => showToast(`Executing diagnostic processing for Lab ID ${test.id}...`)}
-                          >
-                            PROCESS
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
+                  {!isPatient && (
+                    <td className="px-4 py-4 text-end">
+                      <div className="d-flex justify-content-end gap-2">
+                        <button
+                          className="btn btn-sm btn-glass text-primary px-3"
+                          onClick={() => openEditModal(test)}
+                          title="Edit Order"
+                        >
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-glass text-danger px-3"
+                          onClick={() => {
+                            setDeletingTest(test);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          title="Cancel/Delete"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-glass text-white opacity-50 px-3"
+                          onClick={() => showToast(`Executing diagnostic processing for Lab ID ${test.id}...`)}
+                        >
+                          PROCESS
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

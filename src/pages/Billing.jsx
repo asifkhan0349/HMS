@@ -8,7 +8,8 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const Billing = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isPatient = user?.role?.toLowerCase() === 'patient';
   const { 
     data: invoices, 
     loading, 
@@ -107,10 +108,12 @@ const Billing = () => {
           <h2 className="fw-bold mb-1">Financial Records</h2>
           <p className="text-muted mb-0">Manage clinical billing and payment records.</p>
         </div>
-        <button className="btn btn-primary px-4 py-2" onClick={() => setIsModalOpen(true)}>
-          <i className="bi bi-plus-circle me-2" aria-hidden="true"></i>
-          Create New Invoice
-        </button>
+        {!isPatient && (
+          <button className="btn btn-primary px-4 py-2" onClick={() => setIsModalOpen(true)}>
+            <i className="bi bi-plus-circle me-2" aria-hidden="true"></i>
+            Create New Invoice
+          </button>
+        )}
       </div>
 
       <div className="glass-card p-0 overflow-hidden border">
@@ -119,17 +122,19 @@ const Billing = () => {
           style={{ background: 'var(--accents-1)' }}
         >
           <h6 className="fw-bold mb-0">Recent Invoices</h6>
-          <div className="d-flex gap-2">
-            <button className="btn btn-sm btn-glass border px-3" onClick={() => showToast('Exporting ledger...')}>
-              Export CSV
-            </button>
-            <button
-              className="btn btn-sm btn-glass border px-3"
-              onClick={() => showToast('Syncing with financial server...')}
-            >
-              Sync Ledger
-            </button>
-          </div>
+          {!isPatient && (
+            <div className="d-flex gap-2">
+              <button className="btn btn-sm btn-glass border px-3" onClick={() => showToast('Exporting ledger...')}>
+                Export CSV
+              </button>
+              <button
+                className="btn btn-sm btn-glass border px-3"
+                onClick={() => showToast('Syncing with financial server...')}
+              >
+                Sync Ledger
+              </button>
+            </div>
+          )}
         </div>
         <Skeleton name="billing-table" loading={loading}>
           <div className="table-responsive">
@@ -142,7 +147,7 @@ const Billing = () => {
                 <th className="py-3">Amount</th>
                 <th className="py-3">Status</th>
                 <th className="py-3">Method</th>
-                <th className="px-4 py-3 text-end">Actions</th>
+                {!isPatient && <th className="px-4 py-3 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -153,8 +158,8 @@ const Billing = () => {
                       icon="bi-receipt"
                       title="No Invoices"
                       description="No financial records or billing cycles have been initialized."
-                      actionText="Create New Invoice"
-                      onAction={() => setIsModalOpen(true)}
+                      actionText={isPatient ? undefined : "Create New Invoice"}
+                      onAction={isPatient ? undefined : () => setIsModalOpen(true)}
                     />
                   </td>
                 </tr>
@@ -186,25 +191,27 @@ const Billing = () => {
                     </span>
                   </td>
                   <td className="py-4 text-muted small">{inv.method}</td>
-                  <td className="px-4 py-4 text-end">
-                    <button
-                      className="btn btn-sm btn-glass border me-2"
-                      onClick={() => openEditModal(inv)}
-                      title="Edit Invoice"
-                    >
-                      <i className="bi bi-pencil-square" aria-hidden="true"></i>
-                    </button>
-                    <button
-                      className="btn btn-sm btn-glass border text-danger"
-                      onClick={() => {
-                        setDeletingInvoice(inv);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      title="Delete Invoice"
-                    >
-                      <i className="bi bi-trash3" aria-hidden="true"></i>
-                    </button>
-                  </td>
+                  {!isPatient && (
+                    <td className="px-4 py-4 text-end">
+                      <button
+                        className="btn btn-sm btn-glass border me-2"
+                        onClick={() => openEditModal(inv)}
+                        title="Edit Invoice"
+                      >
+                        <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-glass border text-danger"
+                        onClick={() => {
+                          setDeletingInvoice(inv);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        title="Delete Invoice"
+                      >
+                        <i className="bi bi-trash3" aria-hidden="true"></i>
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

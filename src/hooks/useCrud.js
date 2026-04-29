@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 export const useCrud = (apiClient, mapFromApi, options = {}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { showToast } = useApp();
+  const { showToast, globalRefreshTime } = useApp();
   const { enabled = true } = options;
 
   const loadData = useCallback(async () => {
@@ -23,7 +23,7 @@ export const useCrud = (apiClient, mapFromApi, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [apiClient, enabled, mapFromApi, showToast]);
+  }, [apiClient, enabled, mapFromApi, showToast, globalRefreshTime]);
 
   useEffect(() => {
     loadData();

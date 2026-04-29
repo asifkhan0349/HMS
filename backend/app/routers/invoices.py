@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id, require_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles
 from .. import crud, models, schemas
 from ..core.database import get_db
 from .common import PositiveId
@@ -22,7 +22,7 @@ def list_invoices(db: Session = Depends(get_db), current_user_id: int = Depends(
     return crud.list_entities(db, models.Invoice, current_user_id)
 
 
-@router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
 def create_invoice(payload: schemas.InvoiceCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.create_entity(db, models.Invoice, payload, current_user_id)
 
@@ -32,13 +32,13 @@ def get_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), current_u
     return crud.get_entity_or_404(db, models.Invoice, invoice_id, current_user_id)
 
 
-@router.put("/{invoice_id}", response_model=schemas.InvoiceRead)
+@router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(exclude_roles(["Patient"]))])
 def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, current_user_id)
     return crud.update_entity(db, invoice, payload)
 
 
-@router.delete("/{invoice_id}", response_model=schemas.MessageResponse)
+@router.delete("/{invoice_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient"]))])
 def delete_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, current_user_id)
     return crud.delete_entity(db, invoice)

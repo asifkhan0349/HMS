@@ -9,7 +9,7 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 // Memoized individual row
-const PatientRow = memo(({ patient, onEdit, onDelete }) => {
+const PatientRow = memo(({ patient, onEdit, onDelete, isPatient }) => {
   const navigate = useNavigate();
   const { showToast } = useApp();
   return (
@@ -40,34 +40,39 @@ const PatientRow = memo(({ patient, onEdit, onDelete }) => {
           {patient.status}
         </span>
       </td>
-      <td className="px-4 py-4 text-end">
-        <button 
-          className="btn btn-primary btn-sm px-3 me-2"
-          onClick={() => navigate('/emr')}
-        >
-          EHR
-        </button>
-        <button 
-          className="btn btn-sm btn-glass me-2"
-          onClick={() => onEdit(patient)}
-          title="Edit Patient"
-        >
-          <i className="bi bi-pencil-square"></i>
-        </button>
-        <button 
-          className="btn btn-sm btn-glass text-danger"
-          onClick={() => onDelete(patient)}
-          title="Delete Patient"
-        >
-          <i className="bi bi-trash3"></i>
-        </button>
-      </td>
+      {!isPatient && (
+        <td className="px-4 py-4 text-end">
+          <button 
+            className="btn btn-primary btn-sm px-3 me-2"
+            onClick={() => navigate('/emr')}
+          >
+            EHR
+          </button>
+          <>
+            <button 
+              className="btn btn-sm btn-glass me-2"
+              onClick={() => onEdit(patient)}
+              title="Edit Patient"
+            >
+              <i className="bi bi-pencil-square"></i>
+            </button>
+            <button 
+              className="btn btn-sm btn-glass text-danger"
+              onClick={() => onDelete(patient)}
+              title="Delete Patient"
+            >
+              <i className="bi bi-trash3"></i>
+            </button>
+          </>
+        </td>
+      )}
     </tr>
   );
 });
 
 const Patients = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isPatient = user?.role?.toLowerCase() === 'patient';
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
   const { 
@@ -175,13 +180,15 @@ const Patients = () => {
           <h2 className="fw-bold mb-1">Patient Registry</h2>
           <p className="text-muted mb-0">Manage patient records and hospital admissions.</p>
         </div>
-        <button 
-          className="btn btn-primary px-4 py-2"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <i className="bi bi-person-plus me-2" aria-hidden="true"></i>
-          Register Patient
-        </button>
+        {!isPatient && (
+          <button 
+            className="btn btn-primary px-4 py-2"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <i className="bi bi-person-plus me-2" aria-hidden="true"></i>
+            Register Patient
+          </button>
+        )}
       </div>
 
       <div className="glass-card p-0 overflow-hidden border">
@@ -212,7 +219,7 @@ const Patients = () => {
                 <th className="py-3">Blood Group</th>
                 <th className="py-3">Last Visit</th>
                 <th className="py-3">Status</th>
-                <th className="px-4 py-3 text-end">Actions</th>
+                {!isPatient && <th className="px-4 py-3 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -223,8 +230,8 @@ const Patients = () => {
                       icon="bi-people"
                       title="No patients registered yet"
                       description="Your patient registry is currently empty. Start by registering a new patient profile to track clinical outcomes."
-                      actionText="Register Patient"
-                      onAction={() => setIsModalOpen(true)}
+                      actionText={isPatient ? undefined : "Register Patient"}
+                      onAction={isPatient ? undefined : () => setIsModalOpen(true)}
                     />
                   </td>
                 </tr>
@@ -246,6 +253,7 @@ const Patients = () => {
                   patient={p} 
                   onEdit={openEditModal}
                   onDelete={(p) => { setDeletingPatient(p); setIsDeleteModalOpen(true); }}
+                  isPatient={isPatient}
                 />
               ))}
             </tbody>

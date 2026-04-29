@@ -109,3 +109,17 @@ def require_roles(allowed: list[str]):
             )
         return user
     return _check
+
+
+def exclude_roles(excluded: list[str]):
+    """
+    Factory that returns a FastAPI dependency enforcing a role blocklist.
+    """
+    def _check(user: User = Depends(get_current_user)) -> User:
+        if user.role in excluded:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Role '{user.role}' is not permitted to perform this action.",
+            )
+        return user
+    return _check

@@ -11,6 +11,9 @@ from .auth_context import get_current_user_id
 from .core.config import API_PREFIX, CORS_ORIGINS, settings
 from .core.database import Base, SessionLocal, engine
 from .core.logging_config import setup_logging
+from .core.websockets import manager
+import asyncio
+from fastapi import WebSocket, WebSocketDisconnect
 
 # Initialize logging immediately
 setup_logging()
@@ -49,6 +52,7 @@ from .seed import seed_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    manager.set_loop(asyncio.get_running_loop())
     # Only run automatic table creation in development. 
     # Production should strictly use Alembic migrations.
     if settings.ENV != "production":
@@ -127,6 +131,17 @@ async def global_exception_handler(request, exc):
 @app.get(f"{API_PREFIX}/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.websocket(f"{API_PREFIX}/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Just keep the connection open
+            _ = await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 
 app.include_router(patients.router, prefix=API_PREFIX)
