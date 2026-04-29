@@ -147,7 +147,11 @@ const createCrudClient = (resourceName) => ({
 export const patientsApi = createCrudClient('patients');
 export const appointmentsApi = createCrudClient('appointments');
 export const recordsApi = createCrudClient('records');
-export const invoicesApi = createCrudClient('invoices');
+export const invoicesApi = {
+  ...createCrudClient('invoices'),
+  sendPaidInvoiceEmail: (id, data) =>
+    request(`/invoices/${id}/send-paid-email`, { method: 'POST', body: data, isProtected: true }),
+};
 export const medicinesApi = createCrudClient('medicines');
 export const testsApi = createCrudClient('tests');
 export const staffApi = createCrudClient('staff');

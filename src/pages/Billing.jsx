@@ -10,20 +10,28 @@ import { Skeleton } from 'boneyard-js/react';
 const Billing = () => {
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const { 
     data: invoices, 
     loading, 
     addData: addInvoice,
     updateData: updateInvoice,
-    removeData: deleteInvoice
+    removeData: deleteInvoice,
+    loadData: loadInvoices
   } = useCrud(invoicesApi, mapInvoiceFromApi);
   
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
   const [deletingInvoice, setDeletingInvoice] = useState(null);
+  const [emailFormData, setEmailFormData] = useState({ recipientEmail: '' });
+  const [emailValidationError, setEmailValidationError] = useState('');
+  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [emailSentMessage, setEmailSentMessage] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const [formData, setFormData] = useState({
     patient: '',
@@ -63,6 +71,7 @@ const Billing = () => {
   };
 
   const openEditModal = (inv) => {
+    const matchedPatient = patients.find((patient) => patient.name === inv.patient);
     setEditingInvoice(inv);
     setEditFormData({
       patient: inv.patient,
@@ -70,16 +79,54 @@ const Billing = () => {
       status: inv.status,
       method: inv.method
     });
+    setEmailFormData({ recipientEmail: matchedPatient?.email || '' });
+    setEmailValidationError('');
+    setIsEmailSent(false);
+    setEmailSentMessage('');
     setIsEditModalOpen(true);
+  };
+
+  const closeEmailModal = () => {
+    setIsEmailModalOpen(false);
+    setEmailValidationError('');
+    setIsEmailSent(false);
+    setEmailSentMessage('');
+  };
+
+  const handleUpdateStatus = async (inv, newStatus) => {
+    if (newStatus === 'Paid') {
+      setEditingInvoice(inv);
+      setEditFormData({
+        patient: inv.patient,
+        amount: inv.amountValue,
+        status: 'Paid',
+        method: inv.method
+      });
+      const matchedPatient = patients.find((p) => p.name === inv.patient);
+      setEmailFormData({ recipientEmail: matchedPatient?.email || '' });
+      setEmailValidationError('');
+      setIsEmailSent(false);
+      setEmailSentMessage('');
+      setIsEmailModalOpen(true);
+      return;
+    }
+
+    try {
+      await updateInvoice(inv.apiId, { status: newStatus });
+      showToast(`Invoice for ${inv.patient} marked as ${newStatus}.`);
+    } catch (error) {
+      showToast(error.message || `Unable to update status to ${newStatus}.`, 'error');
+    }
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const payload = {
         patient_name: editFormData.patient,
         amount: Number(editFormData.amount),
-        status: editFormData.status,
+        status: editingInvoice.status, // Preserve current status
         payment_method: editFormData.method,
       };
       await updateInvoice(editingInvoice.apiId, payload);
@@ -88,6 +135,39 @@ const Billing = () => {
       setEditingInvoice(null);
     } catch (error) {
       showToast(error.message || 'Unable to update the invoice.', 'error');
+    }
+  };
+
+  const handleSendPaidInvoiceEmail = async (e) => {
+    e.preventDefault();
+
+    const normalizedEmail = emailFormData.recipientEmail.trim().toLowerCase();
+    if (!emailPattern.test(normalizedEmail)) {
+      setEmailValidationError('Enter a valid email address before sending the invoice.');
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      const response = await invoicesApi.sendPaidInvoiceEmail(editingInvoice.apiId, {
+        patient_name: editFormData.patient,
+        amount: Number(editFormData.amount),
+        status: editFormData.status,
+        payment_method: editFormData.method,
+        recipient_email: normalizedEmail,
+      });
+      await loadInvoices();
+
+      if (response.email_sent) {
+        setIsEmailSent(true);
+        setEmailSentMessage(response.message || `Invoice successfully dispatched to ${normalizedEmail}.`);
+      } else {
+        showToast(response.message, 'error');
+      }
+    } catch (error) {
+      showToast(error.message || 'Unable to email the invoice PDF.', 'error');
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -146,9 +226,9 @@ const Billing = () => {
                 <th className="py-3">Patient Name</th>
                 <th className="py-3">Date</th>
                 <th className="py-3">Amount</th>
-                <th className="py-3">Status</th>
                 <th className="py-3">Method</th>
-                {!isPatient && <th className="px-4 py-3 text-end">Actions</th>}
+                <th className="py-3">Status</th>
+                {!isPatient && <th className="py-3 ps-0 text-start">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -176,24 +256,46 @@ const Billing = () => {
                   <td className="py-4 fw-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {inv.amount}
                   </td>
-                  <td className="py-4">
-                    <span
-                      className="badge rounded-pill px-3 py-1 border"
-                      style={{
-                        background: inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 166, 35, 0.1)',
-                        color: inv.status === 'Paid' ? 'var(--geist-success)' : 'var(--geist-warning)',
-                        borderColor:
-                          inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 166, 35, 0.2)',
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      <span className="pulsing-dot me-2" aria-hidden="true" style={{ width: '6px', height: '6px' }}></span>
-                      {inv.status}
-                    </span>
-                  </td>
                   <td className="py-4 text-muted small">{inv.method}</td>
+                  <td className="py-4">
+                    <div className="d-flex align-items-center gap-3">
+                      <span
+                        className="badge rounded-pill px-3 py-1 border"
+                        style={{
+                          background: inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 166, 35, 0.1)',
+                          color: inv.status === 'Paid' ? 'var(--geist-success)' : 'var(--geist-warning)',
+                          borderColor:
+                            inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 166, 35, 0.2)',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        <span className="pulsing-dot me-2" aria-hidden="true" style={{ width: '6px', height: '6px' }}></span>
+                        {inv.status}
+                      </span>
+                      {!isPatient && inv.status !== 'Paid' && (
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-glass border border-success text-success"
+                            style={{ padding: '0.15rem 0.4rem' }}
+                            onClick={() => handleUpdateStatus(inv, 'Paid')}
+                            title="Mark as Paid"
+                          >
+                            <i className="bi bi-check-lg" style={{ fontSize: '0.85rem' }} aria-hidden="true"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-glass border border-danger text-danger"
+                            style={{ padding: '0.15rem 0.4rem' }}
+                            onClick={() => handleUpdateStatus(inv, 'Cancelled')}
+                            title="Mark as Cancelled"
+                          >
+                            <i className="bi bi-x-lg" style={{ fontSize: '0.85rem' }} aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   {!isPatient && (
-                    <td className="px-4 py-4 text-end">
+                    <td className="ps-0 py-4 text-start">
                       <button
                         className="btn btn-sm btn-glass border me-2"
                         onClick={() => openEditModal(inv)}
@@ -303,30 +405,15 @@ const Billing = () => {
                 list="patient-datalist"
               />
             </div>
-            <div className="row g-3 mb-4">
-              <div className="col-md-6">
-                <label htmlFor="edit-invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
-                <input
-                  id="edit-invoice-amount"
-                  type="number"
-                  className="form-control"
-                  value={editFormData.amount}
-                  onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
-                />
-              </div>
-              <div className="col-md-6">
-                <label htmlFor="edit-invoice-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Status</label>
-                <select
-                  id="edit-invoice-status"
-                  className="form-select"
-                  value={editFormData.status}
-                  onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                >
-                  <option>Pending</option>
-                  <option>Paid</option>
-                  <option>Cancelled</option>
-                </select>
-              </div>
+            <div className="mb-4">
+              <label htmlFor="edit-invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
+              <input
+                id="edit-invoice-amount"
+                type="number"
+                className="form-control"
+                value={editFormData.amount}
+                onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
+              />
             </div>
             <div className="mb-4">
               <label htmlFor="edit-invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2">Payment Method</label>
@@ -359,9 +446,78 @@ const Billing = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
-        itemName={`Invoice ${editingInvoice?.id} for ${editingInvoice?.patient}`}
+        itemName={`Invoice ${deletingInvoice?.id} for ${deletingInvoice?.patient}`}
         itemType="Invoice"
       />
+
+      <Modal isOpen={isEmailModalOpen} onClose={closeEmailModal} title="Email Paid Invoice">
+        {isEmailSent ? (
+          <div className="text-center py-4">
+            <div 
+              className="d-inline-flex align-items-center justify-content-center rounded-circle mb-4"
+              style={{ width: '80px', height: '80px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+            >
+              <i className="bi bi-check-lg fs-1 text-success" aria-hidden="true"></i>
+            </div>
+            <h4 className="fw-bold mb-2">Invoice Sent!</h4>
+            <p className="text-muted mb-5 px-4">{emailSentMessage}</p>
+            <button 
+              type="button" 
+              className="btn btn-primary w-100 py-2" 
+              onClick={() => {
+                closeEmailModal();
+                setIsEditModalOpen(false);
+                setEditingInvoice(null);
+              }}
+            >
+              Back to Invoices
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSendPaidInvoiceEmail} noValidate>
+            <div className="mb-3">
+              <label htmlFor="invoice-recipient-email" className="form-label text-muted fw-bold small text-uppercase mb-2">
+                Recipient Email
+              </label>
+              <input
+                id="invoice-recipient-email"
+                type="email"
+                className={`form-control ${emailValidationError ? 'is-invalid' : ''}`}
+                placeholder="patient@example.com"
+                value={emailFormData.recipientEmail}
+                onChange={(e) => {
+                  setEmailFormData({ recipientEmail: e.target.value });
+                  if (emailValidationError) {
+                    setEmailValidationError('');
+                  }
+                }}
+                required
+              />
+              {emailValidationError && <div className="invalid-feedback d-block">{emailValidationError}</div>}
+            </div>
+            <div className="p-3 rounded-3 mb-4" style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}>
+              <small className="text-muted">
+                Marking this invoice as paid will generate a PDF on the backend and email it as an attachment.
+              </small>
+            </div>
+            <div className="d-flex gap-2">
+              <button type="button" className="btn btn-glass w-100 py-2" onClick={closeEmailModal} disabled={isSendingEmail}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary w-100 py-2" disabled={isSendingEmail}>
+                {isSendingEmail ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Sending...
+                  </>
+                ) : (
+                  'Send Invoice PDF'
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </main>
   );
 };

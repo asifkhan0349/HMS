@@ -30,3 +30,19 @@ class InvoiceRead(InvoiceBase, ORMBase):
     id: int
     invoice_code: str
     created_at: datetime
+
+
+class InvoicePaidEmailRequest(AppBaseModel):
+    recipient_email: str = Field(..., min_length=5, max_length=254, pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+    invoice_code: Optional[str] = None
+    patient_name: Optional[str] = Field(None, min_length=2, max_length=120)
+    invoice_date: Optional[date] = None
+    amount: Optional[Decimal] = Field(None, ge=0)
+    status: str = Field(..., min_length=2, max_length=50)
+    payment_method: Optional[str] = Field(None, min_length=2, max_length=100)
+
+
+class InvoicePaidEmailResponse(AppBaseModel):
+    invoice: InvoiceRead
+    email_sent: bool
+    message: str

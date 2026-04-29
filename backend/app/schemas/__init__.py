@@ -2,7 +2,14 @@ from .base import AppBaseModel, MessageResponse, ORMBase
 from .patient import PatientBase, PatientCreate, PatientUpdate, PatientRead, Gender, BloodGroup
 from .appointment import AppointmentBase, AppointmentCreate, AppointmentUpdate, AppointmentRead
 from .medical_record import MedicalRecordBase, MedicalRecordCreate, MedicalRecordUpdate, MedicalRecordRead
-from .invoice import InvoiceBase, InvoiceCreate, InvoiceUpdate, InvoiceRead
+from .invoice import (
+    InvoiceBase,
+    InvoiceCreate,
+    InvoiceUpdate,
+    InvoiceRead,
+    InvoicePaidEmailRequest,
+    InvoicePaidEmailResponse,
+)
 from .medicine import MedicineBase, MedicineCreate, MedicineUpdate, MedicineRead
 from .lab_test import LabTestBase, LabTestCreate, LabTestUpdate, LabTestRead
 from .staff import StaffBase, StaffCreate, StaffUpdate, StaffRead
