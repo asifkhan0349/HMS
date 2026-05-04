@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -34,7 +34,7 @@ def create_blood_inventory(
     return crud.create_entity(db, models.BloodInventory, payload, user_id)
 
 
-@router.put("/{bg_id}", response_model=schemas.BloodInventoryRead)
+@router.put("/{bg_id}", response_model=schemas.BloodInventoryRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_blood_inventory(
     bg_id: PositiveId,
     payload: schemas.BloodInventoryUpdate,
@@ -45,7 +45,7 @@ def update_blood_inventory(
     return crud.update_entity(db, item, payload)
 
 
-@router.delete("/{bg_id}", response_model=schemas.MessageResponse)
+@router.delete("/{bg_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_blood_inventory(
     bg_id: PositiveId,
     db: Session = Depends(get_db),

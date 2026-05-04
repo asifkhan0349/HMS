@@ -18,6 +18,9 @@ const EMR = () => {
 
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const canReadStaff = true;
   const { 
     data: records, 
@@ -131,7 +134,7 @@ const EMR = () => {
           <h2 className="fw-bold mb-0">Electronic Medical Records</h2>
           <p className="text-white opacity-75 mb-0">Encrypted clinical history and diagnostic telemetry.</p>
         </div>
-        {!isPatient && (
+        {!isPatient && !(isDoctor || isNurse || isReception) && (
           <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
             <i className="bi bi-file-earmark-plus me-2"></i>New EMR Entry
           </button>
@@ -154,7 +157,7 @@ const EMR = () => {
                 <th className="py-4">Patient Identity</th>
                 <th className="py-4">Clinician</th>
                 <th className="py-4">Primary Diagnosis</th>
-                {!isPatient && <th className="px-4 py-4 text-end">Electronic Validation</th>}
+                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Electronic Validation</th>}
               </tr>
             </thead>
             <tbody>
@@ -180,7 +183,7 @@ const EMR = () => {
                   <td className="py-4">
                     <span className="badge-soft-success px-3 py-1 rounded-pill">{record.diagnosis}</span>
                   </td>
-                  {!isPatient && (
+                  {!isPatient && !(isDoctor || isNurse || isReception) && (
                     <td className="px-4 py-4 text-end">
                       <button
                         className="btn btn-sm btn-glass me-2"

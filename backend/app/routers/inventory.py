@@ -3,7 +3,7 @@ from ..core.limiter import limiter
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -37,7 +37,7 @@ def create_inventory_item(
     return crud.create_entity(db, models.InventoryItem, payload, user_id)
 
 
-@router.put("/{item_id}", response_model=schemas.InventoryItemRead)
+@router.put("/{item_id}", response_model=schemas.InventoryItemRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 @limiter.limit("20/minute")
 def update_inventory_item(
     request: Request,
@@ -50,7 +50,7 @@ def update_inventory_item(
     return crud.update_entity(db, item, payload)
 
 
-@router.delete("/{item_id}", response_model=schemas.MessageResponse)
+@router.delete("/{item_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 @limiter.limit("5/minute")
 def delete_inventory_item(
     request: Request,

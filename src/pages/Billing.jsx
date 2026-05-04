@@ -10,6 +10,9 @@ import { Skeleton } from 'boneyard-js/react';
 const Billing = () => {
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const { 
     data: invoices, 
@@ -228,7 +231,7 @@ const Billing = () => {
                 <th className="py-3">Amount</th>
                 <th className="py-3">Method</th>
                 <th className="py-3">Status</th>
-                {!isPatient && <th className="py-3 ps-0 text-start">Actions</th>}
+                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="py-3 ps-0 text-start">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -272,7 +275,7 @@ const Billing = () => {
                         <span className="pulsing-dot me-2" aria-hidden="true" style={{ width: '6px', height: '6px' }}></span>
                         {inv.status}
                       </span>
-                      {!isPatient && inv.status !== 'Paid' && (
+                      {!isPatient && !(isDoctor || isNurse || isReception) && inv.status !== 'Paid' && (
                         <div className="d-flex gap-2">
                           <button
                             className="btn btn-sm btn-glass border border-success text-success"
@@ -294,7 +297,7 @@ const Billing = () => {
                       )}
                     </div>
                   </td>
-                  {!isPatient && (
+                   {!isPatient && !(isDoctor || isNurse || isReception) && (
                     <td className="ps-0 py-4 text-start">
                       <button
                         className="btn btn-sm btn-glass border me-2"

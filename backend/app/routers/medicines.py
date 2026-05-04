@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id, require_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles
 from .. import crud, models, schemas
 from ..core.database import get_db
 from .common import PositiveId
@@ -32,13 +32,13 @@ def get_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), current
     return crud.get_entity_or_404(db, models.Medicine, medicine_id, current_user_id)
 
 
-@router.put("/{medicine_id}", response_model=schemas.MedicineRead)
+@router.put("/{medicine_id}", response_model=schemas.MedicineRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_medicine(medicine_id: PositiveId, payload: schemas.MedicineUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, current_user_id)
     return crud.update_entity(db, medicine, payload)
 
 
-@router.delete("/{medicine_id}", response_model=schemas.MessageResponse)
+@router.delete("/{medicine_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, current_user_id)
     return crud.delete_entity(db, medicine)

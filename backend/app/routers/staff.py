@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id, require_admin
+from ..auth_context import get_current_user_id, require_admin, exclude_roles
 from .. import crud, models, schemas
 from ..core.database import get_db
 from .common import PositiveId
@@ -27,13 +27,13 @@ def get_staff_member(staff_id: PositiveId, db: Session = Depends(get_db), curren
     return crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
 
 
-@router.put("/{staff_id}", response_model=schemas.StaffRead, dependencies=[Depends(require_admin)])
+@router.put("/{staff_id}", response_model=schemas.StaffRead, dependencies=[Depends(require_admin), Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_staff_member(staff_id: PositiveId, payload: schemas.StaffUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     staff_member = crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
     return crud.update_entity(db, staff_member, payload)
 
 
-@router.delete("/{staff_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_admin)])
+@router.delete("/{staff_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_admin), Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_staff_member(staff_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     staff_member = crud.get_entity_or_404(db, models.Staff, staff_id, current_user_id)
     return crud.delete_entity(db, staff_member)

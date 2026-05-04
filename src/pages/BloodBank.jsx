@@ -8,7 +8,10 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const BloodBank = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const { 
     data: bloodGroups, 
     loading: loadingInventory,
@@ -272,7 +275,7 @@ const BloodBank = () => {
                     >
                       {displayStatus.toUpperCase()}
                     </span>
-                    {group.apiId && (
+                    {group.apiId && !(isDoctor || isNurse || isReception) && (
                       <div className="dropdown">
                         <button className="btn btn-sm btn-glass p-0 border-0" data-bs-toggle="dropdown" style={{ width: '20px' }}>
                           <i className="bi bi-three-dots-vertical small"></i>
@@ -311,7 +314,7 @@ const BloodBank = () => {
                 <th>Units</th>
                 <th>Entity/Person</th>
                 <th>Timestamp</th>
-                <th className="text-end">Actions</th>
+                {!(isDoctor || isNurse || isReception) && <th className="text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -337,16 +340,20 @@ const BloodBank = () => {
                   <td className="text-muted">{act.donor || act.hospital}</td>
                   <td className="small text-muted">{act.date}</td>
                   <td className="text-end">
-                    <button className="btn btn-sm btn-glass me-2" onClick={() => openActivityEditModal(act)}>
-                      <i className="bi bi-pencil"></i>
-                    </button>
-                    <button className="btn btn-sm btn-glass text-danger" onClick={() => {
-                      setDeletingItem(act);
-                      setDeletingType('activity');
-                      setIsDeleteModalOpen(true);
-                    }}>
-                      <i className="bi bi-trash"></i>
-                    </button>
+                    {!(isDoctor || isNurse || isReception) && (
+                      <>
+                        <button className="btn btn-sm btn-glass me-2" onClick={() => openActivityEditModal(act)}>
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button className="btn btn-sm btn-glass text-danger" onClick={() => {
+                          setDeletingItem(act);
+                          setDeletingType('activity');
+                          setIsDeleteModalOpen(true);
+                        }}>
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

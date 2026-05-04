@@ -8,7 +8,10 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const Beds = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const { 
     data: beds, 
     loading,
@@ -139,50 +142,52 @@ const Beds = () => {
                 </div>
               ) : ward.beds.map((bed, bIdx) => (
                 <div key={bIdx} className="col-6 col-md-3 col-lg-2">
-                   <div className="position-relative h-100">
-                     <button 
-                       className="glass-card p-4 text-center border w-100 h-100 transition-all hover-translate-y" 
-                       onClick={() => openEditModal(bed)}
-                       aria-label={`Edit Bed ${bed.id}, ${bed.status}`}
-                       style={{ 
-                         background: 'var(--geist-background)',
-                         borderColor: 'var(--accents-2)',
-                         cursor: 'pointer'
-                       }}
-                     >
-                        <div className={`bg-accents-1 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center border`} style={{ width: '48px', height: '48px', background: 'var(--accents-1)' }}>
-                          <i className={`bi bi-door-closed fs-5 ${
-                             bed.status === 'Available' ? 'text-success' : 
-                             bed.status === 'Occupied' ? 'text-danger' : 
-                             'text-warning'
-                          }`} aria-hidden="true"></i>
-                        </div>
-                        
-                        <h6 className="fw-bold mb-1" style={{ fontVariantNumeric: 'tabular-nums' }}>BED {bed.id}</h6>
-                        <small className="text-muted d-block text-uppercase" style={{ fontSize: '0.6rem', letterSpacing: '0.05em' }}>{bed.type}</small>
-                        <small 
-                          className="mt-2 d-inline-block fw-bold" 
-                          style={{ 
-                              fontSize: '0.65rem',
-                              color: bed.status === 'Available' ? 'var(--geist-success)' : bed.status === 'Occupied' ? 'var(--geist-error)' : 'var(--geist-warning)'
+                    <div className="position-relative h-100">
+                      <button 
+                        className="glass-card p-4 text-center border w-100 h-100 transition-all hover-translate-y" 
+                        onClick={() => !(isDoctor || isNurse || isReception) && openEditModal(bed)}
+                        aria-label={`Edit Bed ${bed.id}, ${bed.status}`}
+                        style={{ 
+                          background: 'var(--geist-background)',
+                          borderColor: 'var(--accents-2)',
+                          cursor: (isDoctor || isNurse || isReception) ? 'default' : 'pointer'
+                        }}
+                      >
+                         <div className={`bg-accents-1 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center border`} style={{ width: '48px', height: '48px', background: 'var(--accents-1)' }}>
+                           <i className={`bi bi-door-closed fs-5 ${
+                              bed.status === 'Available' ? 'text-success' : 
+                              bed.status === 'Occupied' ? 'text-danger' : 
+                              'text-warning'
+                           }`} aria-hidden="true"></i>
+                         </div>
+                         
+                         <h6 className="fw-bold mb-1" style={{ fontVariantNumeric: 'tabular-nums' }}>BED {bed.id}</h6>
+                         <small className="text-muted d-block text-uppercase" style={{ fontSize: '0.6rem', letterSpacing: '0.05em' }}>{bed.type}</small>
+                         <small 
+                           className="mt-2 d-inline-block fw-bold" 
+                           style={{ 
+                               fontSize: '0.65rem',
+                               color: bed.status === 'Available' ? 'var(--geist-success)' : bed.status === 'Occupied' ? 'var(--geist-error)' : 'var(--geist-warning)'
+                           }}
+                         >
+                           {bed.status.toUpperCase()}
+                         </small>
+                      </button>
+                      {!(isDoctor || isNurse || isReception) && (
+                        <button 
+                          className="btn btn-sm btn-glass text-danger position-absolute top-0 end-0 m-2 p-0 d-flex align-items-center justify-content-center"
+                          style={{ width: '24px', height: '24px', borderRadius: '50%', zIndex: 10 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingBed(bed);
+                            setIsDeleteModalOpen(true);
                           }}
+                          title="Delete Bed"
                         >
-                          {bed.status.toUpperCase()}
-                        </small>
-                     </button>
-                     <button 
-                       className="btn btn-sm btn-glass text-danger position-absolute top-0 end-0 m-2 p-0 d-flex align-items-center justify-content-center"
-                       style={{ width: '24px', height: '24px', borderRadius: '50%', zIndex: 10 }}
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         setDeletingBed(bed);
-                         setIsDeleteModalOpen(true);
-                       }}
-                       title="Delete Bed"
-                     >
-                       <i className="bi bi-x" aria-hidden="true"></i>
-                     </button>
-                   </div>
+                          <i className="bi bi-x" aria-hidden="true"></i>
+                        </button>
+                      )}
+                    </div>
                 </div>
               ))}
            </div>

@@ -11,6 +11,9 @@ const Lab = () => {
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
   const userRole = user?.role;
+  const isDoctor = userRole === 'Doctor';
+  const isNurse = userRole === 'Nurse';
+  const isReception = userRole === 'Reception';
   const userName = user?.name;
   const canReadStaff = true;
   const { 
@@ -151,7 +154,7 @@ const Lab = () => {
                 <th className="py-4">Diagnostic Test</th>
                 <th className="py-4">Ordering Clinician</th>
                 <th className="py-4 text-center">Protocol Status</th>
-                {!isPatient && <th className="px-4 py-4 text-end">Actions</th>}
+                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -193,7 +196,7 @@ const Lab = () => {
                       {test.status}
                     </span>
                   </td>
-                  {!isPatient && (
+                  {!isPatient && !(isDoctor || isNurse || isReception) && (
                     <td className="px-4 py-4 text-end">
                       <div className="d-flex justify-content-end gap-2">
                         <button

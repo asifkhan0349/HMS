@@ -33,7 +33,7 @@ def get_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), current_u
     return crud.get_entity_or_404(db, models.Invoice, invoice_id)
 
 
-@router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id)
     return crud.update_entity(db, invoice, payload)
@@ -83,7 +83,7 @@ def send_paid_invoice_email(
         )
 
 
-@router.delete("/{invoice_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.delete("/{invoice_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id)
     return crud.delete_entity(db, invoice)

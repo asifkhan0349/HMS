@@ -48,7 +48,7 @@ def get_patient(
 ):
     return crud.get_patient_or_404(db, patient_id, current_user.id)
 
-@router.put("/{patient_id}", response_model=schemas.PatientRead, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.put("/{patient_id}", response_model=schemas.PatientRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 @limiter.limit("10/minute")
 def update_patient(
     request: Request,
@@ -60,7 +60,7 @@ def update_patient(
     patient = crud.get_patient_or_404(db, patient_id, current_user.id)
     return crud.update_patient(db, patient, payload)
 
-@router.delete("/{patient_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.delete("/{patient_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 @limiter.limit("5/minute")
 def delete_patient(
     request: Request,

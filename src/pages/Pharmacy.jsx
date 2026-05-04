@@ -8,7 +8,10 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const Pharmacy = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const { 
     data: medicines, 
     loading, 
@@ -167,7 +170,7 @@ const Pharmacy = () => {
                 <th className="py-3">Stock Level</th>
                 <th className="py-3">Expiration</th>
                 <th className="py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-end">Actions</th>
+                {!(isDoctor || isNurse || isReception) && <th className="px-4 py-3 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -201,29 +204,35 @@ const Pharmacy = () => {
                   </td>
                   <td className="px-4 py-4 text-end">
                     <div className="d-flex justify-content-end align-items-center gap-2">
-                      <button 
-                        className="btn btn-primary btn-sm px-3"
-                        onClick={() => showToast(`Dispensing ${med.name}…`)}
-                      >
-                        Dispense
-                      </button>
-                      <button 
-                        className="btn btn-sm btn-glass text-primary"
-                        onClick={() => openEditModal(med)}
-                        title="Edit Stock"
-                      >
-                        <i className="bi bi-pencil"></i>
-                      </button>
-                      <button 
-                        className="btn btn-sm btn-glass text-danger"
-                        onClick={() => {
-                          setDeletingMedicine(med);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        title="Remove Medicine"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
+                      {!(isDoctor || isNurse || isReception) && (
+                        <button 
+                          className="btn btn-primary btn-sm px-3"
+                          onClick={() => showToast(`Dispensing ${med.name}…`)}
+                        >
+                          Dispense
+                        </button>
+                      )}
+                      {!(isDoctor || isNurse || isReception) && (
+                        <>
+                          <button 
+                            className="btn btn-sm btn-glass text-primary"
+                            onClick={() => openEditModal(med)}
+                            title="Edit Stock"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button 
+                            className="btn btn-sm btn-glass text-danger"
+                            onClick={() => {
+                              setDeletingMedicine(med);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            title="Remove Medicine"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

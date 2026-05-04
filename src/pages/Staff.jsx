@@ -8,7 +8,10 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const Staff = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const { 
     data: staff, 
     loading, 
@@ -154,7 +157,7 @@ const Staff = () => {
                 <th className="py-4">Clinical Department</th>
                 <th className="py-4 text-center">Active Shift</th>
                 <th className="py-4 text-center">Duty Status</th>
-                <th className="px-4 py-4 text-end">Electronic Validation</th>
+                {!(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Electronic Validation</th>}
               </tr>
             </thead>
             <tbody>
@@ -205,15 +208,19 @@ const Staff = () => {
                     </span>
                   </td>
                   <td className="px-4 py-4 text-end">
-                    <button className="btn btn-sm btn-glass me-1" onClick={() => openEditModal(s)}>
-                      <i className="bi bi-pencil-square"></i>
-                    </button>
-                    <button className="btn btn-sm btn-glass text-danger" onClick={() => {
-                        setDeletingStaff(s);
-                        setIsDeleteModalOpen(true);
-                      }}>
-                      <i className="bi bi-trash3"></i>
-                    </button>
+                    {!(isDoctor || isNurse || isReception) && (
+                      <>
+                        <button className="btn btn-sm btn-glass me-1" onClick={() => openEditModal(s)}>
+                          <i className="bi bi-pencil-square"></i>
+                        </button>
+                        <button className="btn btn-sm btn-glass text-danger" onClick={() => {
+                            setDeletingStaff(s);
+                            setIsDeleteModalOpen(true);
+                          }}>
+                          <i className="bi bi-trash3"></i>
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

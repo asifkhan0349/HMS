@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import httpx
 import logging
 
-from ..auth_context import get_current_user, get_current_user_id, require_roles, require_admin
+from ..auth_context import get_current_user, get_current_user_id, require_roles, require_admin, exclude_roles
 from .. import crud, models, schemas
 from ..core.database import get_db
 from ..core.config import settings
@@ -69,7 +69,7 @@ def get_appointment(
     return crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
 
 
-@router.put("/{appointment_id}", response_model=schemas.AppointmentRead)
+@router.put("/{appointment_id}", response_model=schemas.AppointmentRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_appointment(
     appointment_id: PositiveId,
     payload: schemas.AppointmentUpdate,
@@ -99,7 +99,7 @@ def update_appointment(
     return updated_appointment
 
 
-@router.delete("/{appointment_id}", response_model=schemas.MessageResponse)
+@router.delete("/{appointment_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_appointment(
     appointment_id: PositiveId,
     db: Session = Depends(get_db),

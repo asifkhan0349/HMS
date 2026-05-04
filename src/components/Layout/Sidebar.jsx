@@ -7,7 +7,7 @@ const menuItems = [
   { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
   { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
   { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin', 'Doctor', 'Patient'] },
-  { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical' },
+  { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', allowedRoles: ['Admin', 'Patient'] },
   { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception', 'Patient'] },
   { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
   { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },

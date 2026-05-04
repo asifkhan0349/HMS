@@ -13,12 +13,12 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=list[schemas.MedicalRecordRead])
+@router.get("", response_model=list[schemas.MedicalRecordRead], dependencies=[Depends(exclude_roles(["Doctor", "Nurse", "Reception"]))])
 def list_records(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.list_entities(db, models.MedicalRecord, current_user_id)
 
 
-@router.post("", response_model=schemas.MedicalRecordRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.post("", response_model=schemas.MedicalRecordRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def create_record(payload: schemas.MedicalRecordCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.create_entity(db, models.MedicalRecord, payload, current_user_id)
 
@@ -28,13 +28,13 @@ def get_record(record_id: PositiveId, db: Session = Depends(get_db), current_use
     return crud.get_entity_or_404(db, models.MedicalRecord, record_id, current_user_id)
 
 
-@router.put("/{record_id}", response_model=schemas.MedicalRecordRead, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.put("/{record_id}", response_model=schemas.MedicalRecordRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_record(record_id: PositiveId, payload: schemas.MedicalRecordUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     record = crud.get_entity_or_404(db, models.MedicalRecord, record_id, current_user_id)
     return crud.update_entity(db, record, payload)
 
 
-@router.delete("/{record_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.delete("/{record_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_record(record_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     record = crud.get_entity_or_404(db, models.MedicalRecord, record_id, current_user_id)
     return crud.delete_entity(db, record)

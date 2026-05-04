@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -34,7 +34,7 @@ def create_bed(
     return crud.create_entity(db, models.Bed, payload, user_id)
 
 
-@router.put("/{bed_id}", response_model=schemas.BedRead)
+@router.put("/{bed_id}", response_model=schemas.BedRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_bed(
     bed_id: PositiveId,
     payload: schemas.BedUpdate,
@@ -45,7 +45,7 @@ def update_bed(
     return crud.update_entity(db, bed, payload)
 
 
-@router.delete("/{bed_id}", response_model=schemas.MessageResponse)
+@router.delete("/{bed_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_bed(
     bed_id: PositiveId,
     db: Session = Depends(get_db),

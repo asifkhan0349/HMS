@@ -9,7 +9,7 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 // Memoized individual row
-const PatientRow = memo(({ patient, onEdit, onDelete, isPatient }) => {
+const PatientRow = memo(({ patient, onEdit, onDelete, isPatient, isDoctor, isNurse, isReception }) => {
   const navigate = useNavigate();
   const { showToast } = useApp();
   return (
@@ -48,13 +48,16 @@ const PatientRow = memo(({ patient, onEdit, onDelete, isPatient }) => {
       </td>
       {!isPatient && (
         <td className="px-4 py-4 text-end">
-          <button 
-            className="btn btn-primary btn-sm px-3 me-2"
-            onClick={() => navigate('/emr')}
-          >
-            EHR
-          </button>
-          <>
+          {!(isDoctor || isNurse || isReception) && (
+            <button 
+              className="btn btn-primary btn-sm px-3 me-2"
+              onClick={() => navigate('/emr')}
+            >
+              EHR
+            </button>
+          )}
+          {!(isDoctor || isNurse || isReception) && (
+            <>
             <button 
               className="btn btn-sm btn-glass me-2"
               onClick={() => onEdit(patient)}
@@ -69,7 +72,8 @@ const PatientRow = memo(({ patient, onEdit, onDelete, isPatient }) => {
             >
               <i className="bi bi-trash3"></i>
             </button>
-          </>
+            </>
+          )}
         </td>
       )}
     </tr>
@@ -79,6 +83,9 @@ const PatientRow = memo(({ patient, onEdit, onDelete, isPatient }) => {
 const Patients = () => {
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
   const { 
@@ -233,7 +240,7 @@ const Patients = () => {
                 <th className="py-3">Email</th>
                 <th className="py-3">Last Visit</th>
                 <th className="py-3">Status</th>
-                {!isPatient && <th className="px-4 py-3 text-end">Actions</th>}
+                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-3 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -268,6 +275,9 @@ const Patients = () => {
                   onEdit={openEditModal}
                   onDelete={(p) => { setDeletingPatient(p); setIsDeleteModalOpen(true); }}
                   isPatient={isPatient}
+                  isDoctor={isDoctor}
+                  isNurse={isNurse}
+                  isReception={isReception}
                 />
               ))}
             </tbody>

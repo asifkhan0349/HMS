@@ -8,7 +8,10 @@ import DeleteConfirmation from '../components/UI/DeleteConfirmation';
 import { Skeleton } from 'boneyard-js/react';
 
 const Inventory = () => {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
   const { 
     data: inventoryItems, 
     loading,
@@ -172,7 +175,7 @@ const Inventory = () => {
                 <th>Category</th>
                 <th>Current Stock</th>
                 <th>Status</th>
-                <th className="px-4 text-end">Actions</th>
+                {!(isDoctor || isNurse || isReception) && <th className="px-4 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -217,23 +220,27 @@ const Inventory = () => {
                     </span>
                   </td>
                   <td className="px-4 text-end">
-                    <button 
-                      className="btn btn-sm btn-glass me-2"
-                      onClick={() => openEditModal(item)}
-                      title="Edit Item"
-                    >
-                      <i className="bi bi-pencil-square" aria-hidden="true"></i>
-                    </button>
-                    <button 
-                      className="btn btn-sm btn-glass text-danger"
-                      onClick={() => {
-                        setDeletingItem(item);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      title="Delete Item"
-                    >
-                      <i className="bi bi-trash3" aria-hidden="true"></i>
-                    </button>
+                    {!(isDoctor || isNurse || isReception) && (
+                      <>
+                        <button 
+                          className="btn btn-sm btn-glass me-2"
+                          onClick={() => openEditModal(item)}
+                          title="Edit Item"
+                        >
+                          <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                        </button>
+                        <button 
+                          className="btn btn-sm btn-glass text-danger"
+                          onClick={() => {
+                            setDeletingItem(item);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          title="Delete Item"
+                        >
+                          <i className="bi bi-trash3" aria-hidden="true"></i>
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

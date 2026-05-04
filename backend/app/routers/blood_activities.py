@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -99,7 +99,7 @@ def create_blood_activity(
     return activity
 
 
-@router.put("/{act_id}", response_model=schemas.BloodActivityRead)
+@router.put("/{act_id}", response_model=schemas.BloodActivityRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_blood_activity(
     act_id: PositiveId,
     payload: schemas.BloodActivityUpdate,
@@ -125,7 +125,7 @@ def update_blood_activity(
     return activity
 
 
-@router.delete("/{act_id}", response_model=schemas.MessageResponse)
+@router.delete("/{act_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_blood_activity(
     act_id: PositiveId,
     db: Session = Depends(get_db),

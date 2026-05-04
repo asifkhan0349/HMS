@@ -32,13 +32,13 @@ def get_test(test_id: PositiveId, db: Session = Depends(get_db), current_user_id
     return crud.get_entity_or_404(db, models.LabTest, test_id, current_user_id)
 
 
-@router.put("/{test_id}", response_model=schemas.LabTestRead, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.put("/{test_id}", response_model=schemas.LabTestRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def update_test(test_id: PositiveId, payload: schemas.LabTestUpdate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, current_user_id)
     return crud.update_entity(db, test, payload)
 
 
-@router.delete("/{test_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.delete("/{test_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
 def delete_test(test_id: PositiveId, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, current_user_id)
     return crud.delete_entity(db, test)

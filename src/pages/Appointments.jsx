@@ -38,6 +38,10 @@ const createEmptyAppointmentForm = () => ({
 
 const Appointments = () => {
   const { showToast, user } = useApp();
+  const isDoctor = user?.role === 'Doctor';
+  const isNurse = user?.role === 'Nurse';
+  const isReception = user?.role === 'Reception';
+  const isPatient = user?.role?.toLowerCase() === 'patient';
   const { 
     data: appointments, 
     loading, 
@@ -248,7 +252,7 @@ const Appointments = () => {
                 <th className="py-3">Department</th>
                 <th className="py-3">Visit Type</th>
                 <th className="py-3">Status</th>
-                {user?.role === 'Admin' && <th className="px-4 py-3 text-end">Actions</th>}
+                {!(isPatient || isDoctor || isNurse || isReception) && <th className="px-4 py-3 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -311,7 +315,7 @@ const Appointments = () => {
                       {app.status || 'Pending'}
                     </span>
                   </td>
-                  {user?.role === 'Admin' && (
+                  {!(isPatient || isDoctor || isNurse || isReception) && (
                     <td className="px-4 py-4 text-end">
                       {app.status === 'Pending' && (
                         <div className="d-inline-flex gap-2 me-3 pe-3 border-end">
