@@ -21,6 +21,14 @@ router = APIRouter(
     dependencies=[Depends(require_roles(_ALLOWED_ROLES))]
 )
 
+# ── Public router (no authentication) ─────────────────────────────────────────
+# Mounted separately in main.py so it is completely outside the auth dependency
+# chain applied to `router` above.
+public_router = APIRouter(
+    prefix="/appointments",
+    tags=["appointments – public"],
+)
+
 
 async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
     url = settings.APPOINTMENT_WEBHOOK_URL
@@ -113,3 +121,39 @@ def delete_appointment(
         )
     appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
     return crud.delete_entity(db, appointment)
+
+
+# ── Public endpoint ────────────────────────────────────────────────────────────
+
+@public_router.post(
+    "/public",
+    response_model=schemas.AppointmentRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Book an appointment (no authentication required)",
+)
+def create_public_appointment(
+    payload: schemas.AppointmentPublicCreate,
+    db: Session = Depends(get_db),
+):
+    """
+    Public appointment-booking endpoint.
+
+    * No authentication or role check is applied.
+    * The ``status`` field is not accepted from the caller and is always
+      forced to ``"pending"`` so that staff can review and approve bookings.
+    * All other validation rules (required fields, age-or-dob constraint, etc.)
+      remain exactly as for the protected endpoint.
+    """
+    # Build a full AppointmentCreate by injecting the forced status.
+    full_payload = schemas.AppointmentCreate(
+        **payload.model_dump(),
+        status="Pending",
+    )
+
+    # Resolve an owner the same way the protected route does.
+    default_user = db.query(models.User).filter(models.User.role.ilike("%admin%")).first()
+    if not default_user:
+        default_user = db.query(models.User).first()
+    owner_id = default_user.id if default_user else 1
+
+    return crud.create_entity(db, models.Appointment, full_payload, owner_id)

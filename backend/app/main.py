@@ -47,6 +47,7 @@ from .routers import (
     staff,
     tests,
 )
+from .routers.appointments import public_router as appointments_public_router
 from .seed import seed_database
 
 
@@ -146,6 +147,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
 app.include_router(patients.router, prefix=API_PREFIX)
 app.include_router(auth.router, prefix=API_PREFIX)
+# Public appointment booking must be registered BEFORE the protected router
+# so that the literal path /appointments/public takes priority over
+# the wildcard /{appointment_id} route defined in the protected router.
+app.include_router(appointments_public_router, prefix=API_PREFIX)
 app.include_router(appointments.router, prefix=API_PREFIX)
 app.include_router(records.router, prefix=API_PREFIX)
 app.include_router(invoices.router, prefix=API_PREFIX)
