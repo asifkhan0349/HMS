@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
 
     # Webhook
-    APPOINTMENT_WEBHOOK_URL: str = "https://krishnakanth950.app.n8n.cloud/webhook/hospital-appointment-confirmation"
+    APPOINTMENT_WEBHOOK_URL: str = "https://krishnakanth11.app.n8n.cloud/webhook/Hospital-appointment-confirmation"
 
     @property
     def cors_origins(self) -> List[str]:
