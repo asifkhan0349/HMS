@@ -72,6 +72,12 @@ const Appointments = () => {
   const [editingApp, setEditingApp] = useState(null);
   const [deletingApp, setDeletingApp] = useState(null);
 
+  // Status-action modals
+  const [scheduledModalApp, setScheduledModalApp] = useState(null);
+  const [scheduledLaterModalApp, setScheduledLaterModalApp] = useState(null);
+  const [scheduledDoctorName, setScheduledDoctorName] = useState('');
+  const [scheduledLaterReason, setScheduledLaterReason] = useState('');
+
   const [formData, setFormData] = useState(createEmptyAppointmentForm);
 
   const [editFormData, setEditFormData] = useState({
@@ -189,13 +195,33 @@ const Appointments = () => {
     }
   };
 
-  const handleStatusUpdate = async (app, newStatus) => {
+  const handleStatusUpdate = async (app, newStatus, extra = {}) => {
     try {
-      await updateAppointment(app.apiId, { status: newStatus });
+      await updateAppointment(app.apiId, { status: newStatus, ...extra });
       showToast(`Appointment for ${app.patient} has been ${newStatus.toLowerCase()}.`);
     } catch (error) {
       showToast(error.message || `Unable to ${newStatus.toLowerCase()} the appointment.`, 'error');
     }
+  };
+
+  const handleConfirmScheduled = async () => {
+    if (!scheduledDoctorName.trim()) {
+      showToast('Please enter the doctor name.', 'warning');
+      return;
+    }
+    await handleStatusUpdate(scheduledModalApp, 'Scheduled', { doctor_name: scheduledDoctorName.trim() });
+    setScheduledModalApp(null);
+    setScheduledDoctorName('');
+  };
+
+  const handleConfirmScheduledLater = async () => {
+    if (!scheduledLaterReason.trim()) {
+      showToast('Please enter the reason.', 'warning');
+      return;
+    }
+    await handleStatusUpdate(scheduledLaterModalApp, 'Scheduled Later', { scheduled_later_reason: scheduledLaterReason.trim() });
+    setScheduledLaterModalApp(null);
+    setScheduledLaterReason('');
   };
 
   const handleDelete = async () => {
@@ -250,6 +276,7 @@ const Appointments = () => {
                 <th className="py-3">Appt Date / Time</th>
                 <th className="py-3">Age / Gender</th>
                 <th className="py-3">Department</th>
+                <th className="py-3">Doctor</th>
                 <th className="py-3">Visit Type</th>
                 <th className="py-3">Status</th>
                 {!(isPatient || isDoctor || isNurse || isReception) && <th className="px-4 py-3 text-end">Actions</th>}
@@ -258,7 +285,7 @@ const Appointments = () => {
             <tbody>
               {appointments.length === 0 ? (
                 <tr>
-                  <td colSpan={user?.role === 'Admin' ? 7 : 6} className="p-0">
+                  <td colSpan={user?.role === 'Admin' ? 8 : 7} className="p-0">
                     <EmptyState
                       icon="bi-calendar-event"
                       title="No Appointments"
@@ -283,6 +310,9 @@ const Appointments = () => {
                   </td>
                   <td className="py-4 text-truncate" style={{ maxWidth: '150px' }}>
                     <span className="badge bg-light text-dark border">{app.department || 'General'}</span>
+                  </td>
+                  <td className="py-4">
+                    <span className="fw-medium">{app.doctor || 'Not Assigned'}</span>
                   </td>
                   <td className="py-4">
                     <span
@@ -322,7 +352,7 @@ const Appointments = () => {
                           <button
                             className="btn btn-sm btn-glass p-0 text-success"
                             style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 191, 131, 0.2)' }}
-                            onClick={() => handleStatusUpdate(app, 'Scheduled')}
+                            onClick={() => { setScheduledDoctorName(''); setScheduledModalApp(app); }}
                             disabled={loading}
                             title="Set to Scheduled"
                           >
@@ -331,7 +361,7 @@ const Appointments = () => {
                           <button
                             className="btn btn-sm btn-glass p-0 text-primary"
                             style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 122, 255, 0.2)' }}
-                            onClick={() => handleStatusUpdate(app, 'Scheduled Later')}
+                            onClick={() => { setScheduledLaterReason(''); setScheduledLaterModalApp(app); }}
                             disabled={loading}
                             title="Set to Scheduled Later"
                           >
@@ -677,6 +707,329 @@ const Appointments = () => {
         itemName={deletingApp?.patient}
         itemType="Appointment"
       />
+
+      {/* ── Scheduled: Doctor Name Dialog ── */}
+      {!!scheduledModalApp && (
+        <div
+          style={{
+            position: 'fixed', inset: 0,
+            backgroundColor: 'rgba(2, 6, 23, 0.80)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            zIndex: 4000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            animation: 'fadeIn 0.2s ease',
+          }}
+          onClick={() => setScheduledModalApp(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sched-dialog-title"
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '440px',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,191,131,0.25)',
+              overflow: 'hidden',
+              animation: 'slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #00bf83 0%, #00a372 100%)',
+              padding: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}>
+              <div style={{
+                width: '48px', height: '48px',
+                borderRadius: '14px',
+                background: 'rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <i className="bi bi-calendar-check-fill" style={{ fontSize: '1.4rem', color: '#fff' }} />
+              </div>
+              <div>
+                <h5 id="sched-dialog-title" style={{ margin: 0, fontWeight: 700, color: '#fff', fontSize: '1.1rem' }}>
+                  Confirm Scheduled
+                </h5>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.8)', fontSize: '0.82rem', marginTop: '2px' }}>
+                  Assign a doctor to this appointment
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setScheduledModalApp(null)}
+                style={{
+                  marginLeft: 'auto', background: 'rgba(255,255,255,0.2)',
+                  border: 'none', borderRadius: '50%',
+                  width: '32px', height: '32px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#fff', flexShrink: 0,
+                  transition: 'background 0.2s',
+                }}
+                aria-label="Close"
+              >
+                <i className="bi bi-x-lg" style={{ fontSize: '0.85rem' }} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{
+                background: 'rgba(0,191,131,0.07)',
+                border: '1px solid rgba(0,191,131,0.18)',
+                borderRadius: '12px',
+                padding: '0.75rem 1rem',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+              }}>
+                <i className="bi bi-person-circle" style={{ color: '#00bf83', fontSize: '1rem', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.88rem', color: '#374151' }}>
+                  Patient: <strong>{scheduledModalApp?.patient}</strong>
+                </span>
+              </div>
+
+              <label
+                htmlFor="schedule-doctor-name"
+                style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
+                  textTransform: 'uppercase', letterSpacing: '0.06em',
+                  color: '#6b7280', marginBottom: '0.5rem' }}
+              >
+                Doctor Name
+              </label>
+              <div style={{ position: 'relative' }}>
+                <i className="bi bi-person-badge"
+                  style={{ position: 'absolute', left: '12px', top: '50%',
+                    transform: 'translateY(-50%)', color: '#00bf83', pointerEvents: 'none' }}
+                />
+                <input
+                  id="schedule-doctor-name"
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. Dr. Ananya Sharma"
+                  value={scheduledDoctorName}
+                  onChange={(e) => setScheduledDoctorName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConfirmScheduled()}
+                  list="doctor-options-scheduled"
+                  autoFocus
+                  style={{
+                    paddingLeft: '36px',
+                    borderRadius: '12px',
+                    border: '2px solid #e5e7eb',
+                    fontSize: '0.95rem',
+                    transition: 'border-color 0.2s',
+                  }}
+                />
+                <datalist id="doctor-options-scheduled">
+                  {doctorOptions.map((d) => <option key={d} value={d} />)}
+                </datalist>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setScheduledModalApp(null)}
+                  style={{
+                    flex: 1, padding: '0.65rem 1rem',
+                    border: '2px solid #e5e7eb', borderRadius: '12px',
+                    background: '#fff', color: '#374151', fontWeight: 600,
+                    fontSize: '0.9rem', cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmScheduled}
+                  disabled={loading || !scheduledDoctorName.trim()}
+                  style={{
+                    flex: 1, padding: '0.65rem 1rem',
+                    border: 'none', borderRadius: '12px',
+                    background: scheduledDoctorName.trim()
+                      ? 'linear-gradient(135deg, #00bf83 0%, #00a372 100%)'
+                      : '#d1fae5',
+                    color: scheduledDoctorName.trim() ? '#fff' : '#6ee7b7',
+                    fontWeight: 700, fontSize: '0.9rem', cursor: scheduledDoctorName.trim() ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                  }}
+                >
+                  <i className="bi bi-calendar-check-fill" />
+                  Confirm Scheduled
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Schedule Later: Reason Dialog ── */}
+      {!!scheduledLaterModalApp && (
+        <div
+          style={{
+            position: 'fixed', inset: 0,
+            backgroundColor: 'rgba(2, 6, 23, 0.80)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            zIndex: 4000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            animation: 'fadeIn 0.2s ease',
+          }}
+          onClick={() => setScheduledLaterModalApp(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sched-later-dialog-title"
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '440px',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,122,255,0.25)',
+              overflow: 'hidden',
+              animation: 'slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #007aff 0%, #0055cc 100%)',
+              padding: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}>
+              <div style={{
+                width: '48px', height: '48px',
+                borderRadius: '14px',
+                background: 'rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <i className="bi bi-clock-history" style={{ fontSize: '1.4rem', color: '#fff' }} />
+              </div>
+              <div>
+                <h5 id="sched-later-dialog-title" style={{ margin: 0, fontWeight: 700, color: '#fff', fontSize: '1.1rem' }}>
+                  Schedule Later
+                </h5>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.8)', fontSize: '0.82rem', marginTop: '2px' }}>
+                  Provide a reason for deferring
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setScheduledLaterModalApp(null)}
+                style={{
+                  marginLeft: 'auto', background: 'rgba(255,255,255,0.2)',
+                  border: 'none', borderRadius: '50%',
+                  width: '32px', height: '32px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#fff', flexShrink: 0,
+                  transition: 'background 0.2s',
+                }}
+                aria-label="Close"
+              >
+                <i className="bi bi-x-lg" style={{ fontSize: '0.85rem' }} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{
+                background: 'rgba(0,122,255,0.07)',
+                border: '1px solid rgba(0,122,255,0.18)',
+                borderRadius: '12px',
+                padding: '0.75rem 1rem',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+              }}>
+                <i className="bi bi-person-circle" style={{ color: '#007aff', fontSize: '1rem', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.88rem', color: '#374151' }}>
+                  Patient: <strong>{scheduledLaterModalApp?.patient}</strong>
+                </span>
+              </div>
+
+              <label
+                htmlFor="schedule-later-reason"
+                style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
+                  textTransform: 'uppercase', letterSpacing: '0.06em',
+                  color: '#6b7280', marginBottom: '0.5rem' }}
+              >
+                Reason for Scheduling Later
+              </label>
+              <textarea
+                id="schedule-later-reason"
+                className="form-control"
+                rows={3}
+                placeholder="e.g. Doctor unavailable, patient requested a later slot…"
+                value={scheduledLaterReason}
+                onChange={(e) => setScheduledLaterReason(e.target.value)}
+                autoFocus
+                style={{
+                  borderRadius: '12px',
+                  border: '2px solid #e5e7eb',
+                  fontSize: '0.95rem',
+                  resize: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+              />
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setScheduledLaterModalApp(null)}
+                  style={{
+                    flex: 1, padding: '0.65rem 1rem',
+                    border: '2px solid #e5e7eb', borderRadius: '12px',
+                    background: '#fff', color: '#374151', fontWeight: 600,
+                    fontSize: '0.9rem', cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmScheduledLater}
+                  disabled={loading || !scheduledLaterReason.trim()}
+                  style={{
+                    flex: 1, padding: '0.65rem 1rem',
+                    border: 'none', borderRadius: '12px',
+                    background: scheduledLaterReason.trim()
+                      ? 'linear-gradient(135deg, #007aff 0%, #0055cc 100%)'
+                      : '#dbeafe',
+                    color: scheduledLaterReason.trim() ? '#fff' : '#93c5fd',
+                    fontWeight: 700, fontSize: '0.9rem', cursor: scheduledLaterReason.trim() ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                  }}
+                >
+                  <i className="bi bi-clock-fill" />
+                  Confirm Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

@@ -141,6 +141,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   phoneNumber: appointment.phone_number || '',
   timeSlot: appointment.time_slot || '',
   department: appointment.department || '',
+  doctor: appointment.doctor_name || '',
 });
 
 export const mapRecordFromApi = (record) => ({

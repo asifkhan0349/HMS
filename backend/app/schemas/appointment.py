@@ -17,6 +17,8 @@ class AppointmentBase(AppBaseModel):
     phone_number: Optional[str] = Field(None, max_length=20)
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
+    doctor_name: Optional[str] = Field(None, max_length=120)
+    scheduled_later_reason: Optional[str] = Field(None, max_length=255)
 
     @model_validator(mode="after")
     def validate_age_or_dob(self):
@@ -65,6 +67,8 @@ class AppointmentUpdate(AppBaseModel):
     phone_number: Optional[str] = Field(None, max_length=20)
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
+    doctor_name: Optional[str] = Field(None, max_length=120)
+    scheduled_later_reason: Optional[str] = Field(None, max_length=255)
 
 
 class AppointmentRead(ORMBase):
@@ -81,6 +85,8 @@ class AppointmentRead(ORMBase):
     phone_number: Optional[str] = None
     time_slot: Optional[str] = None
     department: Optional[str] = None
+    doctor_name: Optional[str] = None
+    scheduled_later_reason: Optional[str] = None
     created_at: datetime
     
     @field_serializer("created_at")

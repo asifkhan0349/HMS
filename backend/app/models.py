@@ -29,6 +29,8 @@ class Appointment(Base):
     phone_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     time_slot: Mapped[str | None] = mapped_column(String(50), nullable=True)
     department: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    doctor_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    scheduled_later_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
