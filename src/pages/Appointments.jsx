@@ -514,14 +514,29 @@ const Appointments = () => {
                 </div>
                 <div className="col-md-6">
                   <label htmlFor="appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
-                  <input
+                  <select
                     id="appointment-timeslot"
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. 10:30 AM"
+                    className="form-select"
                     value={formData.timeSlot}
                     onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
-                  />
+                  >
+                    <option value="">Select Time Slot</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="10:30 AM">10:30 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="11:30 AM">11:30 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="12:30 PM">12:30 PM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                    <option value="1:30 PM">1:30 PM</option>
+                    <option value="2:00 PM">2:00 PM</option>
+                    <option value="2:30 PM">2:30 PM</option>
+                    <option value="3:00 PM">3:00 PM</option>
+                    <option value="3:30 PM">3:30 PM</option>
+                    <option value="4:00 PM">4:00 PM</option>
+                    <option value="4:30 PM">4:30 PM</option>
+                    <option value="5:00 PM">5:00 PM</option>
+                  </select>
                 </div>
                 <div className="col-md-12">
                   <label htmlFor="appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2">Department</label>
@@ -659,14 +674,29 @@ const Appointments = () => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="edit-appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
-                      <input
+                      <select
                         id="edit-appointment-timeslot"
-                        type="text"
-                        className="form-control"
-                        placeholder="e.g. 10:30 AM"
+                        className="form-select"
                         value={editFormData.timeSlot}
                         onChange={(e) => setEditFormData({ ...editFormData, timeSlot: e.target.value })}
-                      />
+                      >
+                        <option value="">Select Time Slot</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="12:30 PM">12:30 PM</option>
+                        <option value="1:00 PM">1:00 PM</option>
+                        <option value="1:30 PM">1:30 PM</option>
+                        <option value="2:00 PM">2:00 PM</option>
+                        <option value="2:30 PM">2:30 PM</option>
+                        <option value="3:00 PM">3:00 PM</option>
+                        <option value="3:30 PM">3:30 PM</option>
+                        <option value="4:00 PM">4:00 PM</option>
+                        <option value="4:30 PM">4:30 PM</option>
+                        <option value="5:00 PM">5:00 PM</option>
+                      </select>
                     </div>
                     <div className="col-md-12">
                       <label htmlFor="edit-appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2">Department</label>
@@ -813,15 +843,12 @@ const Appointments = () => {
                   style={{ position: 'absolute', left: '12px', top: '50%',
                     transform: 'translateY(-50%)', color: '#00bf83', pointerEvents: 'none' }}
                 />
-                <input
+                <select
                   id="schedule-doctor-name"
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Dr. Ananya Sharma"
+                  className="form-select"
                   value={scheduledDoctorName}
                   onChange={(e) => setScheduledDoctorName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleConfirmScheduled()}
-                  list="doctor-options-scheduled"
                   autoFocus
                   style={{
                     paddingLeft: '36px',
@@ -829,11 +856,13 @@ const Appointments = () => {
                     border: '2px solid #e5e7eb',
                     fontSize: '0.95rem',
                     transition: 'border-color 0.2s',
+                    appearance: 'none',
+                    backgroundColor: '#fff',
                   }}
-                />
-                <datalist id="doctor-options-scheduled">
-                  {doctorOptions.map((d) => <option key={d} value={d} />)}
-                </datalist>
+                >
+                  <option value="" disabled>Select a Doctor</option>
+                  {doctorOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
