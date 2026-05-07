@@ -30,20 +30,16 @@ public_router = APIRouter(
 )
 
 
-async def send_appointment_webhook(status: str, telegram_chat_id: str | None):
+async def send_appointment_webhook(appointment_data: dict):
     url = settings.APPOINTMENT_WEBHOOK_URL
     if not url:
         logger.warning("Appointment webhook URL not configured. Skipping.")
         return
 
-    payload = {
-        "status": status,
-        "telegram_chat_id": str(telegram_chat_id) if telegram_chat_id is not None else None
-    }
     headers = {"Content-Type": "application/json"}
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, headers=headers, timeout=10.0)
+            response = await client.post(url, json=appointment_data, headers=headers, timeout=10.0)
             response.raise_for_status()
             logger.info(f"Webhook sent to {url} successfully: {response.status_code}")
     except Exception as e:
@@ -98,10 +94,10 @@ def update_appointment(
     updated_appointment = crud.update_entity(db, appointment, payload)
 
     if payload.status is not None and payload.status != old_status:
+        appointment_data = schemas.AppointmentRead.model_validate(updated_appointment).model_dump(mode='json')
         background_tasks.add_task(
             send_appointment_webhook,
-            updated_appointment.status,
-            updated_appointment.telegram_chat_id
+            appointment_data
         )
 
     return updated_appointment
