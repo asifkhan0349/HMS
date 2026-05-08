@@ -21,6 +21,8 @@ const EMR = () => {
   const isDoctor = user?.role === 'Doctor';
   const isNurse = user?.role === 'Nurse';
   const isReception = user?.role === 'Reception';
+  const canCreate = isDoctor || isNurse || user?.role === 'Admin';
+  const canEditDelete = user?.role === 'Admin';
   const canReadStaff = true;
   const { 
     data: records, 
@@ -134,7 +136,7 @@ const EMR = () => {
           <h2 className="fw-bold mb-0">Electronic Medical Records</h2>
           <p className="text-white opacity-75 mb-0">Encrypted clinical history and diagnostic telemetry.</p>
         </div>
-        {!isPatient && !(isDoctor || isNurse || isReception) && (
+        {canCreate && (
           <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
             <i className="bi bi-file-earmark-plus me-2"></i>New EMR Entry
           </button>
@@ -157,7 +159,7 @@ const EMR = () => {
                 <th className="py-4">Patient Identity</th>
                 <th className="py-4">Clinician</th>
                 <th className="py-4">Primary Diagnosis</th>
-                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Electronic Validation</th>}
+                {canEditDelete && <th className="px-4 py-4 text-end">Electronic Validation</th>}
               </tr>
             </thead>
             <tbody>
@@ -168,8 +170,8 @@ const EMR = () => {
                       icon="bi-file-earmark-medical"
                       title="No Clinical Records"
                       description="Electronic health history is currently empty for the selected clinical scope."
-                      actionText={isPatient ? undefined : "New EMR Entry"}
-                      onAction={isPatient ? undefined : () => setIsModalOpen(true)}
+                      actionText={canCreate ? "New EMR Entry" : undefined}
+                      onAction={canCreate ? () => setIsModalOpen(true) : undefined}
                     />
                   </td>
                 </tr>
@@ -183,7 +185,7 @@ const EMR = () => {
                   <td className="py-4">
                     <span className="badge-soft-success px-3 py-1 rounded-pill">{record.diagnosis}</span>
                   </td>
-                  {!isPatient && !(isDoctor || isNurse || isReception) && (
+                  {canEditDelete && (
                     <td className="px-4 py-4 text-end">
                       <button
                         className="btn btn-sm btn-glass me-2"

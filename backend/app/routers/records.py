@@ -13,12 +13,12 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=list[schemas.MedicalRecordRead], dependencies=[Depends(exclude_roles(["Doctor", "Nurse", "Reception"]))])
+@router.get("", response_model=list[schemas.MedicalRecordRead])
 def list_records(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.list_entities(db, models.MedicalRecord, current_user_id)
 
 
-@router.post("", response_model=schemas.MedicalRecordRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.post("", response_model=schemas.MedicalRecordRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient", "Reception"]))])
 def create_record(payload: schemas.MedicalRecordCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     return crud.create_entity(db, models.MedicalRecord, payload, current_user_id)
 
