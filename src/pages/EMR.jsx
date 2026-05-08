@@ -5,7 +5,9 @@ import { recordsApi, patientsApi, staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const EMR = () => {
   const createDraftRecord = () => ({
@@ -31,6 +33,16 @@ const EMR = () => {
     updateData: updateRecord,
     removeData: deleteRecord
   } = useCrud(recordsApi, mapRecordFromApi);
+
+  const {
+    paginatedData: paginatedRecords,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(records);
   
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff } = useCrud(staffApi, mapStaffFromApi, { enabled: canReadStaff });
@@ -175,7 +187,7 @@ const EMR = () => {
                     />
                   </td>
                 </tr>
-              ) : records.map((record) => (
+              ) : paginatedRecords.map((record) => (
                 <tr key={record.id}>
                   <td className="px-4 py-4 fw-bold gradient-text">{record.id}</td>
                   <td className="py-4 text-white opacity-75">{record.clinicalId}</td>
@@ -212,6 +224,14 @@ const EMR = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Electronic Clinical Entry Protocol">

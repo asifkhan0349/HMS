@@ -20,6 +20,9 @@ def send_invoice_email(invoice, recipient_email: str) -> str:
     if not script_path.is_file():
         raise InvoiceDeliveryError("Invoice email script is missing from the backend.")
 
+    # Read line items from the saved invoice record (persisted in the DB)
+    stored_line_items = invoice.line_items or []
+
     payload = {
         "recipient_email": recipient_email,
         "mail_from": settings.MAIL_FROM,
@@ -38,6 +41,7 @@ def send_invoice_email(invoice, recipient_email: str) -> str:
             "status": invoice.status,
             "payment_method": invoice.payment_method,
         },
+        "line_items": stored_line_items,
     }
 
     try:
@@ -72,3 +76,51 @@ def send_invoice_email(invoice, recipient_email: str) -> str:
         raise InvoiceDeliveryError(response.get("message") or "Invoice delivery failed.")
 
     return response.get("message") or "Invoice PDF generated and emailed successfully."
+
+
+def download_invoice_pdf(invoice) -> bytes:
+    """Generate invoice PDF and return raw bytes for a file download response."""
+    project_root = Path(__file__).resolve().parents[3]
+    script_path = project_root / "backend" / "app" / "scripts" / "download_invoice_pdf.mjs"
+
+    if not script_path.is_file():
+        raise InvoiceDeliveryError("Invoice PDF download script is missing from the backend.")
+
+    stored_line_items = invoice.line_items or []
+
+    payload = {
+        "invoice": {
+            "id": invoice.id,
+            "invoice_code": invoice.invoice_code,
+            "patient_name": invoice.patient_name,
+            "invoice_date": invoice.invoice_date.isoformat(),
+            "amount": str(invoice.amount),
+            "status": invoice.status,
+            "payment_method": invoice.payment_method,
+        },
+        "line_items": stored_line_items,
+    }
+
+    try:
+        result = subprocess.run(
+            ["node", str(script_path)],
+            input=json.dumps(payload).encode(),
+            capture_output=True,
+            cwd=str(project_root),
+            timeout=120,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise InvoiceDeliveryError("Node.js is not available on the server.") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise InvoiceDeliveryError("Invoice PDF generation timed out.") from exc
+
+    if result.returncode != 0:
+        stderr = (result.stderr or b"").decode(errors="replace").strip()
+        logger.error("Invoice PDF download script failed. stderr=%s", stderr)
+        raise InvoiceDeliveryError(stderr or "PDF generation process exited unexpectedly.")
+
+    if not result.stdout:
+        raise InvoiceDeliveryError("PDF generation produced no output.")
+
+    return result.stdout

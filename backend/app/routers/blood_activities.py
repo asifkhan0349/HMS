@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -79,9 +79,9 @@ def sync_activity_to_inventory(db: Session, user_id: int, blood_group: str, unit
 @router.get("", response_model=list[schemas.BloodActivityRead])
 def list_blood_activities(
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    return crud.list_entities(db, models.BloodActivity, user_id)
+    return crud.list_entities(db, models.BloodActivity, owner_id)
 
 
 @router.post("", response_model=schemas.BloodActivityRead, status_code=status.HTTP_201_CREATED)
@@ -104,9 +104,9 @@ def update_blood_activity(
     act_id: PositiveId,
     payload: schemas.BloodActivityUpdate,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id)
+    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, owner_id)
     inventory_owner_id = activity.owner_user_id
 
     # 1. Revert OLD impact completely
@@ -129,9 +129,9 @@ def update_blood_activity(
 def delete_blood_activity(
     act_id: PositiveId,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id)
+    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, owner_id)
     sync_activity_to_inventory(db, activity.owner_user_id, activity.blood_group, activity.units, activity.type, revert=True)
     db.delete(activity)
     db.commit()

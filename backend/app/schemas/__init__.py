@@ -7,6 +7,7 @@ from .invoice import (
     InvoiceCreate,
     InvoiceUpdate,
     InvoiceRead,
+    InvoiceLineItem,
     InvoicePaidEmailRequest,
     InvoicePaidEmailResponse,
 )

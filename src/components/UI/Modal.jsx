@@ -124,14 +124,14 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     >
       <div 
         ref={dialogRef}
-        className="glass-card p-0 w-100 mx-3 animate-fade-up"
-        style={{ maxWidth: '600px', overflow: 'hidden', border: '1px solid rgba(45, 212, 191, 0.4)' }}
+        className="glass-card p-0 w-100 mx-3 animate-fade-up d-flex flex-column"
+        style={{ maxWidth: '600px', maxHeight: '90vh', overflow: 'hidden', border: '1px solid rgba(45, 212, 191, 0.4)' }}
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <div className="p-4 border-bottom border-accents-2 d-flex justify-content-between align-items-center bg-white">
+        <div className="p-4 border-bottom border-accents-2 d-flex justify-content-between align-items-center bg-white flex-shrink-0">
           <h4 id={titleId} className="mb-0 fw-bold d-flex align-items-center text-dark">
             <i className="bi bi-file-earmark-plus text-primary me-2"></i>
             {title}
@@ -146,7 +146,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
-        <div className="p-4 bg-white text-dark">
+        <div className="p-4 bg-white text-dark overflow-y-auto custom-scrollbar flex-grow-1">
           {children}
         </div>
       </div>

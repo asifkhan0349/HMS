@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useApp, mapMedicineFromApi, createCode } from '../context/AppContext';
+import { useApp, mapMedicineFromApi } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
 import { medicinesApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const Pharmacy = () => {
   const { showToast, user } = useApp();
@@ -19,6 +21,23 @@ const Pharmacy = () => {
     updateData: updateMedicine,
     removeData: deleteMedicine
   } = useCrud(medicinesApi, mapMedicineFromApi);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredMedicines = medicines.filter(med => 
+    med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    med.batch.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const {
+    paginatedData: paginatedMedicines,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(filteredMedicines);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -157,7 +176,16 @@ const Pharmacy = () => {
           <h6 className="fw-bold mb-0">Active Stock</h6>
           <div className="input-group w-25">
             <span className="input-group-text bg-transparent border-end-0 border-accents-2 opacity-50"><i className="bi bi-search" aria-hidden="true"></i></span>
-            <input type="text" className="form-control border-start-0 ps-0 py-1" placeholder="Search inventory…" />
+            <input 
+              type="text" 
+              className="form-control border-start-0 ps-0 py-1" 
+              placeholder="Search inventory…" 
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                onPageChange(1);
+              }}
+            />
           </div>
         </div>
         <Skeleton name="pharmacy-table" loading={loading}>
@@ -186,7 +214,19 @@ const Pharmacy = () => {
                     />
                   </td>
                 </tr>
-              ) : medicines.map((med) => (
+              ) : paginatedMedicines.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-0">
+                    <EmptyState 
+                      icon="bi-search"
+                      title="No matching medicine"
+                      description={`We couldn't find any medicine matching "${searchTerm}" in our inventory.`}
+                      actionText="Clear Search"
+                      onAction={() => { setSearchTerm(''); onPageChange(1); }}
+                    />
+                  </td>
+                </tr>
+              ) : paginatedMedicines.map((med) => (
                 <tr key={med.id}>
                   <td className="px-4 py-4 fw-bold">{med.name}</td>
                   <td className="py-4 text-muted small" style={{ fontVariantNumeric: 'tabular-nums' }}>{med.batch}</td>
@@ -241,6 +281,14 @@ const Pharmacy = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       {/* Add Medicine Modal */}

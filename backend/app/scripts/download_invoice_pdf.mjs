@@ -1,16 +1,25 @@
-import nodemailer from 'nodemailer';
+/**
+ * download_invoice_pdf.mjs
+ *
+ * Reads invoice JSON from stdin, generates a PDF with Puppeteer, and writes
+ * the raw PDF bytes to stdout. The Python caller streams those bytes directly
+ * to the HTTP client as an application/pdf download.
+ *
+ * stdin payload:  { invoice: {...}, line_items: [...] }
+ * stdout:         raw PDF bytes
+ * stderr / exit 1: error message string
+ */
+
+import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
-import { promises as fs } from 'fs';
 import puppeteer from 'puppeteer';
 
 const readStdin = async () =>
   new Promise((resolve, reject) => {
     let data = '';
     process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => {
-      data += chunk;
-    });
+    process.stdin.on('data', (chunk) => { data += chunk; });
     process.stdin.on('end', () => resolve(data));
     process.stdin.on('error', reject);
   });
@@ -51,7 +60,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         max-width: 760px;
         margin: 0 auto;
       }
-      /* ── Header ── */
       .header {
         display: flex;
         justify-content: space-between;
@@ -79,7 +87,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         font-weight: 700;
         margin-top: 10px;
       }
-      /* ── Info Grid ── */
       .info-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -99,7 +106,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         margin-bottom: 6px;
       }
       .info-value { font-size: 15px; font-weight: 600; color: #0f172a; }
-      /* ── Medicine Table ── */
       .section-title {
         font-size: 13px;
         font-weight: 700;
@@ -108,11 +114,7 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         letter-spacing: 0.08em;
         margin-bottom: 10px;
       }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-      }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
       thead tr { background: #f1f5f9; }
       th {
         text-align: left;
@@ -131,7 +133,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         color: #1e293b;
       }
       tr:last-child td { border-bottom: none; }
-      /* ── Total ── */
       .total-row {
         display: flex;
         justify-content: flex-end;
@@ -145,7 +146,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
       }
       .total-label { font-size: 13px; font-weight: 600; color: #475569; }
       .total-amount { font-size: 22px; font-weight: 700; color: #166534; }
-      /* ── Footer ── */
       .footer {
         margin-top: 32px;
         padding-top: 18px;
@@ -158,7 +158,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
   </head>
   <body>
     <div class="sheet">
-      <!-- Header -->
       <div class="header">
         <div>
           <div class="eyebrow">Hospital Management System</div>
@@ -172,7 +171,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- Info Cards -->
       <div class="info-grid">
         <div class="info-card">
           <div class="info-label">Invoice ID</div>
@@ -200,7 +198,6 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- Medicine Details Table -->
       <div class="section-title">Medicine Details</div>
       <table>
         <thead>
@@ -220,16 +217,13 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
             <td class="right">${escapeHtml(String(item.quantity))}</td>
             <td class="right">${escapeHtml(currency(item.subtotal))}</td>
           </tr>`).join('')
-            : `<tr>
-            <td colspan="4" style="color:#94a3b8;font-style:italic;text-align:center">
+            : `<tr><td colspan="4" style="color:#94a3b8;font-style:italic;text-align:center">
               No medicine line items recorded for this invoice.
-            </td>
-          </tr>`
+            </td></tr>`
           }
         </tbody>
       </table>
 
-      <!-- Grand Total -->
       <div class="total-row">
         <span class="total-label">Grand Total</span>
         <span class="total-amount">${escapeHtml(currency(invoice.amount))}</span>
@@ -242,24 +236,14 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
   </body>
 </html>`;
 
-const ensureMailConfig = (payload) => {
-  if (!payload.mail_server || !payload.mail_port || !payload.mail_from) {
-    throw new Error('SMTP configuration is incomplete. Set MAIL_SERVER, MAIL_PORT, and MAIL_FROM.');
-  }
-
-  if (!payload.mail_username || !payload.mail_password) {
-    throw new Error('SMTP credentials are missing. Set MAIL_USERNAME and MAIL_PASSWORD.');
-  }
-};
-
 const main = async () => {
   const rawInput = await readStdin();
   const payload = JSON.parse(rawInput || '{}');
-  ensureMailConfig(payload);
 
   const invoice = payload.invoice;
   const lineItems = Array.isArray(payload.line_items) ? payload.line_items : [];
-  const pdfPath = path.join(os.tmpdir(), `${invoice.invoice_code}.pdf`);
+  const pdfPath = path.join(os.tmpdir(), `download_${invoice.invoice_code}_${Date.now()}.pdf`);
+
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 
   try {
@@ -272,32 +256,9 @@ const main = async () => {
       margin: { top: '18mm', right: '16mm', bottom: '18mm', left: '16mm' },
     });
 
-    const transporter = nodemailer.createTransport({
-      host: payload.mail_server,
-      port: Number(payload.mail_port),
-      secure: Boolean(payload.mail_ssl_tls) || Number(payload.mail_port) === 465,
-      auth: {
-        user: payload.mail_username,
-        pass: payload.mail_password,
-      },
-      requireTLS: Boolean(payload.mail_starttls),
-    });
-
-    await transporter.sendMail({
-      from: payload.mail_from,
-      to: payload.recipient_email,
-      subject: `Paid invoice ${invoice.invoice_code}`,
-      text: `Hello,\n\nPlease find attached the paid invoice ${invoice.invoice_code} for ${invoice.patient_name}.\n\nAmount: ${currency(invoice.amount)}\nPayment method: ${invoice.payment_method}\nDate: ${invoice.invoice_date}\n\nRegards,\nHospital Management System`,
-      attachments: [
-        {
-          filename: `${invoice.invoice_code}.pdf`,
-          path: pdfPath,
-          contentType: 'application/pdf',
-        },
-      ],
-    });
-
-    process.stdout.write(JSON.stringify({ ok: true, message: `Invoice ${invoice.invoice_code} emailed to ${payload.recipient_email}.` }));
+    // Write raw PDF bytes to stdout for Python to stream
+    const pdfBytes = await fs.readFile(pdfPath);
+    process.stdout.write(pdfBytes);
   } finally {
     await browser.close();
     await fs.rm(pdfPath, { force: true });

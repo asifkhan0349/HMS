@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Optional
 from pydantic import Field
 from .base import AppBaseModel, ORMBase
@@ -8,6 +9,7 @@ class MedicineBase(AppBaseModel):
     name: str = Field(..., min_length=2, max_length=120)
     batch: str = Field(..., min_length=1, max_length=50)
     stock: int = Field(..., ge=0)
+    price: Decimal = Field(default=Decimal("0.00"), ge=0)
     expiry_date: date
     status: str = Field(..., min_length=2, max_length=50)
 
@@ -21,6 +23,7 @@ class MedicineUpdate(AppBaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=120)
     batch: Optional[str] = Field(None, min_length=1, max_length=50)
     stock: Optional[int] = Field(None, ge=0)
+    price: Optional[Decimal] = Field(None, ge=0)
     expiry_date: Optional[date] = None
     status: Optional[str] = Field(None, min_length=2, max_length=50)
 
@@ -29,3 +32,4 @@ class MedicineRead(MedicineBase, ORMBase):
     id: int
     medicine_code: str
     created_at: datetime
+

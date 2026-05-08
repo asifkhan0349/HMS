@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, List, Any
 from pydantic import Field
 from .base import AppBaseModel, ORMBase
 
@@ -15,6 +15,7 @@ class InvoiceBase(AppBaseModel):
 
 class InvoiceCreate(InvoiceBase):
     invoice_code: Optional[str] = None
+    line_items: Optional[List[Any]] = None
 
 
 class InvoiceUpdate(AppBaseModel):
@@ -24,12 +25,21 @@ class InvoiceUpdate(AppBaseModel):
     amount: Optional[Decimal] = Field(None, ge=0)
     status: Optional[str] = Field(None, min_length=2, max_length=50)
     payment_method: Optional[str] = Field(None, min_length=2, max_length=100)
+    line_items: Optional[List[Any]] = None
 
 
 class InvoiceRead(InvoiceBase, ORMBase):
     id: int
     invoice_code: str
+    line_items: Optional[List[Any]] = None
     created_at: datetime
+
+
+class InvoiceLineItem(AppBaseModel):
+    name: str
+    price: Decimal = Field(ge=0)
+    quantity: int = Field(ge=1)
+    subtotal: Decimal = Field(ge=0)
 
 
 class InvoicePaidEmailRequest(AppBaseModel):
@@ -46,3 +56,4 @@ class InvoicePaidEmailResponse(AppBaseModel):
     invoice: InvoiceRead
     email_sent: bool
     message: str
+

@@ -5,7 +5,9 @@ import { inventoryApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const Inventory = () => {
   const { showToast, user } = useApp();
@@ -19,6 +21,16 @@ const Inventory = () => {
     updateData: updateInventory,
     removeData: deleteInventory
   } = useCrud(inventoryApi, mapInventoryFromApi);
+
+  const {
+    paginatedData: paginatedInventoryItems,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(inventoryItems);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -191,7 +203,7 @@ const Inventory = () => {
                     />
                   </td>
                 </tr>
-              ) : inventoryItems.map((item) => (
+              ) : paginatedInventoryItems.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 fw-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>{item.id}</td>
                   <td>{item.name}</td>
@@ -248,6 +260,14 @@ const Inventory = () => {
           </table>
         </div>
       </div>
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={onRowsPerPageChange}
+        totalItems={totalItems}
+      />
       </Skeleton>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Inventory Item">

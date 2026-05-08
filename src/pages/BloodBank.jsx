@@ -5,7 +5,9 @@ import { bloodInventoryApi, bloodActivitiesApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const BloodBank = () => {
   const { showToast, user } = useApp();
@@ -27,6 +29,16 @@ const BloodBank = () => {
     updateData: updateActivity,
     removeData: deleteActivity
   } = useCrud(bloodActivitiesApi, mapActivityFromApi);
+
+  const {
+    paginatedData: paginatedActivities,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(activities);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isActivityEditModalOpen, setIsActivityEditModalOpen] = useState(false);
@@ -328,7 +340,7 @@ const BloodBank = () => {
                       />
                    </td>
                 </tr>
-              ) : activities.map((act) => (
+              ) : paginatedActivities.map((act) => (
                 <tr key={act.id}>
                   <td>
                     <span className={`fw-medium ${act.type === 'Donation' ? 'text-success' : 'text-primary'}`}>
@@ -361,6 +373,14 @@ const BloodBank = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       {/* Log Activity Modal */}

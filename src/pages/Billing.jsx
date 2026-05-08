@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
-import { useApp, mapInvoiceFromApi, mapPatientFromApi, createCode } from '../context/AppContext';
+import React, { useState, useMemo } from 'react';
+import { useApp, mapInvoiceFromApi, mapPatientFromApi, mapMedicineFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { invoicesApi, patientsApi } from '../lib/api';
+import { invoicesApi, patientsApi, medicinesApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const Billing = () => {
   const { showToast, user } = useApp();
-  const isPatient = user?.role?.toLowerCase() === 'patient';
   const isDoctor = user?.role === 'Doctor';
   const isNurse = user?.role === 'Nurse';
   const isReception = user?.role === 'Reception';
+  // canOperate: Admin + Reception — create invoices, mark paid/cancelled, download, send email
+  const canOperate = !isDoctor && !isNurse;
+  // canManage: Admin only — can also edit and delete invoices
+  const canManage = canOperate && !isReception;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const { 
     data: invoices, 
@@ -23,7 +28,62 @@ const Billing = () => {
     loadData: loadInvoices
   } = useCrud(invoicesApi, mapInvoiceFromApi);
   
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredInvoices = invoices.filter(inv => 
+    inv.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    inv.id.toString().includes(searchTerm)
+  );
+
+  const {
+    paginatedData: paginatedInvoices,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(filteredInvoices);
+  
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
+  const { data: medicines } = useCrud(medicinesApi, mapMedicineFromApi);
+
+  // lineItems: [{ rowId, name, priceValue, quantity }]
+  const [lineItems, setLineItems] = useState([]);
+  const [newRow, setNewRow] = useState({ name: '', price: '', qty: '1' });
+
+  const lineItemsTotal = useMemo(
+    () => lineItems.reduce((sum, item) => sum + item.priceValue * item.quantity, 0),
+    [lineItems]
+  );
+
+  const handleAddRow = () => {
+    if (!newRow.name.trim()) {
+      showToast('Please enter a medicine name.', 'warning');
+      return;
+    }
+    const price = Math.max(0, parseFloat(newRow.price) || 0);
+    const qty = Math.max(1, parseInt(newRow.qty, 10) || 1);
+    setLineItems((prev) => [
+      ...prev,
+      { rowId: Date.now(), name: newRow.name.trim(), priceValue: price, quantity: qty },
+    ]);
+    setNewRow({ name: '', price: '', qty: '1' });
+  };
+
+  const updateLineItemQty = (rowId, qty) => {
+    const parsed = Math.max(1, parseInt(qty, 10) || 1);
+    setLineItems((prev) => prev.map((i) => i.rowId === rowId ? { ...i, quantity: parsed } : i));
+  };
+
+  const updateLineItemPrice = (rowId, price) => {
+    const parsed = Math.max(0, parseFloat(price) || 0);
+    setLineItems((prev) => prev.map((i) => i.rowId === rowId ? { ...i, priceValue: parsed } : i));
+  };
+
+  const removeLineItem = (rowId) => {
+    setLineItems((prev) => prev.filter((i) => i.rowId !== rowId));
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -35,10 +95,10 @@ const Billing = () => {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [downloadingPdfId, setDownloadingPdfId] = useState(null);
 
   const [formData, setFormData] = useState({
     patient: '',
-    amount: '',
     method: 'Cash',
   });
 
@@ -51,8 +111,12 @@ const Billing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient || !formData.amount) {
-      showToast('Please specify patient and amount for the invoice.', 'warning');
+    if (!formData.patient) {
+      showToast('Please specify a patient for the invoice.', 'warning');
+      return;
+    }
+    if (lineItems.length === 0) {
+      showToast('Please add at least one medicine to the invoice.', 'warning');
       return;
     }
 
@@ -60,14 +124,22 @@ const Billing = () => {
       await addInvoice({
         patient_name: formData.patient,
         invoice_date: new Date().toISOString().slice(0, 10),
-        amount: Number(formData.amount),
+        amount: lineItemsTotal,
         status: 'Pending',
         payment_method: formData.method,
         invoice_code: createCode('INV'),
+        line_items: lineItems.map((item) => ({
+          name: item.name,
+          price: item.priceValue,
+          quantity: item.quantity,
+          subtotal: parseFloat((item.priceValue * item.quantity).toFixed(2)),
+        })),
       });
       showToast(`Invoice for ${formData.patient} generated and queued.`);
       setIsModalOpen(false);
-      setFormData({ patient: '', amount: '', method: 'Cash' });
+      setFormData({ patient: '', method: 'Cash' });
+      setLineItems([]);
+      setNewRow({ name: '', price: '', qty: '1' });
     } catch (error) {
       showToast(error.message || 'Unable to generate the invoice.', 'error');
     }
@@ -192,7 +264,7 @@ const Billing = () => {
           <h2 className="fw-bold mb-1">Financial Records</h2>
           <p className="text-muted mb-0">Manage clinical billing and payment records.</p>
         </div>
-        {!isPatient && (
+        {canOperate && (
           <button className="btn btn-primary px-4 py-2" onClick={() => setIsModalOpen(true)}>
             <i className="bi bi-plus-circle me-2" aria-hidden="true"></i>
             Create New Invoice
@@ -206,19 +278,34 @@ const Billing = () => {
           style={{ background: 'var(--accents-1)' }}
         >
           <h6 className="fw-bold mb-0">Recent Invoices</h6>
-          {!isPatient && (
-            <div className="d-flex gap-2">
-              <button className="btn btn-sm btn-glass border px-3" onClick={() => showToast('Exporting ledger...')}>
-                Export CSV
-              </button>
-              <button
-                className="btn btn-sm btn-glass border px-3"
-                onClick={() => showToast('Syncing with financial server...')}
-              >
-                Sync Ledger
-              </button>
+          <div className="d-flex gap-3 align-items-center">
+            <div className="input-group input-group-sm" style={{ width: '200px' }}>
+              <span className="input-group-text bg-transparent border-end-0 border-accents-2 opacity-50"><i className="bi bi-search" aria-hidden="true"></i></span>
+              <input 
+                type="text" 
+                className="form-control border-start-0 ps-0" 
+                placeholder="Search invoices…" 
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  onPageChange(1);
+                }}
+              />
             </div>
-          )}
+            {canOperate && (
+              <div className="d-flex gap-2">
+                <button className="btn btn-sm btn-glass border px-3" onClick={() => showToast('Exporting ledger...')}>
+                  Export CSV
+                </button>
+                <button
+                  className="btn btn-sm btn-glass border px-3"
+                  onClick={() => showToast('Syncing with financial server...')}
+                >
+                  Sync Ledger
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <Skeleton name="billing-table" loading={loading}>
           <div className="table-responsive">
@@ -231,7 +318,8 @@ const Billing = () => {
                 <th className="py-3">Amount</th>
                 <th className="py-3">Method</th>
                 <th className="py-3">Status</th>
-                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="py-3 ps-0 text-start">Actions</th>}
+                {canManage && <th className="py-3 ps-0 text-start">Actions</th>}
+                {canOperate && <th className="py-3 text-center">Download</th>}
               </tr>
             </thead>
             <tbody>
@@ -242,12 +330,24 @@ const Billing = () => {
                       icon="bi-receipt"
                       title="No Invoices"
                       description="No financial records or billing cycles have been initialized."
-                      actionText={isPatient ? undefined : "Create New Invoice"}
-                      onAction={isPatient ? undefined : () => setIsModalOpen(true)}
+                      actionText={canOperate ? "Create New Invoice" : undefined}
+                      onAction={canOperate ? () => setIsModalOpen(true) : undefined}
                     />
                   </td>
                 </tr>
-              ) : invoices.map((inv) => (
+              ) : paginatedInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="p-0">
+                    <EmptyState 
+                      icon="bi-search"
+                      title="No matching invoices"
+                      description={`We couldn't find any invoices matching "${searchTerm}".`}
+                      actionText="Clear Search"
+                      onAction={() => { setSearchTerm(''); onPageChange(1); }}
+                    />
+                  </td>
+                </tr>
+              ) : paginatedInvoices.map((inv) => (
                 <tr key={inv.id}>
                   <td className="px-4 py-4 fw-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {inv.id}
@@ -275,7 +375,7 @@ const Billing = () => {
                         <span className="pulsing-dot me-2" aria-hidden="true" style={{ width: '6px', height: '6px' }}></span>
                         {inv.status}
                       </span>
-                      {!isPatient && !(isDoctor || isNurse || isReception) && inv.status !== 'Paid' && (
+                      {canOperate && inv.status !== 'Paid' && (
                         <div className="d-flex gap-2">
                           <button
                             className="btn btn-sm btn-glass border border-success text-success"
@@ -297,24 +397,53 @@ const Billing = () => {
                       )}
                     </div>
                   </td>
-                   {!isPatient && !(isDoctor || isNurse || isReception) && (
+                   {canManage && (
                     <td className="ps-0 py-4 text-start">
+                      {canManage && (
+                        <button
+                          className="btn btn-sm btn-glass border me-2"
+                          onClick={() => openEditModal(inv)}
+                          title="Edit Invoice"
+                        >
+                          <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                        </button>
+                      )}
+                      {canManage && (
+                        <button
+                          className="btn btn-sm btn-glass border text-danger"
+                          onClick={() => {
+                            setDeletingInvoice(inv);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          title="Delete Invoice"
+                        >
+                          <i className="bi bi-trash3" aria-hidden="true"></i>
+                        </button>
+                      )}
+                    </td>
+                  )}
+                  {canOperate && (
+                    <td className="py-4 text-center">
                       <button
-                        className="btn btn-sm btn-glass border me-2"
-                        onClick={() => openEditModal(inv)}
-                        title="Edit Invoice"
-                      >
-                        <i className="bi bi-pencil-square" aria-hidden="true"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-glass border text-danger"
-                        onClick={() => {
-                          setDeletingInvoice(inv);
-                          setIsDeleteModalOpen(true);
+                        className="btn btn-sm btn-glass border px-2"
+                        title="Download Invoice PDF"
+                        disabled={downloadingPdfId === inv.apiId}
+                        onClick={async () => {
+                          setDownloadingPdfId(inv.apiId);
+                          try {
+                            await invoicesApi.downloadPdf(inv.apiId, inv.id);
+                          } catch (err) {
+                            showToast(err.message || 'Failed to download PDF.', 'error');
+                          } finally {
+                            setDownloadingPdfId(null);
+                          }
                         }}
-                        title="Delete Invoice"
                       >
-                        <i className="bi bi-trash3" aria-hidden="true"></i>
+                        {downloadingPdfId === inv.apiId ? (
+                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        ) : (
+                          <i className="bi bi-file-earmark-arrow-down" aria-hidden="true"></i>
+                        )}
                       </button>
                     </td>
                   )}
@@ -324,9 +453,17 @@ const Billing = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Generate Invoice">
+      <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setLineItems([]); setNewRow({ name: '', price: '', qty: '1' }); }} title="Generate Invoice">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Patient Name</label>
@@ -347,20 +484,146 @@ const Billing = () => {
               ))}
             </datalist>
           </div>
-          <div className="mb-4">
-            <label htmlFor="invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
-            <div className="input-group">
-              <span className="input-group-text bg-transparent border-end-0 border-accents-2 opacity-50">INR</span>
-              <input
-                id="invoice-amount"
-                type="number"
-                className="form-control border-start-0 ps-0"
-                placeholder="0.00"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              />
+
+          {/* Medicine Line Items — Add Row */}
+          <div className="mb-3">
+            <label className="form-label text-muted fw-bold small text-uppercase mb-2">Medicine Items</label>
+            <div className="rounded-3 p-3" style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}>
+              <div className="row g-2 align-items-end">
+                <div className="col-5">
+                  <label htmlFor="inv-med-name" className="form-label text-muted" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600 }}>Medicine</label>
+                  <input
+                    id="inv-med-name"
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Medicine name"
+                    value={newRow.name}
+                    list="medicine-autocomplete"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const found = medicines.find((m) => m.name === val);
+                      setNewRow((r) => ({
+                        ...r,
+                        name: val,
+                        price: found ? String(found.priceValue) : r.price,
+                      }));
+                    }}
+                  />
+                  <datalist id="medicine-autocomplete">
+                    {medicines.map((m) => (
+                      <option key={m.apiId} value={m.name}>
+                        ₹{m.priceValue} · Stock: {m.stock}
+                      </option>
+                    ))}
+                  </datalist>
+                </div>
+                <div className="col-3">
+                  <label htmlFor="inv-med-price" className="form-label text-muted" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600 }}>Price (₹)</label>
+                  <input
+                    id="inv-med-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="form-control form-control-sm"
+                    placeholder="0.00"
+                    value={newRow.price}
+                    onChange={(e) => setNewRow((r) => ({ ...r, price: e.target.value }))}
+                  />
+                </div>
+                <div className="col-2">
+                  <label htmlFor="inv-med-qty" className="form-label text-muted" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600 }}>Qty</label>
+                  <input
+                    id="inv-med-qty"
+                    type="number"
+                    min="1"
+                    className="form-control form-control-sm"
+                    placeholder="1"
+                    value={newRow.qty}
+                    onChange={(e) => setNewRow((r) => ({ ...r, qty: e.target.value }))}
+                  />
+                </div>
+                <div className="col-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm w-100"
+                    onClick={handleAddRow}
+                  >
+                    <i className="bi bi-plus-lg me-1"></i>Add
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+          {lineItems.length > 0 && (
+            <div className="mb-4 rounded-3 overflow-hidden" style={{ border: '1px solid var(--accents-2)' }}>
+              <table className="table table-sm mb-0 align-middle">
+                <thead style={{ background: 'var(--accents-1)' }}>
+                  <tr>
+                    <th className="px-3 py-2 text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Medicine</th>
+                    <th className="py-2 text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Price</th>
+                    <th className="py-2 text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Qty</th>
+                    <th className="py-2 text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Subtotal</th>
+                    <th className="py-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lineItems.map((item) => (
+                    <tr key={item.rowId}>
+                      <td className="px-3 py-2 fw-bold" style={{ fontSize: '0.875rem' }}>{item.name}</td>
+                      <td className="py-2" style={{ minWidth: '90px' }}>
+                        <div className="input-group input-group-sm">
+                          <span className="input-group-text bg-transparent border-end-0 opacity-50" style={{ fontSize: '0.8rem' }}>₹</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            className="form-control border-start-0 ps-0"
+                            style={{ width: '75px', fontVariantNumeric: 'tabular-nums' }}
+                            value={item.priceValue}
+                            onChange={(e) => updateLineItemPrice(item.rowId, e.target.value)}
+                          />
+                        </div>
+                      </td>
+                      <td className="py-2">
+                        <input
+                          type="number"
+                          min="1"
+                          className="form-control form-control-sm"
+                          style={{ width: '65px' }}
+                          value={item.quantity}
+                          onChange={(e) => updateLineItemQty(item.rowId, e.target.value)}
+                        />
+                      </td>
+                      <td className="py-2 fw-bold" style={{ fontSize: '0.875rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                        ₹{(item.priceValue * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-2 pe-2 text-end">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-glass text-danger p-1"
+                          onClick={() => removeLineItem(item.rowId)}
+                          title="Remove"
+                        >
+                          <i className="bi bi-x-lg" style={{ fontSize: '0.75rem' }}></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot style={{ background: 'var(--accents-1)', borderTop: '2px solid var(--accents-2)' }}>
+                  <tr>
+                    <td colSpan="3" className="px-3 py-2 fw-bold text-end text-muted small text-uppercase" style={{ letterSpacing: '0.5px' }}>Grand Total</td>
+                    <td className="py-2 fw-bold" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--geist-success)' }}>
+                      ₹{lineItemsTotal.toLocaleString('en-IN')}
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
+
           <div className="mb-4">
             <label htmlFor="invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2">Payment Method</label>
             <select
@@ -382,7 +645,7 @@ const Billing = () => {
             </div>
           </div>
           <div className="d-flex gap-2">
-            <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsModalOpen(false)}>
+            <button type="button" className="btn btn-glass w-100 py-2" onClick={() => { setIsModalOpen(false); setLineItems([]); }}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary w-100 py-2">

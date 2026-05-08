@@ -123,3 +123,26 @@ def exclude_roles(excluded: list[str]):
             )
         return user
     return _check
+
+
+def get_patient_name_filter(
+    user: User = Depends(get_current_user),
+) -> str | None:
+    """Return the current user's full_name when they are a Patient, else None.
+
+    Endpoints that list records shared across all staff use this to restrict
+    Patient accounts to rows that belong to them only (matched by patient_name
+    or equivalent name column).  Non-patient callers receive None, meaning no
+    extra name-based filter is applied.
+    """
+    if user.role == "Patient":
+        return user.full_name
+    return None
+
+def get_owner_id_for_filtering(
+    user: User = Depends(get_current_user),
+) -> int | None:
+    """Return None if user is an Admin (sees all data), else return user's ID."""
+    if user.role == "Admin":
+        return None
+    return user.id

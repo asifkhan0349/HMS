@@ -151,6 +151,25 @@ export const invoicesApi = {
   ...createCrudClient('invoices'),
   sendPaidInvoiceEmail: (id, data) =>
     request(`/invoices/${id}/send-paid-email`, { method: 'POST', body: data, isProtected: true }),
+  downloadPdf: async (id, invoiceCode) => {
+    const token = sessionStorage.getItem('hms_token');
+    const res = await fetch(`${DEV_BACKEND_URL}/api/invoices/${id}/download-pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to generate the invoice PDF.');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${invoiceCode}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
 };
 export const medicinesApi = createCrudClient('medicines');
 export const testsApi = createCrudClient('tests');

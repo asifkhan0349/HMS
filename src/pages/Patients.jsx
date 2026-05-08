@@ -6,12 +6,13 @@ import { patientsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 // Memoized individual row
 const PatientRow = memo(({ patient, onEdit, onDelete, isPatient, isDoctor, isNurse, isReception }) => {
   const navigate = useNavigate();
-  const { showToast } = useApp();
   return (
     <tr>
       <td className="px-4 py-4 fw-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>{patient.id}</td>
@@ -110,6 +111,25 @@ const Patients = () => {
     name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient'
   });
 
+  const {
+    paginatedData: paginatedPatients,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(
+    patients.filter(p => {
+      const q = (searchParams.get('search') || '').toLowerCase();
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || 
+             p.id.toString().includes(q) || 
+             p.patientCode.toLowerCase().includes(q) ||
+             p.bloodGroup.toLowerCase().includes(q);
+    })
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.age || !formData.phoneNumber) {
@@ -183,14 +203,7 @@ const Patients = () => {
     setIsEditModalOpen(true);
   };
 
-  const filteredPatients = patients.filter(p => {
-    const q = (searchParams.get('search') || '').toLowerCase();
-    if (!q) return true;
-    return p.name.toLowerCase().includes(q) || 
-           p.id.toString().includes(q) || 
-           p.patientCode.toLowerCase().includes(q) ||
-           p.bloodGroup.toLowerCase().includes(q);
-  });
+
 
   return (
     <main className="patients-page p-4">
@@ -199,15 +212,13 @@ const Patients = () => {
           <h2 className="fw-bold mb-1">Patient Registry</h2>
           <p className="text-muted mb-0">Manage patient records and hospital admissions.</p>
         </div>
-        {!isPatient && (
-          <button 
-            className="btn btn-primary px-4 py-2"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <i className="bi bi-person-plus me-2" aria-hidden="true"></i>
-            Register Patient
-          </button>
-        )}
+        <button 
+          className="btn btn-primary px-4 py-2"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <i className="bi bi-person-plus me-2" aria-hidden="true"></i>
+          Register Patient
+        </button>
       </div>
 
       <div className="glass-card p-0 overflow-hidden border">
@@ -251,12 +262,12 @@ const Patients = () => {
                       icon="bi-people"
                       title="No patients registered yet"
                       description="Your patient registry is currently empty. Start by registering a new patient profile to track clinical outcomes."
-                      actionText={isPatient ? undefined : "Register Patient"}
-                      onAction={isPatient ? undefined : () => setIsModalOpen(true)}
+                      actionText="Register Patient"
+                      onAction={() => setIsModalOpen(true)}
                     />
                   </td>
                 </tr>
-              ) : filteredPatients.length === 0 ? (
+              ) : paginatedPatients.length === 0 ? (
                 <tr>
                   <td colSpan={isPatient ? 7 : 8} className="p-0">
                     <EmptyState 
@@ -268,7 +279,7 @@ const Patients = () => {
                     />
                   </td>
                 </tr>
-              ) : filteredPatients.map((p) => (
+              ) : paginatedPatients.map((p) => (
                 <PatientRow 
                   key={p.id} 
                   patient={p} 
@@ -284,16 +295,14 @@ const Patients = () => {
           </table>
         </div>
         </Skeleton>
-        <div className="p-4 border-top d-flex justify-content-between align-items-center">
-          <small className="text-muted">Showing {filteredPatients.length} active profiles</small>
-          <nav aria-label="Pagination">
-            <ul className="pagination pagination-sm mb-0">
-              <li className="page-item disabled"><button className="page-link border">Previous</button></li>
-              <li className="page-item active"><button className="page-link border">1</button></li>
-              <li className="page-item"><button className="page-link border">Next</button></li>
-            </ul>
-          </nav>
-        </div>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       {/* Register Modal */}

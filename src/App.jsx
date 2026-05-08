@@ -39,13 +39,16 @@ const PATIENT_DIR_ROLES = ['Admin', 'Doctor', 'Nurse', 'Patient'];
 const SCHEDULING_ROLES = ['Admin', 'Doctor', 'Patient'];
 
 // Roles that can access Revenue Cycle
-const BILLING_ROLES = ['Admin', 'Reception', 'Patient'];
+const BILLING_ROLES = ['Admin', 'Reception'];
 
 // Roles that can access Pharmacy
 const PHARMACY_ROLES = ['Admin', 'Nurse', 'Reception'];
 
+// Roles that can access Medical Records (EMR)
+const EMR_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
+
 // Roles that can access Diagnostics & Lab
-const LAB_ROLES = ['Admin', 'Doctor', 'Nurse', 'Patient'];
+const LAB_ROLES = ['Admin', 'Doctor', 'Nurse'];
 
 // Roles that can access Facility Management
 const BEDS_ROLES = ['Admin', 'Nurse', 'Reception'];
@@ -89,7 +92,7 @@ function App() {
               <Route path="/dashboard" element={<ProtectedRoute adminOnly><Dashboard /></ProtectedRoute>} />
               <Route path="/patients" element={<ProtectedRoute allowedRoles={PATIENT_DIR_ROLES}><Patients /></ProtectedRoute>} />
               <Route path="/appointments" element={<ProtectedRoute allowedRoles={SCHEDULING_ROLES}><Appointments /></ProtectedRoute>} />
-              <Route path="/emr" element={<ProtectedRoute><EMR /></ProtectedRoute>} />
+              <Route path="/emr" element={<ProtectedRoute allowedRoles={EMR_ROLES}><EMR /></ProtectedRoute>} />
               <Route path="/billing" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><Billing /></ProtectedRoute>} />
               <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={PHARMACY_ROLES}><Pharmacy /></ProtectedRoute>} />
               <Route path="/lab" element={<ProtectedRoute allowedRoles={LAB_ROLES}><Lab /></ProtectedRoute>} />

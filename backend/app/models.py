@@ -1,7 +1,7 @@
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, Integer, Numeric, String
+from sqlalchemy import Date, DateTime, Integer, JSON, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .core.database import Base
@@ -60,6 +60,7 @@ class Invoice(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     status: Mapped[str] = mapped_column(String(30), index=True)
     payment_method: Mapped[str] = mapped_column(String(30))
+    line_items: Mapped[list | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
@@ -72,6 +73,7 @@ class Medicine(Base):
     name: Mapped[str] = mapped_column(String(120), index=True)
     batch: Mapped[str] = mapped_column(String(30), index=True)
     stock: Mapped[int] = mapped_column(Integer)
+    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
     expiry_date: Mapped[date] = mapped_column(Date)
     status: Mapped[str] = mapped_column(String(30), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

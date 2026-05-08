@@ -9,7 +9,8 @@ def list_entities(db: Session, model, owner_id: int | None = None,
                   skip: int = 0, limit: int = 100):
     """Return a paginated list of entities. Default: first 100 records."""
     query = db.query(model)
-    # Filter removed to satisfy "visible to all other users" requirement
+    if owner_id is not None:
+        query = query.filter(model.owner_user_id == owner_id)
     return query.order_by(model.id.desc()).offset(skip).limit(limit).all()
 
 

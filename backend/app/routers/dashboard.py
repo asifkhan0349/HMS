@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id, require_admin
+from ..auth_context import get_owner_id_for_filtering, require_admin
 from .. import models, schemas
 from ..core.database import get_db
 
@@ -16,13 +16,19 @@ router = APIRouter(
 
 
 @router.get("/stats", response_model=schemas.DashboardStats)
-def get_dashboard_stats(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def get_dashboard_stats(db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+    def count_model(model):
+        query = db.query(model)
+        if owner_id is not None:
+            query = query.filter(model.owner_user_id == owner_id)
+        return query.count()
+
     return schemas.DashboardStats(
-        patients=db.query(models.Patient).filter(models.Patient.owner_user_id == current_user_id).count(),
-        appointments=db.query(models.Appointment).filter(models.Appointment.owner_user_id == current_user_id).count(),
-        records=db.query(models.MedicalRecord).filter(models.MedicalRecord.owner_user_id == current_user_id).count(),
-        invoices=db.query(models.Invoice).filter(models.Invoice.owner_user_id == current_user_id).count(),
-        medicines=db.query(models.Medicine).filter(models.Medicine.owner_user_id == current_user_id).count(),
-        tests=db.query(models.LabTest).filter(models.LabTest.owner_user_id == current_user_id).count(),
-        staff=db.query(models.Staff).filter(models.Staff.owner_user_id == current_user_id).count(),
+        patients=count_model(models.Patient),
+        appointments=count_model(models.Appointment),
+        records=count_model(models.MedicalRecord),
+        invoices=count_model(models.Invoice),
+        medicines=count_model(models.Medicine),
+        tests=count_model(models.LabTest),
+        staff=count_model(models.Staff),
     )

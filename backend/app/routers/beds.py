@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles
+from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -20,9 +20,9 @@ router = APIRouter(
 @router.get("", response_model=list[schemas.BedRead])
 def list_beds(
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    return crud.list_entities(db, models.Bed, user_id)
+    return crud.list_entities(db, models.Bed, owner_id)
 
 
 @router.post("", response_model=schemas.BedRead, status_code=status.HTTP_201_CREATED)
@@ -39,9 +39,9 @@ def update_bed(
     bed_id: PositiveId,
     payload: schemas.BedUpdate,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    bed = crud.get_entity_or_404(db, models.Bed, bed_id)
+    bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
     return crud.update_entity(db, bed, payload)
 
 
@@ -49,7 +49,7 @@ def update_bed(
 def delete_bed(
     bed_id: PositiveId,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    bed = crud.get_entity_or_404(db, models.Bed, bed_id)
+    bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
     return crud.delete_entity(db, bed)

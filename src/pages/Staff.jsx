@@ -5,7 +5,9 @@ import { staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const Staff = () => {
   const { showToast, user } = useApp();
@@ -55,6 +57,16 @@ const Staff = () => {
     shift: '',
     status: 'Active'
   });
+
+  const {
+    paginatedData: paginatedStaff,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(staff);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -173,7 +185,7 @@ const Staff = () => {
                     />
                   </td>
                 </tr>
-              ) : staff.map((s) => (
+              ) : paginatedStaff.map((s) => (
                 <tr key={s.id}>
                   <td className="px-4 py-4">
                     <div className="d-flex align-items-center">
@@ -228,6 +240,14 @@ const Staff = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Personnel Onboarding Protocol">

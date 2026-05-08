@@ -5,7 +5,9 @@ import { appointmentsApi, patientsApi, staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const APPOINTMENT_TYPE_OPTIONS = ['New Consultation', 'Follow-up', 'Routine Check-up'];
 const GENDER_OPTIONS = ['Male', 'Female', 'Other'];
@@ -49,6 +51,23 @@ const Appointments = () => {
     updateData: updateAppointment,
     removeData: deleteAppointment
   } = useCrud(appointmentsApi, mapAppointmentFromApi);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredAppointments = appointments.filter(app => 
+    app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.id.toString().includes(searchTerm)
+  );
+
+  const {
+    paginatedData: paginatedAppointments,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(filteredAppointments);
   
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff } = useCrud(staffApi, mapStaffFromApi);
@@ -263,8 +282,23 @@ const Appointments = () => {
           style={{ background: 'var(--accents-1)' }}
         >
           <h6 className="fw-bold mb-0">Daily Queue</h6>
-          <div className="btn-group border rounded-2" style={{ overflow: 'hidden' }}>
-            <button className="btn btn-sm px-3 bg-white text-black fw-bold">Active {appointmentSummary.todayCount}</button>
+          <div className="d-flex gap-3 align-items-center">
+            <div className="input-group input-group-sm" style={{ width: '250px' }}>
+              <span className="input-group-text bg-transparent border-end-0 border-accents-2 opacity-50"><i className="bi bi-search" aria-hidden="true"></i></span>
+              <input 
+                type="text" 
+                className="form-control border-start-0 ps-0" 
+                placeholder="Search appointments…" 
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  onPageChange(1);
+                }}
+              />
+            </div>
+            <div className="btn-group border rounded-2" style={{ overflow: 'hidden' }}>
+              <button className="btn btn-sm px-3 bg-white text-black fw-bold">Active {appointmentSummary.todayCount}</button>
+            </div>
           </div>
         </div>
         <Skeleton name="appointments-table" loading={loading}>
@@ -295,7 +329,19 @@ const Appointments = () => {
                     />
                   </td>
                 </tr>
-              ) : appointments.map((app) => (
+              ) : paginatedAppointments.length === 0 ? (
+                <tr>
+                  <td colSpan={user?.role === 'Admin' ? 8 : 7} className="p-0">
+                    <EmptyState 
+                      icon="bi-search"
+                      title="No matching appointments"
+                      description={`We couldn't find any appointments matching "${searchTerm}".`}
+                      actionText="Clear Search"
+                      onAction={() => { setSearchTerm(''); onPageChange(1); }}
+                    />
+                  </td>
+                </tr>
+              ) : paginatedAppointments.map((app) => (
                 <tr key={app.id}>
                   <td className="px-4 py-4">
                     <div className="fw-bold">{app.patient}</div>
@@ -398,6 +444,14 @@ const Appointments = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       {/* Book Appointment Modal */}

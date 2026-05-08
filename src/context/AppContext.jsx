@@ -174,6 +174,8 @@ export const mapMedicineFromApi = (medicine) => ({
   name: medicine.name,
   batch: medicine.batch,
   stock: medicine.stock,
+  price: formatCurrency(medicine.price ?? 0),
+  priceValue: Number(medicine.price ?? 0),
   expiry: formatDate(medicine.expiry_date, { month: 'short', year: 'numeric' }),
   rawExpiry: medicine.expiry_date ? medicine.expiry_date.split('T')[0] : '',
   status: medicine.status,

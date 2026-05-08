@@ -9,22 +9,21 @@ from . import models
 def _generate_code(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8].upper()}"
 
-def list_patients(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
-    # Removing owner_user_id filter to ensure data is "visible to all other users" as requested.
-    return (
-        db.query(models.Patient)
-        .order_by(models.Patient.id.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+def list_patients(db: Session, owner_id: int | None, skip: int = 0, limit: int = 100,
+                  patient_name_filter: str | None = None):
+    query = db.query(models.Patient)
+    if owner_id is not None:
+        query = query.filter(models.Patient.owner_user_id == owner_id)
+    if patient_name_filter is not None:
+        # Patient role: only show the record whose name matches the logged-in user
+        query = query.filter(models.Patient.name == patient_name_filter)
+    return query.order_by(models.Patient.id.desc()).offset(skip).limit(limit).all()
 
-def get_patient_or_404(db: Session, patient_id: int, owner_id: int):
-    patient = (
-        db.query(models.Patient)
-        .filter(models.Patient.id == patient_id, models.Patient.owner_user_id == owner_id)
-        .first()
-    )
+def get_patient_or_404(db: Session, patient_id: int, owner_id: int | None):
+    query = db.query(models.Patient).filter(models.Patient.id == patient_id)
+    if owner_id is not None:
+        query = query.filter(models.Patient.owner_user_id == owner_id)
+    patient = query.first()
     if not patient:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

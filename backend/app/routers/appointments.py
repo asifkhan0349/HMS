@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import httpx
 import logging
 
-from ..auth_context import get_current_user, get_current_user_id, require_roles, require_admin, exclude_roles
+from ..auth_context import get_current_user, get_current_user_id, require_roles, require_admin, exclude_roles, get_patient_name_filter, get_owner_id_for_filtering
 from .. import crud, models, schemas
 from ..core.database import get_db
 from ..core.config import settings
@@ -49,28 +49,37 @@ async def send_appointment_webhook(appointment_data: dict):
 @router.get("", response_model=list[schemas.AppointmentRead])
 def list_appointments(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user),
+    patient_name_filter: str | None = Depends(get_patient_name_filter),
+    owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
-    return crud.list_entities(db, models.Appointment, owner_id=None)
+    query = db.query(models.Appointment)
+    if owner_id is not None:
+        query = query.filter(models.Appointment.owner_user_id == owner_id)
+    if patient_name_filter is not None:
+        query = query.filter(models.Appointment.patient_name == patient_name_filter)
+    return query.order_by(models.Appointment.id.desc()).all()
 
 
 @router.post("", response_model=schemas.AppointmentRead, status_code=status.HTTP_201_CREATED)
-def create_appointment(payload: schemas.AppointmentCreate, db: Session = Depends(get_db)):
-    # Public booking remains allowed. We assign to a default admin owner.
-    default_user = db.query(models.User).filter(models.User.role.ilike('%admin%')).first()
-    if not default_user:
-        default_user = db.query(models.User).first()
-    owner_id = default_user.id if default_user else 1
-    return crud.create_entity(db, models.Appointment, payload, owner_id)
+def create_appointment(
+    payload: schemas.AppointmentCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.role == "Patient":
+        payload.patient_name = current_user.full_name
+
+    return crud.create_entity(db, models.Appointment, payload, current_user.id)
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentRead)
 def get_appointment(
     appointment_id: PositiveId,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    owner_id: int | None = Depends(get_owner_id_for_filtering)
 ):
-    return crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
+    return crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=owner_id)
 
 
 @router.put("/{appointment_id}", response_model=schemas.AppointmentRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
@@ -79,9 +88,10 @@ def update_appointment(
     payload: schemas.AppointmentUpdate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user),
+    owner_id: int | None = Depends(get_owner_id_for_filtering)
 ):
-    appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
+    appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=owner_id)
 
     # Only Admin may edit or update an appointment.
     if current_user.role != "Admin":
@@ -107,7 +117,8 @@ def update_appointment(
 def delete_appointment(
     appointment_id: PositiveId,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user),
+    owner_id: int | None = Depends(get_owner_id_for_filtering)
 ):
     # Only Admin may delete an appointment.
     if current_user.role != "Admin":
@@ -115,7 +126,7 @@ def delete_appointment(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. Only Admin can delete appointments.",
         )
-    appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=None)
+    appointment = crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=owner_id)
     return crud.delete_entity(db, appointment)
 
 

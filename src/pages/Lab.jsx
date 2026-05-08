@@ -5,7 +5,9 @@ import { testsApi, patientsApi, staffApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
+import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
+import { usePagination } from '../hooks/usePagination';
 
 const Lab = () => {
   const { showToast, user } = useApp();
@@ -23,8 +25,18 @@ const Lab = () => {
     updateData: updateTest,
     removeData: deleteTest
   } = useCrud(testsApi, mapTestFromApi);
+
+  const {
+    paginatedData: paginatedTests,
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    totalItems,
+    onPageChange,
+    onRowsPerPageChange
+  } = usePagination(tests);
   
-  const { data: patients, loading: loadingPatients } = useCrud(patientsApi, mapPatientFromApi);
+  const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff, loading: loadingStaff } = useCrud(staffApi, mapStaffFromApi, { enabled: canReadStaff });
   
   const doctorOptions = useMemo(() => 
@@ -170,7 +182,7 @@ const Lab = () => {
                      />
                   </td>
                 </tr>
-              ) : tests.map((test) => (
+              ) : paginatedTests.map((test) => (
                 <tr key={test.id}>
                   <td className="px-4 py-4 fw-bold gradient-text">{test.id}</td>
                   <td className="py-4 fw-bold text-white">{test.patient}</td>
@@ -231,6 +243,14 @@ const Lab = () => {
           </table>
         </div>
         </Skeleton>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          totalItems={totalItems}
+        />
       </div>
 
       {/* New Test Modal */}
