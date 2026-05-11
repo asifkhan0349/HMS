@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
+from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_blood_bank_owner_id_filter
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -20,7 +20,7 @@ router = APIRouter(
 @router.get("", response_model=list[schemas.BloodInventoryRead])
 def list_blood_inventory(
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_blood_bank_owner_id_filter),
 ):
     return crud.list_entities(db, models.BloodInventory, owner_id)
 
@@ -39,7 +39,7 @@ def update_blood_inventory(
     bg_id: PositiveId,
     payload: schemas.BloodInventoryUpdate,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_blood_bank_owner_id_filter),
 ):
     item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, owner_id)
     return crud.update_entity(db, item, payload)
@@ -49,7 +49,7 @@ def update_blood_inventory(
 def delete_blood_inventory(
     bg_id: PositiveId,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_blood_bank_owner_id_filter),
 ):
     item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, owner_id)
     return crud.delete_entity(db, item)

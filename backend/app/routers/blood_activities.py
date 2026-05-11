@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
+from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_shared_staff_owner_id_filter
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -79,7 +79,7 @@ def sync_activity_to_inventory(db: Session, user_id: int, blood_group: str, unit
 @router.get("", response_model=list[schemas.BloodActivityRead])
 def list_blood_activities(
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_shared_staff_owner_id_filter),
 ):
     return crud.list_entities(db, models.BloodActivity, owner_id)
 
@@ -104,7 +104,7 @@ def update_blood_activity(
     act_id: PositiveId,
     payload: schemas.BloodActivityUpdate,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_shared_staff_owner_id_filter),
 ):
     activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, owner_id)
     inventory_owner_id = activity.owner_user_id
@@ -129,7 +129,7 @@ def update_blood_activity(
 def delete_blood_activity(
     act_id: PositiveId,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_shared_staff_owner_id_filter),
 ):
     activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, owner_id)
     sync_activity_to_inventory(db, activity.owner_user_id, activity.blood_group, activity.units, activity.type, revert=True)

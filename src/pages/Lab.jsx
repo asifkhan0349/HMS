@@ -18,9 +18,9 @@ const Lab = () => {
   const isReception = userRole === 'Reception';
   const userName = user?.name;
   const canReadStaff = true;
-  const { 
-    data: tests, 
-    loading, 
+  const {
+    data: tests,
+    loading,
     addData: addTest,
     updateData: updateTest,
     removeData: deleteTest
@@ -35,17 +35,17 @@ const Lab = () => {
     onPageChange,
     onRowsPerPageChange
   } = usePagination(tests);
-  
+
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff, loading: loadingStaff } = useCrud(staffApi, mapStaffFromApi, { enabled: canReadStaff });
-  
-  const doctorOptions = useMemo(() => 
+
+  const doctorOptions = useMemo(() =>
     [
       ...new Set([
         ...staff.filter((s) => s.role === 'Doctor').map((s) => s.name),
         ...(!canReadStaff && userRole?.toLowerCase() === 'doctor' ? [userName] : []),
       ].filter(Boolean)),
-    ], 
+    ],
     [canReadStaff, staff, userName, userRole]
   );
 
@@ -157,93 +157,120 @@ const Lab = () => {
           <div className="text-white opacity-75 small">Processing now: {labStats.processing}</div>
         </div>
         <Skeleton name="lab-table" loading={loading}>
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
-            <thead>
-              <tr>
-                <th className="px-4 py-4">Lab ID</th>
-                <th className="py-4">Patient Identity</th>
-                <th className="py-4">Diagnostic Test</th>
-                <th className="py-4">Ordering Clinician</th>
-                <th className="py-4 text-center">Protocol Status</th>
-                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {tests.length === 0 ? (
+          <div className="table-responsive">
+            <table className="table table-hover mb-0 align-middle">
+              <thead>
                 <tr>
-                  <td colSpan={isPatient ? "5" : "6"} className="p-0">
-                     <EmptyState 
-                       icon="bi-thermometer-half"
-                       title="No Lab Tests"
-                       description="The diagnostic queue is currently empty. Place an order for pathology or radiology tests."
-                       actionText={isPatient ? undefined : "Order New Test"}
-                       onAction={isPatient ? undefined : () => setIsModalOpen(true)}
-                     />
-                  </td>
+                  <th className="px-4 py-4">Lab ID</th>
+                  <th className="py-4">Patient Identity</th>
+                  <th className="py-4">Diagnostic Test</th>
+                  <th className="py-4">Ordering Clinician</th>
+                  <th className="py-4 text-center">Protocol Status</th>
+                  {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Actions</th>}
                 </tr>
-              ) : paginatedTests.map((test) => (
-                <tr key={test.id}>
-                  <td className="px-4 py-4 fw-bold gradient-text">{test.id}</td>
-                  <td className="py-4 fw-bold text-white">{test.patient}</td>
-                  <td className="py-4 text-white opacity-75 small">{test.test}</td>
-                  <td className="py-4 text-white-50 small">{test.doctor}</td>
-                  <td className="py-4 text-center">
-                    <span
-                      className={`badge rounded-pill px-4 py-2 border border-opacity-25 ${
-                        test.status === 'Completed'
-                          ? 'bg-success bg-opacity-10 text-success border-success'
-                          : test.status === 'Processing'
-                            ? 'bg-primary bg-opacity-10 text-primary border-primary'
-                            : 'bg-warning bg-opacity-10 text-warning border-warning'
-                      }`}
-                      style={{ fontSize: '0.75rem' }}
-                    >
-                      <span
-                        className={`pulsing-dot me-2 bg-${
-                          test.status === 'Completed' ? 'success' : test.status === 'Processing' ? 'primary' : 'warning'
-                        }`}
-                        style={{ width: '6px', height: '6px' }}
-                      ></span>
-                      {test.status}
-                    </span>
-                  </td>
-                  {!isPatient && !(isDoctor || isNurse || isReception) && (
-                    <td className="px-4 py-4 text-end">
-                      <div className="d-flex justify-content-end gap-2">
-                        <button
-                          className="btn btn-sm btn-glass text-primary px-3"
-                          onClick={() => openEditModal(test)}
-                          title="Edit Order"
-                        >
-                          <i className="bi bi-pencil"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-glass text-danger px-3"
-                          onClick={() => {
-                            setDeletingTest(test);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          title="Cancel/Delete"
-                        >
-                          <i className="bi bi-trash"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-glass text-white opacity-50 px-3"
-                          onClick={() => showToast(`Executing diagnostic processing for Lab ID ${test.id}...`)}
-                        >
-                          PROCESS
-                        </button>
-                      </div>
+              </thead>
+              <tbody>
+                {tests.length === 0 ? (
+                  <tr>
+                    <td colSpan={isPatient ? "5" : "6"} className="p-0">
+                      <EmptyState
+                        icon="bi-thermometer-half"
+                        title="No Lab Tests"
+                        description="The diagnostic queue is currently empty. Place an order for pathology or radiology tests."
+                        actionText={isPatient ? undefined : "Order New Test"}
+                        onAction={isPatient ? undefined : () => setIsModalOpen(true)}
+                      />
                     </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </tr>
+                ) : paginatedTests.map((test) => (
+                  <tr key={test.id}>
+                    <td className="px-4 py-4 fw-bold gradient-text">{test.id}</td>
+                    <td className="py-4 fw-bold text-white">{test.patient}</td>
+                    <td className="py-4 text-white opacity-75 small">{test.test}</td>
+                    <td className="py-4 text-white-50 small">{test.doctor}</td>
+                    <td className="py-4 text-center">
+                      <span
+                        className="badge rounded-pill px-4 py-2 border"
+                        style={{
+                          background:
+                            test.status === 'Completed'
+                              ? 'rgba(16, 185, 129, 0.15)'
+                              : test.status === 'Processing'
+                                ? 'rgba(245, 166, 35, 0.15)'
+                                : 'rgba(239, 68, 68, 0.15)',
+
+                          color:
+                            test.status === 'Completed'
+                              ? 'green'
+                              : test.status === 'Processing'
+                                ? 'orange'
+                                : 'red',
+
+                          borderColor:
+                            test.status === 'Completed'
+                              ? 'rgba(16, 185, 129, 0.3)'
+                              : test.status === 'Processing'
+                                ? 'rgba(245, 166, 35, 0.3)'
+                                : 'rgba(239, 68, 68, 0.3)',
+
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        <span
+                          className="pulsing-dot me-2"
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            display: 'inline-block',
+                            background:
+                              test.status === 'Completed'
+                                ? 'green'
+                                : test.status === 'Processing'
+                                  ? 'orange'
+                                  : 'red'
+                          }}
+                        ></span>
+
+                        {test.status}
+                      </span>
+                    </td>
+                    {!isPatient && !(isDoctor || isNurse || isReception) && (
+                      <td className="px-4 py-4 text-end">
+                        <div className="d-flex justify-content-end gap-2">
+                          <button
+                            className="btn btn-sm btn-glass text-primary px-3"
+                            onClick={() => openEditModal(test)}
+                            title="Edit Order"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-glass text-danger px-3"
+                            onClick={() => {
+                              setDeletingTest(test);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            title="Cancel/Delete"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-glass text-white opacity-50 px-3"
+                            onClick={() => showToast(`Executing diagnostic processing for Lab ID ${test.id}...`)}
+                          >
+                            PROCESS
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Skeleton>
-        <Pagination 
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={onPageChange}
@@ -388,7 +415,7 @@ const Lab = () => {
       </Modal>
 
       {/* Delete Confirmation */}
-      <DeleteConfirmation 
+      <DeleteConfirmation
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}

@@ -35,6 +35,8 @@ class PatientCreate(PatientBase):
     patient_code: Optional[str] = None
     phone_number: str = Field(..., min_length=7, max_length=20)
     email: Optional[str] = Field(None, max_length=120)
+    emergency_contact_1: Optional[str] = Field(None, min_length=7, max_length=20)
+    emergency_contact_2: Optional[str] = Field(None, min_length=7, max_length=20)
 
 
 class PatientUpdate(AppBaseModel):
@@ -45,6 +47,8 @@ class PatientUpdate(AppBaseModel):
     blood_group: Optional[BloodGroup] = None
     phone_number: Optional[str] = Field(None, min_length=7, max_length=20)
     email: Optional[str] = Field(None, max_length=120)
+    emergency_contact_1: Optional[str] = Field(None, min_length=7, max_length=20)
+    emergency_contact_2: Optional[str] = Field(None, min_length=7, max_length=20)
     last_visit: Optional[date] = None
     status: Optional[str] = Field(None, min_length=2, max_length=50)
 
@@ -58,6 +62,8 @@ class PatientRead(ORMBase):
     blood_group: BloodGroup
     phone_number: Optional[str] = None
     email: Optional[str] = None
+    emergency_contact_1: Optional[str] = None
+    emergency_contact_2: Optional[str] = None
     last_visit: Optional[date] = None
     status: str
     created_at: datetime

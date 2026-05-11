@@ -257,6 +257,33 @@ const Billing = () => {
     }
   };
 
+  const getInvoiceStatusStyle = (status) => {
+    const palette = {
+      Pending: {
+        color: '#f59e0b',
+        background: 'rgba(245, 158, 11, 0.12)',
+        borderColor: 'rgba(245, 158, 11, 0.35)',
+      },
+      Paid: {
+        color: '#10b981',
+        background: 'rgba(16, 185, 129, 0.12)',
+        borderColor: 'rgba(16, 185, 129, 0.35)',
+      },
+      Cancelled: {
+        color: '#ef4444',
+        background: 'rgba(239, 68, 68, 0.12)',
+        borderColor: 'rgba(239, 68, 68, 0.35)',
+      },
+    };
+
+    return palette[status] || palette.Pending;
+  };
+
+  const canUpdateInvoiceStatus = (status) => {
+    const normalizedStatus = String(status || '').toLowerCase();
+    return canOperate && normalizedStatus !== 'paid' && normalizedStatus !== 'cancelled';
+  };
+
   return (
     <main className="billing-page p-4">
       <div className="d-flex justify-content-between align-items-center mb-5">
@@ -347,7 +374,9 @@ const Billing = () => {
                     />
                   </td>
                 </tr>
-              ) : paginatedInvoices.map((inv) => (
+              ) : paginatedInvoices.map((inv) => {
+                const statusStyle = getInvoiceStatusStyle(inv.status);
+                return (
                 <tr key={inv.id}>
                   <td className="px-4 py-4 fw-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {inv.id}
@@ -365,17 +394,24 @@ const Billing = () => {
                       <span
                         className="badge rounded-pill px-3 py-1 border"
                         style={{
-                          background: inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 166, 35, 0.1)',
-                          color: inv.status === 'Paid' ? 'var(--geist-success)' : 'var(--geist-warning)',
-                          borderColor:
-                            inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 166, 35, 0.2)',
+                          background: statusStyle.background,
+                          color: statusStyle.color,
+                          borderColor: statusStyle.borderColor,
                           fontSize: '0.75rem',
                         }}
                       >
-                        <span className="pulsing-dot me-2" aria-hidden="true" style={{ width: '6px', height: '6px' }}></span>
+                        <span
+                          className="pulsing-dot me-2"
+                          aria-hidden="true"
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            background: statusStyle.color,
+                          }}
+                        ></span>
                         {inv.status}
                       </span>
-                      {canOperate && inv.status !== 'Paid' && (
+                      {canUpdateInvoiceStatus(inv.status) && (
                         <div className="d-flex gap-2">
                           <button
                             className="btn btn-sm btn-glass border border-success text-success"
@@ -448,7 +484,7 @@ const Billing = () => {
                     </td>
                   )}
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>

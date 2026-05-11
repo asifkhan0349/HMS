@@ -34,6 +34,7 @@ const createEmptyAppointmentForm = () => ({
   appointment_date: new Date().toISOString().split('T')[0],
   type: 'New Consultation',
   phoneNumber: '',
+  emergencyContact: '',
   timeSlot: '',
   department: '',
 });
@@ -108,6 +109,7 @@ const Appointments = () => {
     appointment_date: '',
     type: 'New Consultation',
     phoneNumber: '',
+    emergencyContact: '',
     timeSlot: '',
     department: '',
   });
@@ -138,6 +140,7 @@ const Appointments = () => {
     appointment_date: appointmentData.appointment_date,
     appointment_type: appointmentData.type,
     phone_number: appointmentData.phoneNumber.trim() || null,
+    emergency_contact: appointmentData.emergencyContact.trim() || null,
     time_slot: appointmentData.timeSlot.trim() || null,
     department: appointmentData.department.trim() || null,
   });
@@ -184,6 +187,7 @@ const Appointments = () => {
       appointment_date: app.appointmentDate || '',
       type: app.type,
       phoneNumber: app.phoneNumber || '',
+      emergencyContact: app.emergencyContact || '',
       timeSlot: app.timeSlot || '',
       department: app.department || '',
     });
@@ -567,6 +571,17 @@ const Appointments = () => {
                   />
                 </div>
                 <div className="col-md-6">
+                  <label htmlFor="appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number</label>
+                  <input
+                    id="appointment-emergency-contact"
+                    type="tel"
+                    className="form-control"
+                    placeholder="e.g. +1 234 567 8900"
+                    value={formData.emergencyContact}
+                    onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                  />
+                </div>
+                <div className="col-md-6">
                   <label htmlFor="appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
                   <select
                     id="appointment-timeslot"
@@ -724,6 +739,17 @@ const Appointments = () => {
                         placeholder="e.g. +1 234 567 8900"
                         value={editFormData.phoneNumber}
                         onChange={(e) => setEditFormData({ ...editFormData, phoneNumber: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="edit-appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number</label>
+                      <input
+                        id="edit-appointment-emergency-contact"
+                        type="tel"
+                        className="form-control"
+                        placeholder="e.g. +1 234 567 8900"
+                        value={editFormData.emergencyContact}
+                        onChange={(e) => setEditFormData({ ...editFormData, emergencyContact: e.target.value })}
                       />
                     </div>
                     <div className="col-md-6">

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
+from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_pharmacy_owner_id_filter
 from .. import crud, models, schemas
 from ..core.database import get_db
 from .common import PositiveId
@@ -18,7 +18,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=list[schemas.MedicineRead])
-def list_medicines(db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+def list_medicines(db: Session = Depends(get_db), owner_id: int | None = Depends(get_pharmacy_owner_id_filter)):
     return crud.list_entities(db, models.Medicine, owner_id)
 
 
@@ -28,17 +28,17 @@ def create_medicine(payload: schemas.MedicineCreate, db: Session = Depends(get_d
 
 
 @router.get("/{medicine_id}", response_model=schemas.MedicineRead)
-def get_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+def get_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_pharmacy_owner_id_filter)):
     return crud.get_entity_or_404(db, models.Medicine, medicine_id, owner_id)
 
 
 @router.put("/{medicine_id}", response_model=schemas.MedicineRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
-def update_medicine(medicine_id: PositiveId, payload: schemas.MedicineUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+def update_medicine(medicine_id: PositiveId, payload: schemas.MedicineUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_pharmacy_owner_id_filter)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, owner_id)
     return crud.update_entity(db, medicine, payload)
 
 
 @router.delete("/{medicine_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
-def delete_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+def delete_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_pharmacy_owner_id_filter)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, owner_id)
     return crud.delete_entity(db, medicine)

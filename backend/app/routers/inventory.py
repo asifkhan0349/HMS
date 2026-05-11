@@ -3,7 +3,12 @@ from ..core.limiter import limiter
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
+from ..auth_context import (
+    exclude_roles,
+    get_current_user_id,
+    get_facility_logistics_owner_id_filter,
+    require_roles,
+)
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -21,7 +26,7 @@ router = APIRouter(
 @router.get("", response_model=list[schemas.InventoryItemRead])
 def list_inventory(
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
 ):
     return crud.list_entities(db, models.InventoryItem, owner_id)
 
@@ -44,7 +49,7 @@ def update_inventory_item(
     item_id: PositiveId,
     payload: schemas.InventoryItemUpdate,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
 ):
     item = crud.get_entity_or_404(db, models.InventoryItem, item_id, owner_id)
     return crud.update_entity(db, item, payload)
@@ -56,7 +61,7 @@ def delete_inventory_item(
     request: Request,
     item_id: PositiveId,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
 ):
     item = crud.get_entity_or_404(db, models.InventoryItem, item_id, owner_id)
     return crud.delete_entity(db, item)

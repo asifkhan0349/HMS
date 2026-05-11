@@ -104,11 +104,11 @@ const Patients = () => {
   const [deletingPatient, setDeletingPatient] = useState(null);
   
   const [formData, setFormData] = useState({
-    name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient'
+    name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', emergencyContact1: '', emergencyContact2: '', status: 'Outpatient'
   });
 
   const [editFormData, setEditFormData] = useState({
-    name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient'
+    name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', emergencyContact1: '', emergencyContact2: '', status: 'Outpatient'
   });
 
   const {
@@ -144,6 +144,8 @@ const Patients = () => {
         blood_group: formData.bloodGroup,
         phone_number: formData.phoneNumber,
         email: formData.email.trim() || null,
+        emergency_contact_1: formData.emergencyContact1.trim() || null,
+        emergency_contact_2: formData.emergencyContact2.trim() || null,
         patient_code: createCode('P'),
         status: formData.status,
         last_visit: new Date().toISOString().split('T')[0]
@@ -151,7 +153,7 @@ const Patients = () => {
       await addPatient(payload);
       showToast(`Patient ${formData.name} registered successfully.`);
       setIsModalOpen(false);
-      setFormData({ name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', status: 'Outpatient' });
+      setFormData({ name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', emergencyContact1: '', emergencyContact2: '', status: 'Outpatient' });
     } catch (error) {
       showToast(error.message || 'Unable to register the patient.', 'error');
     }
@@ -167,6 +169,8 @@ const Patients = () => {
         blood_group: editFormData.bloodGroup,
         phone_number: editFormData.phoneNumber,
         email: editFormData.email.trim() || null,
+        emergency_contact_1: editFormData.emergencyContact1.trim() || null,
+        emergency_contact_2: editFormData.emergencyContact2.trim() || null,
         status: editFormData.status
       };
       await updatePatient(editingPatient.apiId, payload);
@@ -198,6 +202,8 @@ const Patients = () => {
       bloodGroup: p.bloodGroup,
       phoneNumber: p.phoneNumber,
       email: p.email,
+      emergencyContact1: p.emergencyContact1 || '',
+      emergencyContact2: p.emergencyContact2 || '',
       status: p.status
     });
     setIsEditModalOpen(true);
@@ -406,6 +412,32 @@ const Patients = () => {
               </select>
             </div>
           </div>
+          <div className="row g-3 mb-4">
+            <div className="col-md-6">
+              <label htmlFor="patient-emergency-contact-1" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number 1</label>
+              <input
+                id="patient-emergency-contact-1"
+                type="tel"
+                className="form-control"
+                placeholder="e.g. +91 98765 43210"
+                value={formData.emergencyContact1}
+                onChange={e => setFormData({...formData, emergencyContact1: e.target.value})}
+                autoComplete="tel"
+              />
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="patient-emergency-contact-2" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number 2</label>
+              <input
+                id="patient-emergency-contact-2"
+                type="tel"
+                className="form-control"
+                placeholder="e.g. +91 98765 43210"
+                value={formData.emergencyContact2}
+                onChange={e => setFormData({...formData, emergencyContact2: e.target.value})}
+                autoComplete="tel"
+              />
+            </div>
+          </div>
           <div className="d-flex gap-2 mt-5">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsModalOpen(false)}>Cancel</button>
             <button type="submit" className="btn btn-primary w-100 py-2">Register Patient</button>
@@ -507,6 +539,30 @@ const Patients = () => {
                 <option>Inpatient</option>
                 <option>Emergency</option>
               </select>
+            </div>
+          </div>
+          <div className="row g-3 mb-4">
+            <div className="col-md-6">
+              <label htmlFor="edit-patient-emergency-contact-1" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number 1</label>
+              <input
+                id="edit-patient-emergency-contact-1"
+                type="tel"
+                className="form-control"
+                value={editFormData.emergencyContact1}
+                onChange={e => setEditFormData({...editFormData, emergencyContact1: e.target.value})}
+                autoComplete="tel"
+              />
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="edit-patient-emergency-contact-2" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number 2</label>
+              <input
+                id="edit-patient-emergency-contact-2"
+                type="tel"
+                className="form-control"
+                value={editFormData.emergencyContact2}
+                onChange={e => setEditFormData({...editFormData, emergencyContact2: e.target.value})}
+                autoComplete="tel"
+              />
             </div>
           </div>
           <div className="d-flex gap-2 mt-5">

@@ -14,14 +14,14 @@ const Staff = () => {
   const isDoctor = user?.role === 'Doctor';
   const isNurse = user?.role === 'Nurse';
   const isReception = user?.role === 'Reception';
-  const { 
-    data: staff, 
-    loading, 
-    addData: addStaff, 
+  const {
+    data: staff,
+    loading,
+    addData: addStaff,
     updateData: updateStaff,
     removeData: deleteStaff
   } = useCrud(staffApi, mapStaffFromApi);
-  
+
   const staffRoleOptions = [...new Set(staff.map((member) => member.role).filter(Boolean))];
   const departmentOptions = [
     'General Medicine',
@@ -36,13 +36,13 @@ const Staff = () => {
     'Emergency / Casualty'
   ];
   const shiftOptions = [...new Set(staff.map((member) => member.shift).filter(Boolean))];
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null);
   const [deletingStaff, setDeletingStaff] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -162,85 +162,92 @@ const Staff = () => {
         <Skeleton name="staff-table" loading={loading}>
           <div className="table-responsive">
             <table className="table table-hover mb-0 align-middle">
-            <thead>
-              <tr>
-                <th className="px-4 py-4">Staff Member</th>
-                <th className="py-4">Role Classification</th>
-                <th className="py-4">Clinical Department</th>
-                <th className="py-4 text-center">Active Shift</th>
-                <th className="py-4 text-center">Duty Status</th>
-                {!(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Electronic Validation</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {staff.length === 0 ? (
+              <thead>
                 <tr>
-                  <td colSpan="6" className="p-0">
-                    <EmptyState 
-                      icon="bi-person-badge"
-                      title="No Staff Onboarded"
-                      description="The personnel directory is empty. Add healthcare professionals to manage departments and shifts."
-                      actionText="Add Staff Member"
-                      onAction={() => setIsModalOpen(true)}
-                    />
-                  </td>
+                  <th className="px-4 py-4">Staff Member</th>
+                  <th className="py-4">Role Classification</th>
+                  <th className="py-4">Clinical Department</th>
+                  <th className="py-4 text-center">Active Shift</th>
+                  <th className="py-4 text-center">Duty Status</th>
+                  {!(isDoctor || isNurse || isReception) && <th className="px-4 py-4 text-end">Electronic Validation</th>}
                 </tr>
-              ) : paginatedStaff.map((s) => (
-                <tr key={s.id}>
-                  <td className="px-4 py-4">
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
-                        style={{ width: '40px', height: '40px' }}
-                      >
-                        <i className="bi bi-person-workspace"></i>
+              </thead>
+              <tbody>
+                {staff.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="p-0">
+                      <EmptyState
+                        icon="bi-person-badge"
+                        title="No Staff Onboarded"
+                        description="The personnel directory is empty. Add healthcare professionals to manage departments and shifts."
+                        actionText="Add Staff Member"
+                        onAction={() => setIsModalOpen(true)}
+                      />
+                    </td>
+                  </tr>
+                ) : paginatedStaff.map((s) => (
+                  <tr key={s.id}>
+                    <td className="px-4 py-4">
+                      <div className="d-flex align-items-center">
+                        <div
+                          className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                          style={{ width: '40px', height: '40px' }}
+                        >
+                          <i className="bi bi-person-workspace"></i>
+                        </div>
+                        <h6 className="mb-0 fw-bold text-black">{s.name}</h6>
                       </div>
-                      <h6 className="mb-0 fw-bold text-black">{s.name}</h6>
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <span className="badge-soft-primary px-3 py-1 rounded-pill">{s.role}</span>
-                  </td>
-                  <td className="py-4 text-muted small">{s.dept}</td>
-                  <td className="py-4 text-center text-muted">{s.shift}</td>
-                  <td className="py-4 text-center">
-                    <span
-                      className={`badge rounded-pill px-4 py-2 border border-opacity-25 ${
-                        s.status === 'Active'
-                          ? 'bg-success bg-opacity-10 text-success border-success'
-                          : 'bg-warning bg-opacity-10 text-warning border-warning'
-                      }`}
-                      style={{ fontSize: '0.75rem' }}
-                    >
+                    </td>
+                    <td className="py-4">
+                      <span className="badge-soft-primary px-3 py-1 rounded-pill">{s.role}</span>
+                    </td>
+                    <td className="py-4 text-muted small">{s.dept}</td>
+                    <td className="py-4 text-center text-muted">{s.shift}</td>
+                    <td className="py-4 text-center">
                       <span
-                        className={`pulsing-dot me-2 bg-${s.status === 'Active' ? 'success' : 'warning'}`}
-                        style={{ width: '6px', height: '6px' }}
-                      ></span>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-end">
-                    {!(isDoctor || isNurse || isReception) && (
-                      <>
-                        <button className="btn btn-sm btn-glass me-1" onClick={() => openEditModal(s)}>
-                          <i className="bi bi-pencil-square"></i>
-                        </button>
-                        <button className="btn btn-sm btn-glass text-danger" onClick={() => {
+                        className={`badge rounded-pill px-4 py-2 border border-opacity-25 ${s.status === 'Active'
+                            ? 'bg-success bg-opacity-10 text-success border-success'
+                            : s.status === 'On Leave'
+                              ? 'bg-warning bg-opacity-10 text-warning border-warning'
+                              : 'bg-danger bg-opacity-10 text-danger border-danger'
+                          }`}
+                        style={{ fontSize: '0.75rem' }}
+                      >
+                        <span
+                          className={`pulsing-dot me-2 ${s.status === 'Active'
+                              ? 'bg-success'
+                              : s.status === 'On Leave'
+                                ? 'bg-warning'
+                                : 'bg-danger'
+                            }`}
+                          style={{ width: '6px', height: '6px' }}
+                        ></span>
+
+                        {s.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-end">
+                      {!(isDoctor || isNurse || isReception) && (
+                        <>
+                          <button className="btn btn-sm btn-glass me-1" onClick={() => openEditModal(s)}>
+                            <i className="bi bi-pencil-square"></i>
+                          </button>
+                          <button className="btn btn-sm btn-glass text-danger" onClick={() => {
                             setDeletingStaff(s);
                             setIsDeleteModalOpen(true);
                           }}>
-                          <i className="bi bi-trash3"></i>
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                            <i className="bi bi-trash3"></i>
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Skeleton>
-        <Pagination 
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={onPageChange}

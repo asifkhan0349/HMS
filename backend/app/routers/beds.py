@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
+from ..auth_context import (
+    exclude_roles,
+    get_current_user_id,
+    get_facility_logistics_owner_id_filter,
+    require_roles,
+)
 from ..core.database import get_db
 from .common import PositiveId
 
@@ -20,7 +25,7 @@ router = APIRouter(
 @router.get("", response_model=list[schemas.BedRead])
 def list_beds(
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
 ):
     return crud.list_entities(db, models.Bed, owner_id)
 
@@ -39,7 +44,7 @@ def update_bed(
     bed_id: PositiveId,
     payload: schemas.BedUpdate,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
 ):
     bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
     return crud.update_entity(db, bed, payload)
@@ -49,7 +54,7 @@ def update_bed(
 def delete_bed(
     bed_id: PositiveId,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_owner_id_for_filtering),
+    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
 ):
     bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
     return crud.delete_entity(db, bed)

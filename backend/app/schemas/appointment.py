@@ -15,6 +15,7 @@ class AppointmentBase(AppBaseModel):
     status: str = "Pending"
     telegram_chat_id: Optional[str] = Field(None, max_length=50)
     phone_number: Optional[str] = Field(None, max_length=20)
+    emergency_contact: Optional[str] = Field(None, max_length=20)
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
     doctor_name: Optional[str] = Field(None, max_length=120)
@@ -44,6 +45,7 @@ class AppointmentPublicCreate(AppBaseModel):
     appointment_type: str = Field(..., min_length=2, max_length=100)
     telegram_chat_id: Optional[str] = Field(None, max_length=50)
     phone_number: Optional[str] = Field(None, max_length=20)
+    emergency_contact: Optional[str] = Field(None, max_length=20)
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
 
@@ -65,6 +67,7 @@ class AppointmentUpdate(AppBaseModel):
     status: Optional[str] = None
     telegram_chat_id: Optional[str] = Field(None, max_length=50)
     phone_number: Optional[str] = Field(None, max_length=20)
+    emergency_contact: Optional[str] = Field(None, max_length=20)
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
     doctor_name: Optional[str] = Field(None, max_length=120)
@@ -83,6 +86,7 @@ class AppointmentRead(ORMBase):
     status: str
     telegram_chat_id: Optional[str] = None
     phone_number: Optional[str] = None
+    emergency_contact: Optional[str] = None
     time_slot: Optional[str] = None
     department: Optional[str] = None
     doctor_name: Optional[str] = None
