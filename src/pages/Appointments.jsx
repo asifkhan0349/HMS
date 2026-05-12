@@ -34,7 +34,10 @@ const createEmptyAppointmentForm = () => ({
   appointment_date: new Date().toISOString().split('T')[0],
   type: 'New Consultation',
   phoneNumber: '',
+  email: '',
+  bloodGroup: 'O+',
   emergencyContact: '',
+  emergencyContact2: '',
   timeSlot: '',
   department: '',
 });
@@ -96,7 +99,9 @@ const Appointments = () => {
   const [scheduledModalApp, setScheduledModalApp] = useState(null);
   const [scheduledLaterModalApp, setScheduledLaterModalApp] = useState(null);
   const [scheduledDoctorName, setScheduledDoctorName] = useState('');
-  const [scheduledLaterReason, setScheduledLaterReason] = useState('');
+  const [scheduledLaterDate, setScheduledLaterDate] = useState('');
+  const [scheduledLaterTimeSlot, setScheduledLaterTimeSlot] = useState('');
+  const [scheduledLaterDoctor, setScheduledLaterDoctor] = useState('');
 
   const [formData, setFormData] = useState(createEmptyAppointmentForm);
 
@@ -109,7 +114,10 @@ const Appointments = () => {
     appointment_date: '',
     type: 'New Consultation',
     phoneNumber: '',
+    email: '',
+    bloodGroup: 'O+',
     emergencyContact: '',
+    emergencyContact2: '',
     timeSlot: '',
     department: '',
   });
@@ -126,6 +134,11 @@ const Appointments = () => {
       patient: name,
       age: matchedPatient.age?.toString() ?? currentData.age,
       gender: matchedPatient.gender || currentData.gender,
+      phoneNumber: matchedPatient.phoneNumber || currentData.phoneNumber,
+      email: matchedPatient.email || currentData.email,
+      bloodGroup: matchedPatient.bloodGroup || currentData.bloodGroup,
+      emergencyContact: matchedPatient.emergencyContact1 || currentData.emergencyContact,
+      emergencyContact2: matchedPatient.emergencyContact2 || currentData.emergencyContact2,
     };
   };
 
@@ -140,7 +153,10 @@ const Appointments = () => {
     appointment_date: appointmentData.appointment_date,
     appointment_type: appointmentData.type,
     phone_number: appointmentData.phoneNumber.trim() || null,
+    patient_email: appointmentData.email?.trim() || null,
+    blood_group: appointmentData.bloodGroup || null,
     emergency_contact: appointmentData.emergencyContact.trim() || null,
+    emergency_contact_2: appointmentData.emergencyContact2?.trim() || null,
     time_slot: appointmentData.timeSlot.trim() || null,
     department: appointmentData.department.trim() || null,
   });
@@ -187,7 +203,10 @@ const Appointments = () => {
       appointment_date: app.appointmentDate || '',
       type: app.type,
       phoneNumber: app.phoneNumber || '',
+      email: app.patientEmail || '',
+      bloodGroup: app.bloodGroup || 'O+',
       emergencyContact: app.emergencyContact || '',
+      emergencyContact2: app.emergencyContact2 || '',
       timeSlot: app.timeSlot || '',
       department: app.department || '',
     });
@@ -238,13 +257,19 @@ const Appointments = () => {
   };
 
   const handleConfirmScheduledLater = async () => {
-    if (!scheduledLaterReason.trim()) {
-      showToast('Please enter the reason.', 'warning');
+    if (!scheduledLaterDate) {
+      showToast('Please select an appointment date.', 'warning');
       return;
     }
-    await handleStatusUpdate(scheduledLaterModalApp, 'Scheduled Later', { scheduled_later_reason: scheduledLaterReason.trim() });
+    await handleStatusUpdate(scheduledLaterModalApp, 'Scheduled Later', { 
+      appointment_date: scheduledLaterDate,
+      time_slot: scheduledLaterTimeSlot || null,
+      doctor_name: scheduledLaterDoctor || null
+    });
     setScheduledLaterModalApp(null);
-    setScheduledLaterReason('');
+    setScheduledLaterDate('');
+    setScheduledLaterTimeSlot('');
+    setScheduledLaterDoctor('');
   };
 
   const handleDelete = async () => {
@@ -411,7 +436,12 @@ const Appointments = () => {
                           <button
                             className="btn btn-sm btn-glass p-0 text-primary"
                             style={{ width: '32px', height: '32px', border: '1px solid rgba(0, 122, 255, 0.2)' }}
-                            onClick={() => { setScheduledLaterReason(''); setScheduledLaterModalApp(app); }}
+                            onClick={() => { 
+                              setScheduledLaterDate(app.appointmentDate || ''); 
+                              setScheduledLaterTimeSlot(app.timeSlot || '');
+                              setScheduledLaterDoctor(app.doctor || '');
+                              setScheduledLaterModalApp(app); 
+                            }}
                             disabled={loading}
                             title="Set to Scheduled Later"
                           >
@@ -571,14 +601,50 @@ const Appointments = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number</label>
+                  <label htmlFor="appointment-email" className="form-label text-muted fw-bold small text-uppercase mb-2">Email Address</label>
+                  <input
+                    id="appointment-email"
+                    type="email"
+                    className="form-control"
+                    placeholder="patient@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="appointment-blood" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+                  <select
+                    id="appointment-blood"
+                    className="form-select"
+                    value={formData.bloodGroup}
+                    onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
+                  >
+                    <option>A+</option><option>A-</option>
+                    <option>B+</option><option>B-</option>
+                    <option>O+</option><option>O-</option>
+                    <option>AB+</option><option>AB-</option>
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact 1</label>
                   <input
                     id="appointment-emergency-contact"
                     type="tel"
                     className="form-control"
-                    placeholder="e.g. +1 234 567 8900"
+                    placeholder="Primary Contact Number"
                     value={formData.emergencyContact}
                     onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="appointment-emergency-contact-2" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact 2</label>
+                  <input
+                    id="appointment-emergency-contact-2"
+                    type="tel"
+                    className="form-control"
+                    placeholder="Secondary Contact Number"
+                    value={formData.emergencyContact2}
+                    onChange={(e) => setFormData({ ...formData, emergencyContact2: e.target.value })}
                   />
                 </div>
                 <div className="col-md-6">
@@ -742,14 +808,50 @@ const Appointments = () => {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number</label>
+                      <label htmlFor="edit-appointment-email" className="form-label text-muted fw-bold small text-uppercase mb-2">Email Address</label>
+                      <input
+                        id="edit-appointment-email"
+                        type="email"
+                        className="form-control"
+                        placeholder="patient@example.com"
+                        value={editFormData.email}
+                        onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="edit-appointment-blood" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+                      <select
+                        id="edit-appointment-blood"
+                        className="form-select"
+                        value={editFormData.bloodGroup}
+                        onChange={(e) => setEditFormData({ ...editFormData, bloodGroup: e.target.value })}
+                      >
+                        <option>A+</option><option>A-</option>
+                        <option>B+</option><option>B-</option>
+                        <option>O+</option><option>O-</option>
+                        <option>AB+</option><option>AB-</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="edit-appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact 1</label>
                       <input
                         id="edit-appointment-emergency-contact"
                         type="tel"
                         className="form-control"
-                        placeholder="e.g. +1 234 567 8900"
+                        placeholder="Primary Contact Number"
                         value={editFormData.emergencyContact}
                         onChange={(e) => setEditFormData({ ...editFormData, emergencyContact: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="edit-appointment-emergency-contact-2" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact 2</label>
+                      <input
+                        id="edit-appointment-emergency-contact-2"
+                        type="tel"
+                        className="form-control"
+                        placeholder="Secondary Contact Number"
+                        value={editFormData.emergencyContact2}
+                        onChange={(e) => setEditFormData({ ...editFormData, emergencyContact2: e.target.value })}
                       />
                     </div>
                     <div className="col-md-6">
@@ -1076,30 +1178,96 @@ const Appointments = () => {
                 </span>
               </div>
 
-              <label
-                htmlFor="schedule-later-reason"
-                style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
-                  textTransform: 'uppercase', letterSpacing: '0.06em',
-                  color: '#6b7280', marginBottom: '0.5rem' }}
-              >
-                Reason for Scheduling Later
-              </label>
-              <textarea
-                id="schedule-later-reason"
-                className="form-control"
-                rows={3}
-                placeholder="e.g. Doctor unavailable, patient requested a later slot…"
-                value={scheduledLaterReason}
-                onChange={(e) => setScheduledLaterReason(e.target.value)}
-                autoFocus
-                style={{
-                  borderRadius: '12px',
-                  border: '2px solid #e5e7eb',
-                  fontSize: '0.95rem',
-                  resize: 'none',
-                  transition: 'border-color 0.2s',
-                }}
-              />
+              <div className="row g-3">
+                <div className="col-md-12">
+                  <label
+                    htmlFor="schedule-later-date"
+                    style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
+                      textTransform: 'uppercase', letterSpacing: '0.06em',
+                      color: '#6b7280', marginBottom: '0.5rem' }}
+                  >
+                    Appointment Date
+                  </label>
+                  <input
+                    id="schedule-later-date"
+                    type="date"
+                    className="form-control"
+                    value={scheduledLaterDate}
+                    onChange={(e) => setScheduledLaterDate(e.target.value)}
+                    required
+                    style={{
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '0.95rem',
+                      transition: 'border-color 0.2s',
+                    }}
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label
+                    htmlFor="schedule-later-timeslot"
+                    style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
+                      textTransform: 'uppercase', letterSpacing: '0.06em',
+                      color: '#6b7280', marginBottom: '0.5rem' }}
+                  >
+                    Time Slot
+                  </label>
+                  <select
+                    id="schedule-later-timeslot"
+                    className="form-select"
+                    value={scheduledLaterTimeSlot}
+                    onChange={(e) => setScheduledLaterTimeSlot(e.target.value)}
+                    style={{
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    <option value="">Select Time Slot</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="10:30 AM">10:30 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="11:30 AM">11:30 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="12:30 PM">12:30 PM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                    <option value="1:30 PM">1:30 PM</option>
+                    <option value="2:00 PM">2:00 PM</option>
+                    <option value="2:30 PM">2:30 PM</option>
+                    <option value="3:00 PM">3:00 PM</option>
+                    <option value="3:30 PM">3:30 PM</option>
+                    <option value="4:00 PM">4:00 PM</option>
+                    <option value="4:30 PM">4:30 PM</option>
+                    <option value="5:00 PM">5:00 PM</option>
+                  </select>
+                </div>
+
+                <div className="col-md-6">
+                  <label
+                    htmlFor="schedule-later-doctor"
+                    style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
+                      textTransform: 'uppercase', letterSpacing: '0.06em',
+                      color: '#6b7280', marginBottom: '0.5rem' }}
+                  >
+                    Doctor Name
+                  </label>
+                  <select
+                    id="schedule-later-doctor"
+                    className="form-select"
+                    value={scheduledLaterDoctor}
+                    onChange={(e) => setScheduledLaterDoctor(e.target.value)}
+                    style={{
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    <option value="">Not Assigned</option>
+                    {doctorOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+              </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                 <button
@@ -1118,15 +1286,15 @@ const Appointments = () => {
                 <button
                   type="button"
                   onClick={handleConfirmScheduledLater}
-                  disabled={loading || !scheduledLaterReason.trim()}
+                  disabled={loading || !scheduledLaterDate}
                   style={{
                     flex: 1, padding: '0.65rem 1rem',
                     border: 'none', borderRadius: '12px',
-                    background: scheduledLaterReason.trim()
+                    background: scheduledLaterDate
                       ? 'linear-gradient(135deg, #007aff 0%, #0055cc 100%)'
                       : '#dbeafe',
-                    color: scheduledLaterReason.trim() ? '#fff' : '#93c5fd',
-                    fontWeight: 700, fontSize: '0.9rem', cursor: scheduledLaterReason.trim() ? 'pointer' : 'not-allowed',
+                    color: scheduledLaterDate ? '#fff' : '#93c5fd',
+                    fontWeight: 700, fontSize: '0.9rem', cursor: scheduledLaterDate ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
                   }}

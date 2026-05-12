@@ -15,6 +15,7 @@ const menuItems = [
   { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', adminOnly: true },
   { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', adminOnly: true },
   { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
+  { title: 'Appointment Calendar', path: '/doctor-calendar', icon: 'bi bi-calendar3', allowedRoles: ['Admin', 'Doctor'] },
   { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Reception'] },
 ];
 

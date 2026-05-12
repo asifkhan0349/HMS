@@ -19,6 +19,7 @@ const Inventory = lazy(() => import('./pages/Inventory'));
 const BloodBank = lazy(() => import('./pages/BloodBank'));
 const Settings = lazy(() => import('./pages/Settings'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
+const DoctorCalendar = lazy(() => import('./pages/DoctorCalendar'));
 const Login = lazy(() => import('./pages/Login'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -58,6 +59,9 @@ const INVENTORY_ROLES = ['Admin', 'Nurse', 'Reception'];
 
 // Roles that can access Emergency Blood Bank
 const BLOOD_BANK_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
+
+// Roles that can access Doctor Calendar
+const CALENDAR_ROLES = ['Admin', 'Doctor'];
 
 /**
  * Send each role to its appropriate home page after login / root visit.
@@ -103,6 +107,7 @@ function App() {
               <Route path="/blood-bank" element={<ProtectedRoute allowedRoles={BLOOD_BANK_ROLES}><BloodBank /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/user-management" element={<ProtectedRoute adminOnly><UserManagement /></ProtectedRoute>} />
+              <Route path="/doctor-calendar" element={<ProtectedRoute allowedRoles={CALENDAR_ROLES}><DoctorCalendar /></ProtectedRoute>} />
 
               {/* Catch-all Route for 404s */}
               <Route path="*" element={<Navigate to="/" replace />} />
