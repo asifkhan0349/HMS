@@ -57,7 +57,8 @@ def register_user(
         normalized_username=normalized_username,
         normalized_email=normalized_email,
         role=payload.role,
-        password_hash=hash_password(payload.password)
+        password_hash=hash_password(payload.password),
+        staff_id=payload.staff_id
     )
     
     # Trigger modular async background task

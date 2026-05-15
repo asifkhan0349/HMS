@@ -14,7 +14,34 @@ router = APIRouter(
 
 @router.get("", response_model=list[schemas.StaffRead])
 def list_staff(db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
-    return crud.list_entities(db, models.Staff, owner_id)
+    staff_members = crud.list_entities(db, models.Staff, owner_id)
+
+    # Enrich each Doctor staff record with the linked user account's staff_id.
+    # The appointment filter compares Appointment.doctor_id == User.staff_id,
+    # so we need this value to be written correctly when assigning doctors.
+    doctor_users = (
+        db.query(models.User)
+        .filter(models.User.role == "Doctor", models.User.staff_id.isnot(None))
+        .all()
+    )
+    # Build a name → user.staff_id lookup (case-insensitive)
+    name_to_staff_id = {u.full_name.strip().lower(): u.staff_id for u in doctor_users}
+
+    results = []
+    for s in staff_members:
+        s_dict = {
+            "id": s.id,
+            "staff_code": s.staff_code,
+            "name": s.name,
+            "role": s.role,
+            "department": s.department,
+            "shift": s.shift,
+            "status": s.status,
+            "created_at": s.created_at,
+            "user_staff_id": name_to_staff_id.get(s.name.strip().lower()) if s.role == "Doctor" else None,
+        }
+        results.append(schemas.StaffRead(**s_dict))
+    return results
 
 
 @router.post("", response_model=schemas.StaffRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])

@@ -25,6 +25,7 @@ const Beds = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingBed, setEditingBed] = useState(null);
   const [deletingBed, setDeletingBed] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     ward_name: 'General Ward',
@@ -40,6 +41,18 @@ const Beds = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!formData.ward_name) errors.ward_name = true;
+    if (!formData.type) errors.type = true;
+    if (!formData.status) errors.status = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
+
     try {
       await addBed({
         ...formData,
@@ -65,6 +78,18 @@ const Beds = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.ward_name) errors.ward_name = true;
+    if (!editFormData.type) errors.type = true;
+    if (!editFormData.status) errors.status = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
+
     try {
       await updateBed(editingBed.apiId, editFormData);
       showToast(`Bed ${editingBed.id} updated successfully.`);
@@ -202,10 +227,10 @@ const Beds = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Bed">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="bed-ward-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Ward Name</label>
+            <label htmlFor="bed-ward-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Ward Name</label>
             <select
               id="bed-ward-name"
-              className="form-select"
+              className={`form-select ${validationErrors.ward_name ? 'is-invalid' : ''}`}
               value={formData.ward_name}
               onChange={e => setFormData({ ...formData, ward_name: e.target.value })}
             >
@@ -217,10 +242,10 @@ const Beds = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="bed-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Bed Type</label>
+              <label htmlFor="bed-type" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Bed Type</label>
               <select
                 id="bed-type"
-                className="form-select"
+                className={`form-select ${validationErrors.type ? 'is-invalid' : ''}`}
                 value={formData.type}
                 onChange={e => setFormData({ ...formData, type: e.target.value })}
               >
@@ -231,10 +256,10 @@ const Beds = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="bed-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Initial Status</label>
+              <label htmlFor="bed-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Initial Status</label>
               <select
                 id="bed-status"
-                className="form-select"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={formData.status}
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
               >
@@ -255,10 +280,10 @@ const Beds = () => {
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Bed Details">
         <form onSubmit={handleEditSubmit}>
           <div className="mb-4">
-            <label htmlFor="edit-bed-ward-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Ward Name</label>
+            <label htmlFor="edit-bed-ward-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Ward Name</label>
             <select
               id="edit-bed-ward-name"
-              className="form-select"
+              className={`form-select ${validationErrors.ward_name ? 'is-invalid' : ''}`}
               value={editFormData.ward_name}
               onChange={e => setEditFormData({ ...editFormData, ward_name: e.target.value })}
             >
@@ -270,10 +295,10 @@ const Beds = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-bed-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Bed Type</label>
+              <label htmlFor="edit-bed-type" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Bed Type</label>
               <select
                 id="edit-bed-type"
-                className="form-select"
+                className={`form-select ${validationErrors.type ? 'is-invalid' : ''}`}
                 value={editFormData.type}
                 onChange={e => setEditFormData({ ...editFormData, type: e.target.value })}
               >
@@ -284,10 +309,10 @@ const Beds = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-bed-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Status</label>
+              <label htmlFor="edit-bed-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Status</label>
               <select
                 id="edit-bed-status"
-                className="form-select"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={editFormData.status}
                 onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}
               >

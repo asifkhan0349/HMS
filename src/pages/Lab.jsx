@@ -54,6 +54,7 @@ const Lab = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingTest, setEditingTest] = useState(null);
   const [deletingTest, setDeletingTest] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     patient: '',
@@ -78,10 +79,17 @@ const Lab = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient || !formData.test) {
-      showToast('Please specify patient and diagnostic test type.', 'warning');
+    const errors = {};
+    if (!formData.patient.trim()) errors.patient = true;
+    if (!formData.test.trim()) errors.test = true;
+    if (!formData.doctor.trim()) errors.doctor = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     try {
       await addTest({
         patient_name: formData.patient,
@@ -111,6 +119,18 @@ const Lab = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.patient.trim()) errors.patient = true;
+    if (!editFormData.test.trim()) errors.test = true;
+    if (!editFormData.status) errors.status = true;
+    if (!editFormData.doctor.trim()) errors.doctor = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       await updateTest(editingTest.apiId, {
         patient_name: editFormData.patient,
@@ -284,13 +304,13 @@ const Lab = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Laboratory Test Ordering Protocol">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Subject Identity
             </label>
             <input
               id="lab-patient"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
               placeholder="Enter patient name..."
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
@@ -305,26 +325,26 @@ const Lab = () => {
             </datalist>
           </div>
           <div className="mb-4">
-            <label htmlFor="lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Diagnostic Test Classification
             </label>
             <input
               id="lab-test"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.test ? 'is-invalid' : ''}`}
               placeholder="e.g. Complete Blood Count (CBC) / MRI Brain"
               value={formData.test}
               onChange={(e) => setFormData({ ...formData, test: e.target.value })}
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="lab-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="lab-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Ordering Physician
             </label>
             <input
               id="lab-doctor"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.doctor ? 'is-invalid' : ''}`}
               value={formData.doctor}
               onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
               list="lab-doctor-options"
@@ -351,11 +371,11 @@ const Lab = () => {
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Diagnostic Order">
         <form onSubmit={handleEditSubmit}>
           <div className="mb-4">
-            <label htmlFor="edit-lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2">Subject Identity</label>
+            <label htmlFor="edit-lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Subject Identity</label>
             <input
               id="edit-lab-patient"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
               placeholder="Enter patient name..."
               value={editFormData.patient}
               onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
@@ -363,22 +383,22 @@ const Lab = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="edit-lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2">Diagnostic Test</label>
+            <label htmlFor="edit-lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Diagnostic Test</label>
             <input
               id="edit-lab-test"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.test ? 'is-invalid' : ''}`}
               value={editFormData.test}
               onChange={(e) => setEditFormData({ ...editFormData, test: e.target.value })}
             />
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-lab-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2">Ordering Physician</label>
+              <label htmlFor="edit-lab-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Ordering Physician</label>
               <input
                 id="edit-lab-doctor"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.doctor ? 'is-invalid' : ''}`}
                 value={editFormData.doctor}
                 onChange={(e) => setEditFormData({ ...editFormData, doctor: e.target.value })}
                 list="edit-lab-doctor-options"
@@ -390,10 +410,10 @@ const Lab = () => {
               </datalist>
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-lab-status" className="form-label text-accent fw-bold small text-uppercase mb-2">Status</label>
+              <label htmlFor="edit-lab-status" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Status</label>
               <select
                 id="edit-lab-status"
-                className="form-select"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={editFormData.status}
                 onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
               >

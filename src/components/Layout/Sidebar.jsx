@@ -5,18 +5,18 @@ import { useApp } from '../../context/AppContext';
 const menuItems = [
   { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', adminOnly: true },
   { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
-  { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient'] },
-  { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin', 'Doctor', 'Patient'] },
-  { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Reception'] },
-  { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception'] },
-  { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
-  { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', allowedRoles: ['Admin', 'Doctor', 'Nurse'] },
+  { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Reception'] },
+  { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin', 'Doctor', 'Reception', 'Patient'] },
+  { title: 'Appointment Calendar', path: '/doctor-calendar', icon: 'bi bi-calendar3', allowedRoles: ['Admin', 'Doctor'] },
+  { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', allowedRoles: ['Admin', 'Doctor', 'Nurse'] },
+  { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception', 'Accountant'] },
+  { title: 'Pharmacy', path: '/pharmacy', icon: 'bi bi-capsule', allowedRoles: ['Admin', 'Pharmacist'] },
+  { title: 'Diagnostics & Lab', path: '/lab', icon: 'bi bi-clipboard2-pulse', allowedRoles: ['Admin', 'Doctor', 'Lab Technician'] },
   { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
   { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', adminOnly: true },
-  { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', adminOnly: true },
-  { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
-  { title: 'Appointment Calendar', path: '/doctor-calendar', icon: 'bi bi-calendar3', allowedRoles: ['Admin', 'Doctor'] },
-  { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Reception'] },
+  { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', allowedRoles: ['Admin', 'Accountant'] },
+  { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Pharmacist'] },
+  { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Doctor', 'Nurse'] },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {

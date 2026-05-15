@@ -8,7 +8,7 @@ from .common import PositiveId
 
 # Roles permitted to access Medical Records — must stay in sync with
 # EMR_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Reception"]
+_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse"]
 
 router = APIRouter(
     prefix="/records",
@@ -35,13 +35,13 @@ def get_record(record_id: PositiveId, db: Session = Depends(get_db), owner_id: i
     return crud.get_entity_or_404(db, models.MedicalRecord, record_id, owner_id)
 
 
-@router.put("/{record_id}", response_model=schemas.MedicalRecordRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{record_id}", response_model=schemas.MedicalRecordRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_record(record_id: PositiveId, payload: schemas.MedicalRecordUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     record = crud.get_entity_or_404(db, models.MedicalRecord, record_id, owner_id)
     return crud.update_entity(db, record, payload)
 
 
-@router.delete("/{record_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{record_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_record(record_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     record = crud.get_entity_or_404(db, models.MedicalRecord, record_id, owner_id)
     return crud.delete_entity(db, record)

@@ -49,6 +49,7 @@ const BloodBank = () => {
   const [editingInventory, setEditingInventory] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
   const [deletingType, setDeletingType] = useState(''); // 'inventory' or 'activity'
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     type: 'Donation',
@@ -72,10 +73,16 @@ const BloodBank = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.units) {
-      showToast('Please enter the number of units.', 'warning');
+    const errors = {};
+    if (!formData.units) errors.units = true;
+    if (!formData.donor_name.trim()) errors.donor_name = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     try {
       await addActivity({
         ...formData,
@@ -103,6 +110,16 @@ const BloodBank = () => {
 
   const handleActivityEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!activityEditFormData.units) errors.units = true;
+    if (!activityEditFormData.donor_name.trim()) errors.donor_name = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       await updateActivity(editingActivity.apiId, {
         ...activityEditFormData,
@@ -129,6 +146,15 @@ const BloodBank = () => {
 
   const handleInventoryEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!inventoryEditFormData.units) errors.units = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       await updateInventory(editingInventory.apiId, {
         units: parseInt(inventoryEditFormData.units, 10),
@@ -387,7 +413,7 @@ const BloodBank = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Log Blood Bank Activity">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="blood-activity-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Activity Type</label>
+            <label htmlFor="blood-activity-type" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Activity Type</label>
             <select 
               id="blood-activity-type"
               className="form-select" 
@@ -401,7 +427,7 @@ const BloodBank = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+              <label htmlFor="blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Blood Group</label>
               <select 
                 id="blood-group"
                 className="form-select"
@@ -415,11 +441,11 @@ const BloodBank = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="blood-units" className="form-label text-muted fw-bold small text-uppercase mb-2">Units (Bags)</label>
+              <label htmlFor="blood-units" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Units (Bags)</label>
               <input 
                 id="blood-units"
                 type="number" 
-                className="form-control" 
+                className={`form-control ${validationErrors.units ? 'is-invalid' : ''}`} 
                 placeholder="1" 
                 min="1"
                 value={formData.units}
@@ -429,11 +455,11 @@ const BloodBank = () => {
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Entity or Donor Name</label>
+            <label htmlFor="blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Entity or Donor Name</label>
             <input 
               id="blood-donor-name"
               type="text" 
-              className="form-control" 
+              className={`form-control ${validationErrors.donor_name ? 'is-invalid' : ''}`} 
               placeholder="e.g. John Doe / City Hospital" 
               value={formData.donor_name}
               onChange={e => setFormData({...formData, donor_name: e.target.value})}
@@ -451,7 +477,7 @@ const BloodBank = () => {
       <Modal isOpen={isActivityEditModalOpen} onClose={() => setIsActivityEditModalOpen(false)} title="Edit Activity Record">
         <form onSubmit={handleActivityEditSubmit}>
           <div className="mb-4">
-            <label htmlFor="edit-activity-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Activity Type</label>
+            <label htmlFor="edit-activity-type" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Activity Type</label>
             <select 
               id="edit-activity-type"
               className="form-select" 
@@ -465,7 +491,7 @@ const BloodBank = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+              <label htmlFor="edit-blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Blood Group</label>
               <select 
                 id="edit-blood-group"
                 className="form-select"
@@ -479,11 +505,11 @@ const BloodBank = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-blood-units" className="form-label text-muted fw-bold small text-uppercase mb-2">Units (Bags)</label>
+              <label htmlFor="edit-blood-units" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Units (Bags)</label>
               <input 
                 id="edit-blood-units"
                 type="number" 
-                className="form-control" 
+                className={`form-control ${validationErrors.units ? 'is-invalid' : ''}`} 
                 min="1"
                 value={activityEditFormData.units}
                 onChange={e => setActivityEditFormData({...activityEditFormData, units: e.target.value})}
@@ -492,11 +518,11 @@ const BloodBank = () => {
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="edit-blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Entity or Donor Name</label>
+            <label htmlFor="edit-blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Entity or Donor Name</label>
             <input 
               id="edit-blood-donor-name"
               type="text" 
-              className="form-control" 
+              className={`form-control ${validationErrors.donor_name ? 'is-invalid' : ''}`} 
               value={activityEditFormData.donor_name}
               onChange={e => setActivityEditFormData({...activityEditFormData, donor_name: e.target.value})}
               required
@@ -513,18 +539,18 @@ const BloodBank = () => {
       <Modal isOpen={isInventoryEditModalOpen} onClose={() => setIsInventoryEditModalOpen(false)} title={`Edit ${editingInventory?.type} Inventory`}>
         <form onSubmit={handleInventoryEditSubmit}>
           <div className="mb-4">
-            <label htmlFor="edit-inv-units" className="form-label text-muted fw-bold small text-uppercase mb-2">Total Units Available</label>
+            <label htmlFor="edit-inv-units" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Total Units Available</label>
             <input 
               id="edit-inv-units"
               type="number" 
-              className="form-control" 
+              className={`form-control ${validationErrors.units ? 'is-invalid' : ''}`} 
               value={inventoryEditFormData.units}
               onChange={e => setInventoryEditFormData({...inventoryEditFormData, units: e.target.value})}
             />
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-inv-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Status</label>
+              <label htmlFor="edit-inv-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Status</label>
               <select 
                 id="edit-inv-status"
                 className="form-select"

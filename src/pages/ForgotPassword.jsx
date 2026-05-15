@@ -5,16 +5,19 @@ import { authApi } from '../lib/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const { showToast } = useApp();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) {
-      showToast('Please enter your email address.', 'warning');
+      setValidationErrors({ email: true });
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
 
     setIsSubmitting(true);
     try {
@@ -42,11 +45,11 @@ const ForgotPassword = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="reset-email" className="form-label text-muted small text-uppercase fw-bold mb-2">Email Address</label>
+            <label htmlFor="reset-email" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">Email Address</label>
             <input
               id="reset-email"
               type="email"
-              className="form-control py-2"
+              className={`form-control py-2 ${validationErrors.email ? 'is-invalid' : ''}`}
               placeholder="name@hospital.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

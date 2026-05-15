@@ -22,6 +22,7 @@ class AppointmentBase(AppBaseModel):
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
     doctor_name: Optional[str] = Field(None, max_length=120)
+    doctor_id: Optional[str] = Field(None, max_length=20)
     scheduled_later_reason: Optional[str] = Field(None, max_length=255)
 
     @model_validator(mode="after")
@@ -80,11 +81,13 @@ class AppointmentUpdate(AppBaseModel):
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
     doctor_name: Optional[str] = Field(None, max_length=120)
+    doctor_id: Optional[str] = Field(None, max_length=20)
     scheduled_later_reason: Optional[str] = Field(None, max_length=255)
 
 
 class AppointmentRead(ORMBase):
     id: int
+    booking_id: Optional[str] = None
     patient_name: str = Field(..., min_length=2, max_length=120)
     patient_date_of_birth: Optional[date] = None
     patient_age: Optional[int] = Field(None, ge=0, le=130)
@@ -102,6 +105,7 @@ class AppointmentRead(ORMBase):
     time_slot: Optional[str] = None
     department: Optional[str] = None
     doctor_name: Optional[str] = None
+    doctor_id: Optional[str] = None
     scheduled_later_reason: Optional[str] = None
     created_at: datetime
     

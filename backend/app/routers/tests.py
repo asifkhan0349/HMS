@@ -8,7 +8,7 @@ from .common import PositiveId
 
 # Roles permitted to access Diagnostics & Lab — must stay in sync with
 # LAB_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse"]
+_ALLOWED_ROLES = ["Admin", "Doctor"]
 
 router = APIRouter(
     prefix="/tests",
@@ -35,13 +35,13 @@ def get_test(test_id: PositiveId, db: Session = Depends(get_db), owner_id: int |
     return crud.get_entity_or_404(db, models.LabTest, test_id, owner_id)
 
 
-@router.put("/{test_id}", response_model=schemas.LabTestRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{test_id}", response_model=schemas.LabTestRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_test(test_id: PositiveId, payload: schemas.LabTestUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, owner_id)
     return crud.update_entity(db, test, payload)
 
 
-@router.delete("/{test_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{test_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_test(test_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, owner_id)
     return crud.delete_entity(db, test)

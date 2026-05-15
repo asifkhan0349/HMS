@@ -8,7 +8,7 @@ from .common import PositiveId
 
 # Roles permitted to access Emergency Blood Bank — must stay in sync with
 # BLOOD_BANK_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Reception"]
+_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse"]
 
 router = APIRouter(
     prefix="/blood_activities",
@@ -99,14 +99,14 @@ def create_blood_activity(
     return activity
 
 
-@router.put("/{act_id}", response_model=schemas.BloodActivityRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{activity_id}", response_model=schemas.BloodActivityRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_blood_activity(
-    act_id: PositiveId,
+    activity_id: PositiveId,
     payload: schemas.BloodActivityUpdate,
     db: Session = Depends(get_db),
     owner_id: int | None = Depends(get_shared_staff_owner_id_filter),
 ):
-    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, owner_id)
+    activity = crud.get_entity_or_404(db, models.BloodActivity, activity_id, owner_id)
     inventory_owner_id = activity.owner_user_id
 
     # 1. Revert OLD impact completely
@@ -125,13 +125,13 @@ def update_blood_activity(
     return activity
 
 
-@router.delete("/{act_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{activity_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_blood_activity(
-    act_id: PositiveId,
+    activity_id: PositiveId,
     db: Session = Depends(get_db),
     owner_id: int | None = Depends(get_shared_staff_owner_id_filter),
 ):
-    activity = crud.get_entity_or_404(db, models.BloodActivity, act_id, owner_id)
+    activity = crud.get_entity_or_404(db, models.BloodActivity, activity_id, owner_id)
     sync_activity_to_inventory(db, activity.owner_user_id, activity.blood_group, activity.units, activity.type, revert=True)
     db.delete(activity)
     db.commit()

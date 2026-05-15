@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import Field
-from .base import AppBaseModel, ORMBase
+from .base import AppBaseModel, ORMBase, MessageResponse
 
 
 class StaffBase(AppBaseModel):
@@ -28,4 +28,5 @@ class StaffUpdate(AppBaseModel):
 class StaffRead(StaffBase, ORMBase):
     id: int
     staff_code: str
+    user_staff_id: Optional[str] = None  # Linked doctor user account's staff_id (used for appointment filtering)
     created_at: datetime

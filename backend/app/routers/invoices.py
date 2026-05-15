@@ -35,7 +35,7 @@ def get_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), owner_id:
     return crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
 
 
-@router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
     return crud.update_entity(db, invoice, payload)
@@ -85,7 +85,7 @@ def send_paid_invoice_email(
         )
 
 
-@router.delete("/{invoice_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{invoice_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
     return crud.delete_entity(db, invoice)

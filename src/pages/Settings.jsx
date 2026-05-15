@@ -19,8 +19,9 @@ const Settings = () => {
     newPassword: '',
     confirmPassword: '',
   });
-  const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
+   const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -51,11 +52,17 @@ const Settings = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    console.log('Profile form submitted', profileData);
-    if (!profileData.fullName.trim() || !profileData.username.trim() || !profileData.email.trim()) {
-      showToast('Please fill in all profile fields.', 'warning');
+    const errors = {};
+    if (!profileData.fullName.trim()) errors.fullName = true;
+    if (!profileData.username.trim()) errors.username = true;
+    if (!profileData.email.trim()) errors.email = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
 
     setIsProfileUpdating(true);
     try {
@@ -93,10 +100,19 @@ const Settings = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    if (!passwordData.currentPassword) {
-      showToast('Please enter your current password.', 'warning');
+    const errors = {};
+    if (!passwordData.currentPassword) errors.currentPassword = true;
+    if (!passwordData.newPassword) errors.newPassword = true;
+    if (!passwordData.confirmPassword) errors.confirmPassword = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       showToast('New passwords do not match.', 'error');
       return;
@@ -158,7 +174,7 @@ const Settings = () => {
                   <div className="form-floating mb-3">
                     <input
                       type="text"
-                      className="form-control border-0 bg-light px-4 pt-4 pb-2 fs-5 fw-medium"
+                      className={`form-control border-0 bg-light px-4 pt-4 pb-2 fs-5 fw-medium ${validationErrors.fullName ? 'is-invalid' : ''}`}
                       id="fullName"
                       placeholder="John Doe"
                       value={profileData.fullName}
@@ -166,7 +182,7 @@ const Settings = () => {
                       disabled={isProfileUpdating}
                       style={{ borderRadius: '16px', height: '70px' }}
                     />
-                    <label htmlFor="fullName" className="px-4 text-muted small fw-bold text-uppercase">Full Name</label>
+                    <label htmlFor="fullName" className="px-4 text-muted small fw-bold text-uppercase required-label">Full Name</label>
                   </div>
                 </div>
 
@@ -174,7 +190,7 @@ const Settings = () => {
                   <div className="form-floating mb-3">
                     <input
                       type="text"
-                      className="form-control border-0 bg-light px-4 pt-4 pb-2 fs-5 fw-medium"
+                      className={`form-control border-0 bg-light px-4 pt-4 pb-2 fs-5 fw-medium ${validationErrors.username ? 'is-invalid' : ''}`}
                       id="username"
                       placeholder="username"
                       value={profileData.username}
@@ -182,7 +198,7 @@ const Settings = () => {
                       disabled={isProfileUpdating}
                       style={{ borderRadius: '16px', height: '70px' }}
                     />
-                    <label htmlFor="username" className="px-4 text-muted small fw-bold text-uppercase">Username</label>
+                    <label htmlFor="username" className="px-4 text-muted small fw-bold text-uppercase required-label">Username</label>
                   </div>
                 </div>
 
@@ -190,7 +206,7 @@ const Settings = () => {
                   <div className="form-floating mb-3">
                     <input
                       type="email"
-                      className="form-control border-0 bg-light px-4 pt-4 pb-2 fs-5 fw-medium"
+                      className={`form-control border-0 bg-light px-4 pt-4 pb-2 fs-5 fw-medium ${validationErrors.email ? 'is-invalid' : ''}`}
                       id="email"
                       placeholder="name@example.com"
                       value={profileData.email}
@@ -198,7 +214,7 @@ const Settings = () => {
                       disabled={isProfileUpdating}
                       style={{ borderRadius: '16px', height: '70px' }}
                     />
-                    <label htmlFor="email" className="px-4 text-muted small fw-bold text-uppercase">Email Address</label>
+                    <label htmlFor="email" className="px-4 text-muted small fw-bold text-uppercase required-label">Email Address</label>
                   </div>
                 </div>
               </div>
@@ -237,7 +253,7 @@ const Settings = () => {
 
             <form onSubmit={handlePasswordSubmit}>
               <div className="mb-4">
-                <label className="form-label small fw-bold text-muted text-uppercase mb-3 px-1">Current Password</label>
+                <label className="form-label small fw-bold text-muted text-uppercase mb-3 px-1 required-label">Current Password</label>
                 <div className="input-group">
                   <span className="input-group-text bg-light border-0 px-3" style={{ borderTopLeftRadius: '14px', borderBottomLeftRadius: '14px' }}>
                     <i className="bi bi-key-fill text-muted"></i>
@@ -245,7 +261,7 @@ const Settings = () => {
                   <input
                     type="password"
                     name="currentPassword"
-                    className="form-control border-0 bg-light py-3 px-3"
+                    className={`form-control border-0 bg-light py-3 px-3 ${validationErrors.currentPassword ? 'is-invalid' : ''}`}
                     placeholder="Enter current password"
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
@@ -256,7 +272,7 @@ const Settings = () => {
               </div>
 
               <div className="mb-4">
-                <label className="form-label small fw-bold text-muted text-uppercase mb-3 px-1">New Password</label>
+                <label className="form-label small fw-bold text-muted text-uppercase mb-3 px-1 required-label">New Password</label>
                 <div className="input-group mb-2">
                   <span className="input-group-text bg-light border-0 px-3" style={{ borderTopLeftRadius: '14px', borderBottomLeftRadius: '14px' }}>
                     <i className="bi bi-shield-plus text-muted"></i>
@@ -264,7 +280,7 @@ const Settings = () => {
                   <input
                     type="password"
                     name="newPassword"
-                    className="form-control border-0 bg-light py-3 px-3"
+                    className={`form-control border-0 bg-light py-3 px-3 ${validationErrors.newPassword ? 'is-invalid' : ''}`}
                     placeholder="Min. 8 characters"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
@@ -293,7 +309,7 @@ const Settings = () => {
               </div>
 
               <div className="mb-5">
-                <label className="form-label small fw-bold text-muted text-uppercase mb-3 px-1">Confirm New Password</label>
+                <label className="form-label small fw-bold text-muted text-uppercase mb-3 px-1 required-label">Confirm New Password</label>
                 <div className="input-group">
                   <span className="input-group-text bg-light border-0 px-3" style={{ borderTopLeftRadius: '14px', borderBottomLeftRadius: '14px' }}>
                     <i className="bi bi-check2-all text-muted"></i>
@@ -301,7 +317,7 @@ const Settings = () => {
                   <input
                     type="password"
                     name="confirmPassword"
-                    className="form-control border-0 bg-light py-3 px-3"
+                    className={`form-control border-0 bg-light py-3 px-3 ${validationErrors.confirmPassword ? 'is-invalid' : ''}`}
                     placeholder="Repeat new password"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}

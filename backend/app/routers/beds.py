@@ -5,7 +5,7 @@ from .. import crud, models, schemas
 from ..auth_context import (
     exclude_roles,
     get_current_user_id,
-    get_facility_logistics_owner_id_filter,
+    get_facility_owner_id_filter,
     require_roles,
 )
 from ..core.database import get_db
@@ -25,7 +25,7 @@ router = APIRouter(
 @router.get("", response_model=list[schemas.BedRead])
 def list_beds(
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
+    owner_id: int | None = Depends(get_facility_owner_id_filter),
 ):
     return crud.list_entities(db, models.Bed, owner_id)
 
@@ -39,22 +39,22 @@ def create_bed(
     return crud.create_entity(db, models.Bed, payload, user_id)
 
 
-@router.put("/{bed_id}", response_model=schemas.BedRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{bed_id}", response_model=schemas.BedRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_bed(
     bed_id: PositiveId,
     payload: schemas.BedUpdate,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
+    owner_id: int | None = Depends(get_facility_owner_id_filter),
 ):
     bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
     return crud.update_entity(db, bed, payload)
 
 
-@router.delete("/{bed_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{bed_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_bed(
     bed_id: PositiveId,
     db: Session = Depends(get_db),
-    owner_id: int | None = Depends(get_facility_logistics_owner_id_filter),
+    owner_id: int | None = Depends(get_facility_owner_id_filter),
 ):
     bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
     return crud.delete_entity(db, bed)

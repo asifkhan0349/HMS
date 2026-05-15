@@ -34,31 +34,31 @@ const PageLoader = () => (
 );
 
 // Roles that can access the Patient Directory
-const PATIENT_DIR_ROLES = ['Admin', 'Doctor', 'Nurse', 'Patient'];
+const PATIENT_DIR_ROLES = ['Admin', 'Doctor', 'Patient', 'Reception'];
 
 // Roles that can access Scheduling
-const SCHEDULING_ROLES = ['Admin', 'Doctor', 'Patient'];
+const SCHEDULING_ROLES = ['Admin', 'Doctor', 'Patient', 'Reception'];
 
 // Roles that can access Revenue Cycle
 const BILLING_ROLES = ['Admin', 'Reception'];
 
 // Roles that can access Pharmacy
-const PHARMACY_ROLES = ['Admin', 'Nurse', 'Reception'];
+const PHARMACY_ROLES = ['Admin'];
 
 // Roles that can access Medical Records (EMR)
-const EMR_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
+const EMR_ROLES = ['Admin', 'Doctor', 'Nurse'];
 
 // Roles that can access Diagnostics & Lab
-const LAB_ROLES = ['Admin', 'Doctor', 'Nurse'];
+const LAB_ROLES = ['Admin', 'Doctor'];
 
 // Roles that can access Facility Management
 const BEDS_ROLES = ['Admin', 'Nurse', 'Reception'];
 
 // Roles that can access Hospital Logistics
-const INVENTORY_ROLES = ['Admin', 'Nurse', 'Reception'];
+const INVENTORY_ROLES = ['Admin'];
 
 // Roles that can access Emergency Blood Bank
-const BLOOD_BANK_ROLES = ['Admin', 'Doctor', 'Nurse', 'Reception'];
+const BLOOD_BANK_ROLES = ['Admin', 'Doctor', 'Nurse'];
 
 // Roles that can access Doctor Calendar
 const CALENDAR_ROLES = ['Admin', 'Doctor'];

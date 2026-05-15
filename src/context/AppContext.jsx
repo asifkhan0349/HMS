@@ -110,7 +110,7 @@ export const parseDisplayTime = (value, baseDate = null) => {
   return parsed.toISOString();
 };
 
-export const createCode = (prefix) => `${prefix}-${Date.now().toString().slice(-6)}`;
+export const createCode = () => ''; // Backend handles sequential ID generation
 
 export const mapPatientFromApi = (patient) => ({
   id: patient.id,
@@ -132,6 +132,7 @@ export const mapPatientFromApi = (patient) => ({
 export const mapAppointmentFromApi = (appointment) => ({
   id: appointment.id,
   apiId: appointment.id,
+  appointmentId: appointment.booking_id || '',
   patient: appointment.patient_name,
   patientDateOfBirth: appointment.patient_date_of_birth || '',
   patientAge: appointment.patient_age ?? '',
@@ -148,6 +149,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   timeSlot: appointment.time_slot || '',
   department: appointment.department || '',
   doctor: appointment.doctor_name || '',
+  doctorId: appointment.doctor_id || '',
 });
 
 export const mapRecordFromApi = (record) => ({
@@ -204,6 +206,7 @@ export const mapStaffFromApi = (staffMember) => ({
   dept: staffMember.department,
   shift: staffMember.shift,
   status: staffMember.status,
+  userStaffId: staffMember.user_staff_id || null,  // Linked doctor user's staff_id for appointment filtering
 });
 
 export const mapBedFromApi = (bed) => ({
@@ -374,6 +377,7 @@ export const AppProvider = ({ children }) => {
       username: apiUser.username,
       email: apiUser.email,
       role: apiUser.role,
+      staff_id: apiUser.staff_id,
     };
     // Store the signed JWT for use in Authorization: Bearer headers
     sessionStorage.setItem('hms_token', token);

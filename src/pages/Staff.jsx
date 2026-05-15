@@ -42,6 +42,7 @@ const Staff = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null);
   const [deletingStaff, setDeletingStaff] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -70,17 +71,24 @@ const Staff = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name) {
-      showToast('Please provide the full name for the staff member onboarding.', 'warning');
+    const errors = {};
+    if (!formData.name.trim()) errors.name = true;
+    if (!formData.role.trim()) errors.role = true;
+    if (!formData.dept.trim()) errors.dept = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     try {
       const payload = {
         name: formData.name,
         role: formData.role,
         department: formData.dept,
         shift: formData.shift,
-        staff_code: createCode('S'),
+        staff_code: createCode('S', 4),
         status: 'Active'
       };
       await addStaff(payload);
@@ -111,6 +119,19 @@ const Staff = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.name.trim()) errors.name = true;
+    if (!editFormData.role.trim()) errors.role = true;
+    if (!editFormData.dept.trim()) errors.dept = true;
+    if (!editFormData.shift.trim()) errors.shift = true;
+    if (!editFormData.status) errors.status = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       const payload = {
         name: editFormData.name,
@@ -164,7 +185,8 @@ const Staff = () => {
             <table className="table table-hover mb-0 align-middle">
               <thead>
                 <tr>
-                  <th className="px-4 py-4">Staff Member</th>
+                  <th className="px-4 py-4">Staff ID</th>
+                  <th className="py-4">Staff Member</th>
                   <th className="py-4">Role Classification</th>
                   <th className="py-4">Clinical Department</th>
                   <th className="py-4 text-center">Active Shift</th>
@@ -188,6 +210,11 @@ const Staff = () => {
                 ) : paginatedStaff.map((s) => (
                   <tr key={s.id}>
                     <td className="px-4 py-4">
+                      <span className="badge bg-light text-primary border border-primary border-opacity-25 fw-bold px-2 py-1" style={{ fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                        {s.id}
+                      </span>
+                    </td>
+                    <td className="py-4">
                       <div className="d-flex align-items-center">
                         <div
                           className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -260,13 +287,13 @@ const Staff = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Personnel Onboarding Protocol">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="staff-name" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="staff-name" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Full Legal Name
             </label>
             <input
               id="staff-name"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
               placeholder="Enter staff member name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -274,13 +301,13 @@ const Staff = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="staff-role" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              <label htmlFor="staff-role" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                 Role Classification
               </label>
               <input
                 id="staff-role"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.role ? 'is-invalid' : ''}`}
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 list="staff-role-options"
@@ -293,12 +320,12 @@ const Staff = () => {
               </datalist>
             </div>
             <div className="col-md-6">
-              <label htmlFor="staff-department" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              <label htmlFor="staff-department" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                 Clinical Department
               </label>
               <select
                 id="staff-department"
-                className="form-select"
+                className={`form-select ${validationErrors.dept ? 'is-invalid' : ''}`}
                 value={formData.dept}
                 onChange={(e) => setFormData({ ...formData, dept: e.target.value })}
               >
@@ -310,7 +337,7 @@ const Staff = () => {
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="staff-shift" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="staff-shift" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Assigned Shift
             </label>
             <input
@@ -343,40 +370,50 @@ const Staff = () => {
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Update Staff Information">
         {editingStaff && (
           <form onSubmit={handleEditSubmit}>
-            <div className="mb-4">
-              <label htmlFor="edit-staff-name" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
-                Full Legal Name
-              </label>
-              <input
-                id="edit-staff-name"
-                type="text"
-                className="form-control"
-                value={editFormData.name}
-                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-              />
-            </div>
+              <div className="row g-3 mb-4">
+                <div className="col-md-8">
+                  <label htmlFor="edit-staff-name" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
+                    Full Legal Name
+                  </label>
+                  <input
+                    id="edit-staff-name"
+                    type="text"
+                    className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-muted fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                    Staff ID
+                  </label>
+                  <div className="form-control bg-light border-0 text-muted fw-bold">
+                    {editingStaff.id}
+                  </div>
+                </div>
+              </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
-                <label htmlFor="edit-staff-role" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                <label htmlFor="edit-staff-role" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                   Role Classification
                 </label>
                 <input
                   id="edit-staff-role"
                   type="text"
-                  className="form-control"
+                  className={`form-control ${validationErrors.role ? 'is-invalid' : ''}`}
                   value={editFormData.role}
                   onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value })}
                   list="staff-role-options"
                 />
               </div>
               <div className="col-md-6">
-                <label htmlFor="edit-staff-department" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                <label htmlFor="edit-staff-department" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                   Clinical Department
                 </label>
                 <input
                   id="edit-staff-department"
                   type="text"
-                  className="form-control"
+                  className={`form-control ${validationErrors.dept ? 'is-invalid' : ''}`}
                   value={editFormData.dept}
                   onChange={(e) => setEditFormData({ ...editFormData, dept: e.target.value })}
                   list="department-options"
@@ -385,7 +422,7 @@ const Staff = () => {
             </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
-                <label htmlFor="edit-staff-shift" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                <label htmlFor="edit-staff-shift" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                   Assigned Shift
                 </label>
                 <input
@@ -398,7 +435,7 @@ const Staff = () => {
                 />
               </div>
               <div className="col-md-6">
-                <label htmlFor="edit-staff-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Duty Status</label>
+                <label htmlFor="edit-staff-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Duty Status</label>
                 <select
                   id="edit-staff-status"
                   className="form-select"

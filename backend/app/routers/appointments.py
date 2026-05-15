@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 # Roles permitted to access Scheduling — must stay in sync with
 # SCHEDULING_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Patient"]
+_ALLOWED_ROLES = ["Admin", "Doctor", "Patient", "Reception"]
 
 router = APIRouter(
     prefix="/appointments",
@@ -54,10 +54,23 @@ def list_appointments(
     owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
     query = db.query(models.Appointment)
-    if owner_id is not None:
+
+    if current_user.role == "Doctor":
+        # Doctors bypass the owner_user_id filter — appointments are owned by
+        # the admin who created them, not by the doctor user account.
+        # Instead, filter only by the doctor's assigned Staff ID.
+        if current_user.staff_id:
+            query = query.filter(models.Appointment.doctor_id == current_user.staff_id)
+        else:
+            # Doctors without a Staff ID cannot see any appointments
+            query = query.filter(models.Appointment.doctor_id == "__NONE__")
+    elif owner_id is not None:
+        # All other non-admin roles: scope to their own data
         query = query.filter(models.Appointment.owner_user_id == owner_id)
+
     if patient_name_filter is not None:
         query = query.filter(models.Appointment.patient_name == patient_name_filter)
+    
     return query.order_by(models.Appointment.id.desc()).all()
 
 
@@ -82,7 +95,7 @@ def get_appointment(
     return crud.get_entity_or_404(db, models.Appointment, appointment_id, owner_id=owner_id)
 
 
-@router.put("/{appointment_id}", response_model=schemas.AppointmentRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{appointment_id}", response_model=schemas.AppointmentRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_appointment(
     appointment_id: PositiveId,
     payload: schemas.AppointmentUpdate,
@@ -113,7 +126,7 @@ def update_appointment(
     return updated_appointment
 
 
-@router.delete("/{appointment_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{appointment_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_appointment(
     appointment_id: PositiveId,
     db: Session = Depends(get_db),

@@ -15,20 +15,31 @@ const UserManagement = () => {
     username: '',
     password: '',
     role: 'Doctor',
+    staff_id: '',
   });
   const [statusMessage, setStatusMessage] = useState(null); // { type: 'success' | 'error' | 'warning', text: string }
   const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
-  const roles = ['Doctor', 'Nurse', 'Reception'];
+  const roles = ['Doctor', 'Nurse', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatusMessage(null);
     
-    if (!formData.full_name || !formData.email || !formData.username || !formData.password) {
-      setStatusMessage({ type: 'warning', text: 'All fields are required to register a new user.' });
+    const errors = {};
+    if (!formData.full_name.trim()) errors.full_name = true;
+    if (!formData.email.trim()) errors.email = true;
+    if (!formData.staff_id.trim()) errors.staff_id = true;
+    if (!formData.username.trim()) errors.username = true;
+    if (!formData.password.trim()) errors.password = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      setStatusMessage({ type: 'warning', text: 'Please fill in all mandatory fields highlighted in red.' });
       return;
     }
+    setValidationErrors({});
 
     setIsSubmitting(true);
     try {
@@ -41,6 +52,7 @@ const UserManagement = () => {
         username: '',
         password: '',
         role: 'Doctor',
+        staff_id: '',
       });
     } catch (error) {
       setStatusMessage({ type: 'error', text: error.message || 'System error: Unable to create user account.' });
@@ -142,10 +154,10 @@ const UserManagement = () => {
       <Modal isOpen={isModalOpen} onClose={closeModal} title="Account Provisioning Protocol">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="form-label text-accent fw-bold small text-uppercase mb-2">Legal Full Name</label>
+            <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Legal Full Name</label>
             <input
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.full_name ? 'is-invalid' : ''}`}
               placeholder="e.g. Dr. Marcus Holloway"
               value={formData.full_name}
               onChange={(e) => handleInputChange('full_name', e.target.value)}
@@ -154,37 +166,49 @@ const UserManagement = () => {
           </div>
           
           <div className="row g-3 mb-4">
-            <div className="col-md-6">
-              <label className="form-label text-accent fw-bold small text-uppercase mb-2">Email Address</label>
+            <div className="col-md-8">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Email Address</label>
               <input
                 type="email"
-                className="form-control"
+                className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`}
                 placeholder="marcus@hms-elite.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 required
               />
             </div>
-            <div className="col-md-6">
-              <label className="form-label text-accent fw-bold small text-uppercase mb-2">System Username</label>
+            <div className="col-md-4">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Staff ID</label>
               <input
                 type="text"
-                className="form-control"
-                placeholder="dr_marcus"
-                value={formData.username}
-                onChange={(e) => handleInputChange('username', e.target.value)}
+                className={`form-control ${validationErrors.staff_id ? 'is-invalid' : ''}`}
+                placeholder="e.g. S-1001"
+                value={formData.staff_id}
+                onChange={(e) => handleInputChange('staff_id', e.target.value)}
                 required
               />
             </div>
           </div>
+          
+          <div className="mb-4">
+            <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">System Username</label>
+            <input
+              type="text"
+              className={`form-control ${validationErrors.username ? 'is-invalid' : ''}`}
+              placeholder="dr_marcus"
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
+              required
+            />
+          </div>
 
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label className="form-label text-accent fw-bold small text-uppercase mb-2">Temporary Password</label>
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Temporary Password</label>
               <div className="input-group">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="form-control border-end-0"
+                  className={`form-control border-end-0 ${validationErrors.password ? 'is-invalid' : ''}`}
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
@@ -201,7 +225,7 @@ const UserManagement = () => {
               </div>
             </div>
             <div className="col-md-6">
-              <label className="form-label text-accent fw-bold small text-uppercase mb-2">Role Assignment</label>
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label">Role Assignment</label>
               <select 
                 className="form-select"
                 value={formData.role}

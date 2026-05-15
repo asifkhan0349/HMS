@@ -249,6 +249,25 @@ input.form-control:focus {
   box-shadow: none !important;
 }
 
+.form-label.required-label::after {
+  content: " *";
+  color: var(--geist-error);
+  font-weight: 600;
+}
+
+input.form-control.is-invalid, 
+select.form-select.is-invalid, 
+textarea.form-control.is-invalid {
+  border-color: var(--geist-error) !important;
+  background-color: rgba(238, 0, 0, 0.05) !important;
+}
+
+input.form-control.is-invalid:focus, 
+select.form-select.is-invalid:focus, 
+textarea.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 2px var(--geist-background), 0 0 0 4px rgba(238, 0, 0, 0.2) !important;
+}
+
 /* Specific Utilities */
 .text-muted {
   color: var(--accents-5) !important;

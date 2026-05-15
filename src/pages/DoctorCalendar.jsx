@@ -197,10 +197,18 @@ const DoctorCalendar = () => {
                   </div>
                 </div>
                 <div className="text-end">
-                  <div className="d-flex align-items-center gap-2 justify-content-end text-primary fw-bold">
+                  <div className="d-flex align-items-center gap-2 justify-content-end text-primary fw-bold mb-1">
                     <i className="bi bi-clock"></i>
                     <span>{app.timeSlot}</span>
                   </div>
+                  {app.appointmentId && (
+                    <div 
+                      className="extra-small font-monospace text-muted fw-bold"
+                      style={{ fontSize: '0.65rem', letterSpacing: '0.5px' }}
+                    >
+                      ID: {app.appointmentId}
+                    </div>
+                  )}
                 </div>
               </div>
               

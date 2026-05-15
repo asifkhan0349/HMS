@@ -44,6 +44,7 @@ const Pharmacy = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState(null);
   const [deletingMedicine, setDeletingMedicine] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: '', batch: '', stock: '', expiry: ''
@@ -59,25 +60,18 @@ const Pharmacy = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!formData.name.trim()) errors.name = true;
+    if (formData.stock === '') errors.stock = true;
+    if (!formData.batch.trim()) errors.batch = true;
+    if (!formData.expiry) errors.expiry = true;
 
-    // Improved validation: Ensure all required fields are present
-    // Note: Allow stock to be 0
-    if (!formData.name) {
-      showToast('Please specify the medicine name.', 'warning');
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
-    if (formData.stock === '') {
-      showToast('Please specify the initial stock quantity.', 'warning');
-      return;
-    }
-    if (!formData.batch) {
-      showToast('Please specify the Batch ID.', 'warning');
-      return;
-    }
-    if (!formData.expiry) {
-      showToast('Please specify the Expiration Date.', 'warning');
-      return;
-    }
+    setValidationErrors({});
 
     try {
       const stockValue = parseInt(formData.stock, 10);
@@ -118,6 +112,19 @@ const Pharmacy = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.name.trim()) errors.name = true;
+    if (editFormData.stock === '') errors.stock = true;
+    if (!editFormData.batch.trim()) errors.batch = true;
+    if (!editFormData.expiry) errors.expiry = true;
+    if (!editFormData.status) errors.status = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       const stock = parseInt(editFormData.stock, 10);
       await updateMedicine(editingMedicine.apiId, {
@@ -320,11 +327,11 @@ const Pharmacy = () => {
       >
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="medicine-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Medicine Name</label>
+            <label htmlFor="medicine-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Medicine Name</label>
             <input
               id="medicine-name"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
               placeholder="e.g. Paracetamol 500mg…"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -332,22 +339,22 @@ const Pharmacy = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="medicine-batch" className="form-label text-muted fw-bold small text-uppercase mb-2">Batch ID</label>
+              <label htmlFor="medicine-batch" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Batch ID</label>
               <input
                 id="medicine-batch"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.batch ? 'is-invalid' : ''}`}
                 placeholder="BT-XXXX"
                 value={formData.batch}
                 onChange={e => setFormData({ ...formData, batch: e.target.value })}
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="medicine-stock" className="form-label text-muted fw-bold small text-uppercase mb-2">Quantity</label>
+              <label htmlFor="medicine-stock" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Quantity</label>
               <input
                 id="medicine-stock"
                 type="number"
-                className="form-control"
+                className={`form-control ${validationErrors.stock ? 'is-invalid' : ''}`}
                 placeholder="0"
                 value={formData.stock}
                 onChange={e => setFormData({ ...formData, stock: e.target.value })}
@@ -355,11 +362,11 @@ const Pharmacy = () => {
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="medicine-expiry" className="form-label text-muted fw-bold small text-uppercase mb-2">Expiration Date (YYYY-MM-DD)</label>
+            <label htmlFor="medicine-expiry" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Expiration Date (YYYY-MM-DD)</label>
             <input
               id="medicine-expiry"
               type="date"
-              className="form-control"
+              className={`form-control ${validationErrors.expiry ? 'is-invalid' : ''}`}
               value={formData.expiry}
               onChange={e => setFormData({ ...formData, expiry: e.target.value })}
             />
@@ -379,32 +386,32 @@ const Pharmacy = () => {
       >
         <form onSubmit={handleEditSubmit}>
           <div className="mb-4">
-            <label htmlFor="edit-medicine-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Medicine Name</label>
+            <label htmlFor="edit-medicine-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Medicine Name</label>
             <input
               id="edit-medicine-name"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
               value={editFormData.name}
               onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
             />
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-medicine-batch" className="form-label text-muted fw-bold small text-uppercase mb-2">Batch ID</label>
+              <label htmlFor="edit-medicine-batch" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Batch ID</label>
               <input
                 id="edit-medicine-batch"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.batch ? 'is-invalid' : ''}`}
                 value={editFormData.batch}
                 onChange={e => setEditFormData({ ...editFormData, batch: e.target.value })}
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-medicine-stock" className="form-label text-muted fw-bold small text-uppercase mb-2">Quantity</label>
+              <label htmlFor="edit-medicine-stock" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Quantity</label>
               <input
                 id="edit-medicine-stock"
                 type="number"
-                className="form-control"
+                className={`form-control ${validationErrors.stock ? 'is-invalid' : ''}`}
                 value={editFormData.stock}
                 onChange={e => setEditFormData({ ...editFormData, stock: e.target.value })}
               />
@@ -412,20 +419,20 @@ const Pharmacy = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-medicine-expiry" className="form-label text-muted fw-bold small text-uppercase mb-2">Expiration Date</label>
+              <label htmlFor="edit-medicine-expiry" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Expiration Date</label>
               <input
                 id="edit-medicine-expiry"
                 type="date"
-                className="form-control"
+                className={`form-control ${validationErrors.expiry ? 'is-invalid' : ''}`}
                 value={editFormData.expiry}
                 onChange={e => setEditFormData({ ...editFormData, expiry: e.target.value })}
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-medicine-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Status Style</label>
+              <label htmlFor="edit-medicine-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Status Style</label>
               <select
                 id="edit-medicine-status"
-                className="form-select"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={editFormData.status}
                 onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}
               >

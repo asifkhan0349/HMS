@@ -37,6 +37,7 @@ const Inventory = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: '', category: 'General', stock: '', unit: 'Units'
@@ -48,10 +49,18 @@ const Inventory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.stock) {
-      showToast('Please specify item name and initial stock quantity.', 'warning');
+    const errors = {};
+    if (!formData.name.trim()) errors.name = true;
+    if (!formData.stock) errors.stock = true;
+    if (!formData.category) errors.category = true;
+    if (!formData.unit) errors.unit = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     try {
       const stockValue = parseInt(formData.stock, 10);
       await addInventory({
@@ -83,6 +92,18 @@ const Inventory = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.name.trim()) errors.name = true;
+    if (!editFormData.stock) errors.stock = true;
+    if (!editFormData.category) errors.category = true;
+    if (!editFormData.unit) errors.unit = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       const stockValue = parseInt(editFormData.stock, 10);
       const payload = {
@@ -285,11 +306,11 @@ const Inventory = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Inventory Item">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="inventory-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Item Name</label>
+            <label htmlFor="inventory-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Item Name</label>
             <input
               id="inventory-name"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
               placeholder="e.g. Surgical Masks"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -297,10 +318,10 @@ const Inventory = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="inventory-category" className="form-label text-muted fw-bold small text-uppercase mb-2">Category</label>
+              <label htmlFor="inventory-category" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Category</label>
               <select
                 id="inventory-category"
-                className="form-select"
+                className={`form-select ${validationErrors.category ? 'is-invalid' : ''}`}
                 value={formData.category}
                 onChange={e => setFormData({ ...formData, category: e.target.value })}
               >
@@ -311,10 +332,10 @@ const Inventory = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="inventory-unit" className="form-label text-muted fw-bold small text-uppercase mb-2">Unit</label>
+              <label htmlFor="inventory-unit" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Unit</label>
               <select
                 id="inventory-unit"
-                className="form-select"
+                className={`form-select ${validationErrors.unit ? 'is-invalid' : ''}`}
                 value={formData.unit}
                 onChange={e => setFormData({ ...formData, unit: e.target.value })}
               >
@@ -326,11 +347,11 @@ const Inventory = () => {
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="inventory-stock" className="form-label text-muted fw-bold small text-uppercase mb-2">Initial Stock</label>
+            <label htmlFor="inventory-stock" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Initial Stock</label>
             <input
               id="inventory-stock"
               type="number"
-              className="form-control"
+              className={`form-control ${validationErrors.stock ? 'is-invalid' : ''}`}
               placeholder="0"
               value={formData.stock}
               onChange={e => setFormData({ ...formData, stock: e.target.value })}
@@ -348,21 +369,21 @@ const Inventory = () => {
         {editingItem && (
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
-              <label htmlFor="edit-inventory-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Item Name</label>
+              <label htmlFor="edit-inventory-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Item Name</label>
               <input
                 id="edit-inventory-name"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
                 value={editFormData.name}
                 onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
               />
             </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
-                <label htmlFor="edit-inventory-category" className="form-label text-muted fw-bold small text-uppercase mb-2">Category</label>
+                <label htmlFor="edit-inventory-category" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Category</label>
                 <select
                   id="edit-inventory-category"
-                  className="form-select"
+                  className={`form-select ${validationErrors.category ? 'is-invalid' : ''}`}
                   value={editFormData.category}
                   onChange={e => setEditFormData({ ...editFormData, category: e.target.value })}
                 >
@@ -373,10 +394,10 @@ const Inventory = () => {
                 </select>
               </div>
               <div className="col-md-6">
-                <label htmlFor="edit-inventory-unit" className="form-label text-muted fw-bold small text-uppercase mb-2">Unit</label>
+                <label htmlFor="edit-inventory-unit" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Unit</label>
                 <select
                   id="edit-inventory-unit"
-                  className="form-select"
+                  className={`form-select ${validationErrors.unit ? 'is-invalid' : ''}`}
                   value={editFormData.unit}
                   onChange={e => setEditFormData({ ...editFormData, unit: e.target.value })}
                 >
@@ -388,11 +409,11 @@ const Inventory = () => {
               </div>
             </div>
             <div className="mb-4">
-              <label htmlFor="edit-inventory-stock" className="form-label text-muted fw-bold small text-uppercase mb-2">Current Stock</label>
+              <label htmlFor="edit-inventory-stock" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Current Stock</label>
               <input
                 id="edit-inventory-stock"
                 type="number"
-                className="form-control"
+                className={`form-control ${validationErrors.stock ? 'is-invalid' : ''}`}
                 value={editFormData.stock}
                 onChange={e => setEditFormData({ ...editFormData, stock: e.target.value })}
               />

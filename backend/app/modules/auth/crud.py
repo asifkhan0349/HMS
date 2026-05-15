@@ -35,7 +35,8 @@ def create_user(
     normalized_username: str, 
     normalized_email: str, 
     role: str, 
-    password_hash: str
+    password_hash: str,
+    staff_id: Optional[str] = None
 ) -> models.User:
     user = models.User(
         full_name=full_name,
@@ -43,6 +44,7 @@ def create_user(
         email=normalized_email,
         role=role,
         password_hash=password_hash,
+        staff_id=staff_id,
     )
     db.add(user)
     db.commit()

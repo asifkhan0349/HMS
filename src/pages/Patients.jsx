@@ -102,6 +102,7 @@ const Patients = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [deletingPatient, setDeletingPatient] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
   
   const [formData, setFormData] = useState({
     name: '', age: '', gender: 'Male', bloodGroup: 'O+', phoneNumber: '', email: '', emergencyContact1: '', emergencyContact2: '', status: 'Outpatient'
@@ -132,10 +133,21 @@ const Patients = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.age || !formData.phoneNumber) {
-      showToast('Please fill in all clinical identifiers.', 'warning');
+    const errors = {};
+    if (!formData.name.trim()) errors.name = true;
+    if (!formData.age) errors.age = true;
+    if (!formData.phoneNumber.trim()) errors.phoneNumber = true;
+    if (!formData.gender) errors.gender = true;
+    if (!formData.bloodGroup) errors.bloodGroup = true;
+    if (!formData.status) errors.status = true;
+    if (!formData.emergencyContact1.trim()) errors.emergencyContact1 = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     try {
       const payload = {
         name: formData.name,
@@ -161,6 +173,21 @@ const Patients = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.name.trim()) errors.name = true;
+    if (!editFormData.age) errors.age = true;
+    if (!editFormData.phoneNumber.trim()) errors.phoneNumber = true;
+    if (!editFormData.gender) errors.gender = true;
+    if (!editFormData.bloodGroup) errors.bloodGroup = true;
+    if (!editFormData.status) errors.status = true;
+    if (!editFormData.emergencyContact1.trim()) errors.emergencyContact1 = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       const payload = {
         name: editFormData.name,
@@ -319,11 +346,11 @@ const Patients = () => {
       >
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="patient-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Full Name</label>
+            <label htmlFor="patient-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Full Name</label>
             <input 
               id="patient-name"
               type="text" 
-              className="form-control" 
+              className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`} 
               placeholder="e.g. John Doe…" 
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
@@ -332,21 +359,21 @@ const Patients = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="patient-age" className="form-label text-muted fw-bold small text-uppercase mb-2">Age</label>
+              <label htmlFor="patient-age" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Age</label>
               <input 
                 id="patient-age"
                 type="number" 
-                className="form-control" 
+                className={`form-control ${validationErrors.age ? 'is-invalid' : ''}`} 
                 placeholder="0" 
                 value={formData.age}
                 onChange={e => setFormData({...formData, age: e.target.value})}
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="patient-gender" className="form-label text-muted fw-bold small text-uppercase mb-2">Gender</label>
+              <label htmlFor="patient-gender" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Gender</label>
               <select 
                 id="patient-gender"
-                className="form-select"
+                className={`form-select ${validationErrors.gender ? 'is-invalid' : ''}`}
                 value={formData.gender}
                 onChange={e => setFormData({...formData, gender: e.target.value})}
               >
@@ -358,10 +385,10 @@ const Patients = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="patient-blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+              <label htmlFor="patient-blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Blood Group</label>
               <select 
                 id="patient-blood-group"
-                className="form-select"
+                className={`form-select ${validationErrors.bloodGroup ? 'is-invalid' : ''}`}
                 value={formData.bloodGroup}
                 onChange={e => setFormData({...formData, bloodGroup: e.target.value})}
               >
@@ -372,11 +399,11 @@ const Patients = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="patient-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
+              <label htmlFor="patient-phone" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Phone Number</label>
               <input
                 id="patient-phone"
                 type="tel"
-                className="form-control"
+                className={`form-control ${validationErrors.phoneNumber ? 'is-invalid' : ''}`}
                 placeholder="e.g. +91 98765 43210"
                 value={formData.phoneNumber}
                 onChange={e => setFormData({...formData, phoneNumber: e.target.value})}
@@ -399,10 +426,10 @@ const Patients = () => {
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="patient-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Admission Status</label>
+              <label htmlFor="patient-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Admission Status</label>
               <select 
                 id="patient-status"
-                className="form-select"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={formData.status}
                 onChange={e => setFormData({...formData, status: e.target.value})}
               >
@@ -414,11 +441,11 @@ const Patients = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="patient-emergency-contact-1" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number 1</label>
+              <label htmlFor="patient-emergency-contact-1" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Emergency Contact Number 1</label>
               <input
                 id="patient-emergency-contact-1"
                 type="tel"
-                className="form-control"
+                className={`form-control ${validationErrors.emergencyContact1 ? 'is-invalid' : ''}`}
                 placeholder="e.g. +91 98765 43210"
                 value={formData.emergencyContact1}
                 onChange={e => setFormData({...formData, emergencyContact1: e.target.value})}
@@ -453,31 +480,31 @@ const Patients = () => {
       >
         <form onSubmit={handleEditSubmit}>
           <div className="mb-4">
-            <label htmlFor="edit-patient-name" className="form-label text-muted fw-bold small text-uppercase mb-2">Full Name</label>
+            <label htmlFor="edit-patient-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Full Name</label>
             <input 
               id="edit-patient-name"
               type="text" 
-              className="form-control" 
+              className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`} 
               value={editFormData.name}
               onChange={e => setEditFormData({...editFormData, name: e.target.value})}
             />
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-patient-age" className="form-label text-muted fw-bold small text-uppercase mb-2">Age</label>
+              <label htmlFor="edit-patient-age" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Age</label>
               <input 
                 id="edit-patient-age"
                 type="number" 
-                className="form-control" 
+                className={`form-control ${validationErrors.age ? 'is-invalid' : ''}`} 
                 value={editFormData.age}
                 onChange={e => setEditFormData({...editFormData, age: e.target.value})}
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-patient-gender" className="form-label text-muted fw-bold small text-uppercase mb-2">Gender</label>
+              <label htmlFor="edit-patient-gender" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Gender</label>
               <select 
                 id="edit-patient-gender"
-                className="form-select"
+                className={`form-select ${validationErrors.gender ? 'is-invalid' : ''}`}
                 value={editFormData.gender}
                 onChange={e => setEditFormData({...editFormData, gender: e.target.value})}
               >
@@ -489,10 +516,10 @@ const Patients = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-patient-blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+              <label htmlFor="edit-patient-blood-group" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Blood Group</label>
               <select 
                 id="edit-patient-blood-group"
-                className="form-select"
+                className={`form-select ${validationErrors.bloodGroup ? 'is-invalid' : ''}`}
                 value={editFormData.bloodGroup}
                 onChange={e => setEditFormData({...editFormData, bloodGroup: e.target.value})}
               >
@@ -503,11 +530,11 @@ const Patients = () => {
               </select>
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-patient-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
+              <label htmlFor="edit-patient-phone" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Phone Number</label>
               <input
                 id="edit-patient-phone"
                 type="tel"
-                className="form-control"
+                className={`form-control ${validationErrors.phoneNumber ? 'is-invalid' : ''}`}
                 value={editFormData.phoneNumber}
                 onChange={e => setEditFormData({...editFormData, phoneNumber: e.target.value})}
                 autoComplete="tel"
@@ -528,10 +555,10 @@ const Patients = () => {
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="edit-patient-status" className="form-label text-muted fw-bold small text-uppercase mb-2">Admission Status</label>
+              <label htmlFor="edit-patient-status" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Admission Status</label>
               <select 
                 id="edit-patient-status"
-                className="form-select"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={editFormData.status}
                 onChange={e => setEditFormData({...editFormData, status: e.target.value})}
               >
@@ -543,11 +570,11 @@ const Patients = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="edit-patient-emergency-contact-1" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact Number 1</label>
+              <label htmlFor="edit-patient-emergency-contact-1" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Emergency Contact Number 1</label>
               <input
                 id="edit-patient-emergency-contact-1"
                 type="tel"
-                className="form-control"
+                className={`form-control ${validationErrors.emergencyContact1 ? 'is-invalid' : ''}`}
                 value={editFormData.emergencyContact1}
                 onChange={e => setEditFormData({...editFormData, emergencyContact1: e.target.value})}
                 autoComplete="tel"

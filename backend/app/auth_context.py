@@ -151,7 +151,7 @@ def get_pharmacy_owner_id_filter(
     user: User = Depends(get_current_user),
 ) -> int | None:
     """Return None for pharmacy roles that share inventory data."""
-    if user.role in ["Admin", "Nurse", "Reception"]:
+    if user.role in ["Admin", "Nurse"]:
         return None
     return user.id
 
@@ -166,15 +166,23 @@ def get_shared_staff_owner_id_filter(
 def get_blood_bank_owner_id_filter(
     user: User = Depends(get_current_user),
 ) -> int | None:
-    """Return None if user is Admin, Doctor, Nurse, or Reception (shared access), else return user's ID."""
-    if user.role in ["Admin", "Doctor", "Nurse", "Reception"]:
+    """Return None if user is Admin, Doctor, or Nurse (shared access), else return user's ID."""
+    if user.role in ["Admin", "Doctor", "Nurse"]:
         return None
     return user.id
 
-def get_facility_logistics_owner_id_filter(
+def get_facility_owner_id_filter(
     user: User = Depends(get_current_user),
 ) -> int | None:
-    """Return None for roles that share facility and logistics data."""
+    """Return None for roles that share facility data."""
     if user.role in ["Admin", "Nurse", "Reception"]:
+        return None
+    return user.id
+
+def get_logistics_owner_id_filter(
+    user: User = Depends(get_current_user),
+) -> int | None:
+    """Return None for roles that share logistics data."""
+    if user.role in ["Admin", "Nurse"]:
         return None
     return user.id

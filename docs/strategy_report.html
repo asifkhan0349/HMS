@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS Strategy & Operations Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --primary: #0070f3;
+            --secondary: #1a1a1a;
+            --muted: #666666;
+            --border: #eaeaea;
+            --bg: #ffffff;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--secondary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            background: var(--bg);
+        }
+
+        .header {
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-weight: 800;
+            font-size: 32px;
+            margin: 0;
+            letter-spacing: -1px;
+            color: var(--primary);
+        }
+
+        .header p {
+            color: var(--muted);
+            margin: 5px 0 0 0;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f9f9f9;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid var(--border);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .module-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .module-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .module-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+
+        .module-item span {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .journey-step {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-right: 15px;
+            z-index: 1;
+        }
+
+        .step-content {
+            padding-top: 2px;
+        }
+
+        .step-content strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .step-content em {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        .step-content p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>HMS Strategy & Operations</h1>
+        <p>Comprehensive System Architecture & Role-Based Access Report</p>
+    </div>
+
+    <h2>1. System Module Architecture</h2>
+    <p>A breakdown of the core operational modules required for a modern clinical environment.</p>
+    
+    <div class="module-list">
+        <div class="module-item">
+            <strong>Command Center</strong>
+            <span>Real-time analytics and hospital-wide KPI tracking.</span>
+        </div>
+        <div class="module-item">
+            <strong>User Management</strong>
+            <span>Secure RBAC and personnel credentialing.</span>
+        </div>
+        <div class="module-item">
+            <strong>Patient Directory</strong>
+            <span>Centralized registry for longitudinal medical records.</span>
+        </div>
+        <div class="module-item">
+            <strong>EMR / EHR</strong>
+            <span>Electronic health records and clinical documentation.</span>
+        </div>
+        <div class="module-item">
+            <strong>Revenue Cycle (Billing)</strong>
+            <span>Invoicing, insurance claims, and financial auditing.</span>
+        </div>
+        <div class="module-item">
+            <strong>Pharmacy Management</strong>
+            <span>Inventory, dispensing, and prescription integration.</span>
+        </div>
+        <div class="module-item">
+            <strong>Diagnostics & Lab</strong>
+            <span>Order management and digital report delivery.</span>
+        </div>
+        <div class="module-item">
+            <strong>Facility Management</strong>
+            <span>Bed allocation, ward occupancy, and cleaning logs.</span>
+        </div>
+    </div>
+
+    <h3>Proposed Expansion Modules</h3>
+    <div class="module-list" style="margin-top: 20px;">
+        <div class="module-item" style="border-color: var(--success);">
+            <strong>Telemedicine Hub</strong>
+            <span>Virtual consultations and remote patient monitoring.</span>
+        </div>
+        <div class="module-item" style="border-color: var(--success);">
+            <strong>Insurance & TPA</strong>
+            <span>Automated claim processing and cashless approvals.</span>
+        </div>
+        <div class="module-item" style="border-color: var(--success);">
+            <strong>Ambulance Dispatch</strong>
+            <span>GPS tracking for emergency response fleets.</span>
+        </div>
+        <div class="module-item" style="border-color: var(--success);">
+            <strong>Asset Maintenance</strong>
+            <span>Clinical equipment uptime and service tracking.</span>
+        </div>
+    </div>
+
+    <h2>2. Detailed Role-Based Access Control (RBAC)</h2>
+    <p>The following table outlines the module-level permissions for each clinical and administrative role.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Permitted Modules</th>
+                <th>Core Responsibility</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Admin</strong></td>
+                <td>All Modules (Command Center, User Management, Reports, etc.)</td>
+                <td>Full System Administration</td>
+            </tr>
+            <tr>
+                <td><strong>Doctor</strong></td>
+                <td>EMR, Appointments, Calendar, Lab, Blood Bank, Telemedicine</td>
+                <td>Clinical Diagnosis & Treatment</td>
+            </tr>
+            <tr>
+                <td><strong>Nurse</strong></td>
+                <td>EMR (Vitals), Patient Registry, Beds, Blood Bank, Pharmacy (View)</td>
+                <td>Nursing Care & Ward Mgmt</td>
+            </tr>
+            <tr>
+                <td><strong>Reception</strong></td>
+                <td>Patient Registry, Appointments, Billing, Beds, Ambulance Dispatch</td>
+                <td>Patient Onboarding & Logistics</td>
+            </tr>
+            <tr>
+                <td><strong>Pharmacist</strong></td>
+                <td>Pharmacy, Inventory, Medicine Stock, Expiry Alerts</td>
+                <td>Medication Safety & Logistics</td>
+            </tr>
+            <tr>
+                <td><strong>Lab Technician</strong></td>
+                <td>Diagnostics & Lab, Patient Directory (View), Equipment Maintenance</td>
+                <td>Diagnostic Testing & Reporting</td>
+            </tr>
+            <tr>
+                <td><strong>Accountant</strong></td>
+                <td>Revenue Cycle (Billing), Insurance/TPA, Financial Reports</td>
+                <td>Financial Integrity & Claims</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Patient Journey Workflow</h2>
+    <div class="journey-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+            <strong>Registration & Triage</strong>
+            <em>Role: Receptionist & Nurse</em>
+            <p>Profile creation followed by recording of vitals and priority assessment.</p>
+        </div>
+    </div>
+    <div class="journey-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+            <strong>Clinical Consultation</strong>
+            <em>Role: Doctor</em>
+            <p>Examination, diagnosis, and generation of orders (Labs/Meds).</p>
+        </div>
+    </div>
+    <div class="journey-step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+            <strong>Diagnostics & Investigation</strong>
+            <em>Role: Lab Technician</em>
+            <p>Sample collection and digital result synchronization to EMR.</p>
+        </div>
+    </div>
+    <div class="journey-step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+            <strong>Financial Settlement</strong>
+            <em>Role: Accountant / Billing Clerk</em>
+            <p>Invoice generation, TPA claim processing, and payment collection.</p>
+        </div>
+    </div>
+    <div class="journey-step">
+        <div class="step-number">5</div>
+        <div class="step-content">
+            <strong>Medication & Exit</strong>
+            <em>Role: Pharmacist</em>
+            <p>Prescription fulfillment and dispensing with dosage guidance.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated by HMS Core Intelligence v1.0 • &copy; 2026 Professional Hospital Management Systems
+    </div>
+
+</body>
+</html>

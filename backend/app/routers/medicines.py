@@ -8,7 +8,7 @@ from .common import PositiveId
 
 # Roles permitted to access Pharmacy — must stay in sync with
 # PHARMACY_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Nurse", "Reception"]
+_ALLOWED_ROLES = ["Admin", "Reception"]
 
 router = APIRouter(
     prefix="/medicines",
@@ -32,13 +32,13 @@ def get_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), owner_i
     return crud.get_entity_or_404(db, models.Medicine, medicine_id, owner_id)
 
 
-@router.put("/{medicine_id}", response_model=schemas.MedicineRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{medicine_id}", response_model=schemas.MedicineRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_medicine(medicine_id: PositiveId, payload: schemas.MedicineUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_pharmacy_owner_id_filter)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, owner_id)
     return crud.update_entity(db, medicine, payload)
 
 
-@router.delete("/{medicine_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{medicine_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_medicine(medicine_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_pharmacy_owner_id_filter)):
     medicine = crud.get_entity_or_404(db, models.Medicine, medicine_id, owner_id)
     return crud.delete_entity(db, medicine)

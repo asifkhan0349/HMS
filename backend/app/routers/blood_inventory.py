@@ -8,7 +8,7 @@ from .common import PositiveId
 
 # Roles permitted to access Emergency Blood Bank — must stay in sync with
 # BLOOD_BANK_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Reception"]
+_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse"]
 
 router = APIRouter(
     prefix="/blood_inventory",
@@ -34,22 +34,22 @@ def create_blood_inventory(
     return crud.create_entity(db, models.BloodInventory, payload, user_id)
 
 
-@router.put("/{bg_id}", response_model=schemas.BloodInventoryRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{item_id}", response_model=schemas.BloodInventoryRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_blood_inventory(
-    bg_id: PositiveId,
+    item_id: PositiveId,
     payload: schemas.BloodInventoryUpdate,
     db: Session = Depends(get_db),
     owner_id: int | None = Depends(get_blood_bank_owner_id_filter),
 ):
-    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, owner_id)
+    item = crud.get_entity_or_404(db, models.BloodInventory, item_id, owner_id)
     return crud.update_entity(db, item, payload)
 
 
-@router.delete("/{bg_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{item_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 def delete_blood_inventory(
-    bg_id: PositiveId,
+    item_id: PositiveId,
     db: Session = Depends(get_db),
     owner_id: int | None = Depends(get_blood_bank_owner_id_filter),
 ):
-    item = crud.get_entity_or_404(db, models.BloodInventory, bg_id, owner_id)
+    item = crud.get_entity_or_404(db, models.BloodInventory, item_id, owner_id)
     return crud.delete_entity(db, item)

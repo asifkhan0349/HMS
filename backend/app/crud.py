@@ -74,6 +74,32 @@ def create_entity(db, model, payload, owner_user_id: int):
     db.add(entity)
     db.commit()
     db.refresh(entity)
+
+    # Universal Sequential ID handling (01, 02...)
+    code_field = _CODE_FIELDS.get(model_name)
+    if code_field and not getattr(entity, code_field[0]):
+        setattr(entity, code_field[0], f"{entity.id:02d}")
+        db.commit()
+        db.refresh(entity)
+    
+    # Handling for Appointment booking_id specifically (if not in _CODE_FIELDS)
+    if model_name == "Appointment" and not entity.booking_id:
+        entity.booking_id = f"{entity.id:02d}"
+        db.commit()
+        db.refresh(entity)
+
+    # Handling for multi-code fields (MedicalRecord)
+    multi_codes = _MULTI_CODE_FIELDS.get(model_name)
+    if multi_codes:
+        needs_commit = False
+        for field_name, _ in multi_codes:
+            if not getattr(entity, field_name):
+                setattr(entity, field_name, f"{entity.id:02d}")
+                needs_commit = True
+        if needs_commit:
+            db.commit()
+            db.refresh(entity)
+
     manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": model_name}))
     return entity
 

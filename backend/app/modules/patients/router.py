@@ -11,7 +11,7 @@ from . import crud, schemas
 
 # Roles permitted to access the Patient Directory — must stay in sync with
 # PATIENT_DIR_ROLES in src/App.jsx and the allowedRoles list in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Patient", "Reception"]
+_ALLOWED_ROLES = ["Admin", "Doctor", "Patient", "Reception"]
 
 router = APIRouter(
     prefix="/patients",
@@ -52,7 +52,7 @@ def get_patient(
 ):
     return crud.get_patient_or_404(db, patient_id, owner_id)
 
-@router.put("/{patient_id}", response_model=schemas.PatientRead, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.put("/{patient_id}", response_model=schemas.PatientRead, dependencies=[Depends(require_roles(["Admin"]))])
 @limiter.limit("10/minute")
 def update_patient(
     request: Request,
@@ -64,7 +64,7 @@ def update_patient(
     patient = crud.get_patient_or_404(db, patient_id, owner_id)
     return crud.update_patient(db, patient, payload)
 
-@router.delete("/{patient_id}", response_model=schemas.MessageResponse, dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse", "Reception"]))])
+@router.delete("/{patient_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])
 @limiter.limit("5/minute")
 def delete_patient(
     request: Request,

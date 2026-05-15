@@ -16,6 +16,7 @@ class Appointment(Base):
     __tablename__ = "appointments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    booking_id: Mapped[str | None] = mapped_column(String(20), unique=True, index=True, nullable=True)
     owner_user_id: Mapped[int] = mapped_column(Integer, index=True)
     patient_name: Mapped[str] = mapped_column(String(120), index=True)
     patient_date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
@@ -34,6 +35,7 @@ class Appointment(Base):
     time_slot: Mapped[str | None] = mapped_column(String(50), nullable=True)
     department: Mapped[str | None] = mapped_column(String(100), nullable=True)
     doctor_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    doctor_id: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     scheduled_later_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 

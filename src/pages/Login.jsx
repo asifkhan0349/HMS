@@ -14,6 +14,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
   const [role, setRole] = useState('Admin');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const { user, login, signup, showToast } = useApp();
   const navigate = useNavigate();
@@ -49,6 +50,24 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const errors = {};
+    if (mode === 'login') {
+      if (!username.trim()) errors.username = true;
+      if (!password.trim()) errors.password = true;
+    } else {
+      if (!fullName.trim()) errors.fullName = true;
+      if (!username.trim()) errors.username = true;
+      if (!email.trim()) errors.email = true;
+      if (!password.trim()) errors.password = true;
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
 
     if (mode === 'signup' && password !== confirmPassword) {
       showToast('Passwords do not match.', 'error');
@@ -106,11 +125,11 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
-            <label htmlFor="auth-username" className="form-label text-muted small text-uppercase fw-bold mb-2">Username</label>
+            <label htmlFor="auth-username" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">Username</label>
             <input
               id="auth-username"
               type="text"
-              className="form-control py-2"
+              className={`form-control py-2 ${validationErrors.username ? 'is-invalid' : ''}`}
               placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -122,7 +141,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
 
           <div className="mb-4">
             <div className="d-flex justify-content-between mb-2">
-              <label htmlFor="auth-password" className="form-label text-muted small text-uppercase fw-bold mb-0">Password</label>
+              <label htmlFor="auth-password" className="form-label text-muted small text-uppercase fw-bold mb-0 required-label">Password</label>
               <Link
                 to="/forgot-password"
                 className="btn btn-link p-0 text-muted small text-decoration-none"
@@ -134,7 +153,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
               <input
                 id="auth-password"
                 type={showPassword ? 'text' : 'password'}
-                className="form-control py-2"
+                className={`form-control py-2 ${validationErrors.password ? 'is-invalid' : ''}`}
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

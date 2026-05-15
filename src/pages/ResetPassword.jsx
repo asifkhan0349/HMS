@@ -9,11 +9,23 @@ const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const { showToast } = useApp();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!password.trim()) errors.password = true;
+    if (!confirmPassword.trim()) errors.confirmPassword = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
+
     if (!token) {
       showToast('Invalid or missing reset token.', 'error');
       return;
@@ -65,11 +77,11 @@ const ResetPassword = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="new-password" className="form-label text-muted small text-uppercase fw-bold mb-2">New Password</label>
+            <label htmlFor="new-password" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">New Password</label>
             <input
               id="new-password"
               type="password"
-              className="form-control py-2"
+              className={`form-control py-2 ${validationErrors.password ? 'is-invalid' : ''}`}
               placeholder="Min. 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -78,11 +90,11 @@ const ResetPassword = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="confirm-new-password" className="form-label text-muted small text-uppercase fw-bold mb-2">Confirm New Password</label>
+            <label htmlFor="confirm-new-password" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">Confirm New Password</label>
             <input
               id="confirm-new-password"
               type="password"
-              className="form-control py-2"
+              className={`form-control py-2 ${validationErrors.confirmPassword ? 'is-invalid' : ''}`}
               placeholder="Repeat new password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

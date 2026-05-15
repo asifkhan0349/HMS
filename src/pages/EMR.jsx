@@ -58,6 +58,7 @@ const EMR = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [deletingRecord, setDeletingRecord] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
   
   const [formData, setFormData] = useState(createDraftRecord);
   const [editFormData, setEditFormData] = useState({
@@ -78,10 +79,18 @@ const EMR = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient || !formData.diagnosis) {
-      showToast('Please specify patient and diagnosis for the EMR entry.', 'warning');
+    const errors = {};
+    if (!formData.patient.trim()) errors.patient = true;
+    if (!formData.diagnosis.trim()) errors.diagnosis = true;
+    if (!formData.prescription.trim()) errors.prescription = true;
+    if (!formData.doctor.trim()) errors.doctor = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     try {
       await addRecord({
         clinical_id: formData.clinicalId,
@@ -114,6 +123,18 @@ const EMR = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.patient.trim()) errors.patient = true;
+    if (!editFormData.diagnosis.trim()) errors.diagnosis = true;
+    if (!editFormData.prescription.trim()) errors.prescription = true;
+    if (!editFormData.doctor.trim()) errors.doctor = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
     try {
       const payload = {
         patient_name: editFormData.patient,
@@ -237,13 +258,13 @@ const EMR = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Electronic Clinical Entry Protocol">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Patient Identity
             </label>
             <input
               id="emr-patient"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
               placeholder="Enter patient name..."
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
@@ -258,25 +279,25 @@ const EMR = () => {
             </datalist>
           </div>
           <div className="mb-4">
-            <label htmlFor="emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Clinical Diagnosis Telemetry
             </label>
             <input
               id="emr-diagnosis"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.diagnosis ? 'is-invalid' : ''}`}
               placeholder="e.g. Acute Respiratory Infection"
               value={formData.diagnosis}
               onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="emr-prescription" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+            <label htmlFor="emr-prescription" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Medical Prescription Protocol
             </label>
             <textarea
               id="emr-prescription"
-              className="form-control"
+              className={`form-control ${validationErrors.prescription ? 'is-invalid' : ''}`}
               rows="3"
               placeholder="List pharmaceutical interventions..."
               value={formData.prescription}
@@ -285,13 +306,13 @@ const EMR = () => {
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label htmlFor="emr-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              <label htmlFor="emr-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                 Attending Clinician
               </label>
               <input
                 id="emr-doctor"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.doctor ? 'is-invalid' : ''}`}
                 value={formData.doctor}
                 onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
                 list="emr-doctor-options"
@@ -326,13 +347,13 @@ const EMR = () => {
         {editingRecord && (
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
-              <label htmlFor="edit-emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              <label htmlFor="edit-emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                 Patient Identity
               </label>
               <input
                 id="edit-emr-patient"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
                 placeholder="Enter patient name..."
                 value={editFormData.patient}
                 onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
@@ -340,24 +361,24 @@ const EMR = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="edit-emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              <label htmlFor="edit-emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                 Clinical Diagnosis Telemetry
               </label>
               <input
                 id="edit-emr-diagnosis"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.diagnosis ? 'is-invalid' : ''}`}
                 value={editFormData.diagnosis}
                 onChange={(e) => setEditFormData({ ...editFormData, diagnosis: e.target.value })}
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="edit-emr-prescription" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              <label htmlFor="edit-emr-prescription" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                 Medical Prescription Protocol
               </label>
               <textarea
                 id="edit-emr-prescription"
-                className="form-control"
+                className={`form-control ${validationErrors.prescription ? 'is-invalid' : ''}`}
                 rows="3"
                 value={editFormData.prescription}
                 onChange={(e) => setEditFormData({ ...editFormData, prescription: e.target.value })}
@@ -365,13 +386,13 @@ const EMR = () => {
             </div>
             <div className="row g-3 mb-4">
               <div className="col-md-6">
-                <label htmlFor="edit-emr-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                <label htmlFor="edit-emr-doctor" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
                   Attending Clinician
                 </label>
                 <input
                   id="edit-emr-doctor"
                   type="text"
-                  className="form-control"
+                  className={`form-control ${validationErrors.doctor ? 'is-invalid' : ''}`}
                   value={editFormData.doctor}
                   onChange={(e) => setEditFormData({ ...editFormData, doctor: e.target.value })}
                   list="emr-doctor-options"

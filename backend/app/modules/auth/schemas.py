@@ -14,6 +14,7 @@ class UserRead(ORMBase):
     username: str
     email: str
     role: str
+    staff_id: Optional[str] = None
     created_at: datetime
 
 
@@ -23,6 +24,7 @@ class SignupRequest(AppBaseModel):
     email: str = Field(..., min_length=5, max_length=120)
     password: str = Field(..., min_length=8, max_length=128)
     role: str = Field(default="Admin", min_length=2, max_length=30)  # Supported roles: Admin, Doctor, Nurse, Reception, Patient
+    staff_id: Optional[str] = Field(None, max_length=20)
 
 
 class LoginRequest(AppBaseModel):

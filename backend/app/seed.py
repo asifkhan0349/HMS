@@ -95,6 +95,7 @@ def seed_database(db: Session):
                 "gender": "Male",
                 "blood_group": "A+",
                 "status": "Inpatient",
+                "phone_number": "555-0101",
             },
             {
                 "patient_code": "P-002",
@@ -103,6 +104,7 @@ def seed_database(db: Session):
                 "gender": "Female",
                 "blood_group": "B-",
                 "status": "Outpatient",
+                "phone_number": "555-0102",
             },
         ]
         for p in patients_data:

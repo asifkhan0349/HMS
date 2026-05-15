@@ -59,9 +59,11 @@ const Billing = () => {
 
   const handleAddRow = () => {
     if (!newRow.name.trim()) {
+      setValidationErrors(prev => ({ ...prev, rowName: true }));
       showToast('Please enter a medicine name.', 'warning');
       return;
     }
+    setValidationErrors(prev => ({ ...prev, rowName: false }));
     const price = Math.max(0, parseFloat(newRow.price) || 0);
     const qty = Math.max(1, parseInt(newRow.qty, 10) || 1);
     setLineItems((prev) => [
@@ -101,6 +103,7 @@ const Billing = () => {
     patient: '',
     method: 'Cash',
   });
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [editFormData, setEditFormData] = useState({
     patient: '',
@@ -111,10 +114,16 @@ const Billing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient) {
-      showToast('Please specify a patient for the invoice.', 'warning');
+    const errors = {};
+    if (!formData.patient.trim()) errors.patient = true;
+    if (!formData.method) errors.method = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
     if (lineItems.length === 0) {
       showToast('Please add at least one medicine to the invoice.', 'warning');
       return;
@@ -196,6 +205,16 @@ const Billing = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const errors = {};
+    if (!editFormData.patient.trim()) errors.patient = true;
+    if (!editFormData.amount) errors.amount = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+    setValidationErrors({});
 
     try {
       const payload = {
@@ -502,11 +521,11 @@ const Billing = () => {
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setLineItems([]); setNewRow({ name: '', price: '', qty: '1' }); }} title="Generate Invoice">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Patient Name</label>
+            <label htmlFor="invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Patient Name</label>
             <input
               id="invoice-patient"
               type="text"
-              className="form-control"
+              className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
               placeholder="Enter patient name..."
               value={formData.patient}
               onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
@@ -527,11 +546,11 @@ const Billing = () => {
             <div className="rounded-3 p-3" style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}>
               <div className="row g-2 align-items-end">
                 <div className="col-5">
-                  <label htmlFor="inv-med-name" className="form-label text-muted" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600 }}>Medicine</label>
+                  <label htmlFor="inv-med-name" className="form-label text-muted required-label" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600 }}>Medicine</label>
                   <input
                     id="inv-med-name"
                     type="text"
-                    className="form-control form-control-sm"
+                    className={`form-control form-control-sm ${validationErrors.rowName ? 'is-invalid' : ''}`}
                     placeholder="Medicine name"
                     value={newRow.name}
                     list="medicine-autocomplete"
@@ -661,10 +680,10 @@ const Billing = () => {
           )}
 
           <div className="mb-4">
-            <label htmlFor="invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2">Payment Method</label>
+            <label htmlFor="invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Payment Method</label>
             <select
               id="invoice-method"
-              className="form-select"
+              className={`form-select ${validationErrors.method ? 'is-invalid' : ''}`}
               value={formData.method}
               onChange={(e) => setFormData({ ...formData, method: e.target.value })}
             >
@@ -696,11 +715,11 @@ const Billing = () => {
         {editingInvoice && (
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
-              <label htmlFor="edit-invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Patient Name</label>
+              <label htmlFor="edit-invoice-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Patient Name</label>
               <input
                 id="edit-invoice-patient"
                 type="text"
-                className="form-control"
+                className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
                 placeholder="Enter patient name..."
                 value={editFormData.patient}
                 onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
@@ -708,20 +727,20 @@ const Billing = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="edit-invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2">Amount (INR)</label>
+              <label htmlFor="edit-invoice-amount" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Amount (INR)</label>
               <input
                 id="edit-invoice-amount"
                 type="number"
-                className="form-control"
+                className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`}
                 value={editFormData.amount}
                 onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="edit-invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2">Payment Method</label>
+              <label htmlFor="edit-invoice-method" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Payment Method</label>
               <select
                 id="edit-invoice-method"
-                className="form-select"
+                className={`form-select ${validationErrors.method ? 'is-invalid' : ''}`}
                 value={editFormData.method}
                 onChange={(e) => setEditFormData({ ...editFormData, method: e.target.value })}
               >

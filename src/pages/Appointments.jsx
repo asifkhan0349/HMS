@@ -40,6 +40,7 @@ const createEmptyAppointmentForm = () => ({
   emergencyContact2: '',
   timeSlot: '',
   department: '',
+  doctor: '',
 });
 
 const Appointments = () => {
@@ -60,6 +61,7 @@ const Appointments = () => {
 
   const filteredAppointments = appointments.filter(app => 
     app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.appointmentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     app.id.toString().includes(searchTerm)
   );
 
@@ -75,7 +77,6 @@ const Appointments = () => {
   
   const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
   const { data: staff } = useCrud(staffApi, mapStaffFromApi);
-  const doctorOptions = [...new Set(staff.filter(s => s.role === 'Doctor').map(s => s.name))];
   const departmentOptions = [
     'General Medicine',
     'Cardiology',
@@ -104,6 +105,7 @@ const Appointments = () => {
   const [scheduledLaterDoctor, setScheduledLaterDoctor] = useState('');
 
   const [formData, setFormData] = useState(createEmptyAppointmentForm);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [editFormData, setEditFormData] = useState({
     patient: '',
@@ -120,6 +122,7 @@ const Appointments = () => {
     emergencyContact2: '',
     timeSlot: '',
     department: '',
+    doctor: '',
   });
 
   const syncPatientDetails = (name, currentData) => {
@@ -144,22 +147,30 @@ const Appointments = () => {
 
   const buildAppointmentPayload = (
     appointmentData
-  ) => ({
-    patient_name: appointmentData.patient.trim(),
-    patient_date_of_birth: appointmentData.dateOfBirth || null,
-    patient_age: appointmentData.age ? Number(appointmentData.age) : null,
-    patient_gender: appointmentData.gender,
-    patient_address: appointmentData.address.trim() || null,
-    appointment_date: appointmentData.appointment_date,
-    appointment_type: appointmentData.type,
-    phone_number: appointmentData.phoneNumber.trim() || null,
-    patient_email: appointmentData.email?.trim() || null,
-    blood_group: appointmentData.bloodGroup || null,
-    emergency_contact: appointmentData.emergencyContact.trim() || null,
-    emergency_contact_2: appointmentData.emergencyContact2?.trim() || null,
-    time_slot: appointmentData.timeSlot.trim() || null,
-    department: appointmentData.department.trim() || null,
-  });
+  ) => {
+    const selectedStaff = staff.find(s => s.name === appointmentData.doctor?.trim());
+    // Use userStaffId (User.staff_id) as doctor_id — matches the backend appointment filter.
+    // Fall back to staff_code only if no linked user account exists.
+    const doctorId = selectedStaff?.userStaffId || selectedStaff?.id || null;
+    return {
+      patient_name: appointmentData.patient.trim(),
+      patient_date_of_birth: appointmentData.dateOfBirth || null,
+      patient_age: appointmentData.age ? Number(appointmentData.age) : null,
+      patient_gender: appointmentData.gender,
+      patient_address: appointmentData.address.trim() || null,
+      appointment_date: appointmentData.appointment_date,
+      appointment_type: appointmentData.type,
+      phone_number: appointmentData.phoneNumber.trim() || null,
+      patient_email: appointmentData.email?.trim() || null,
+      blood_group: appointmentData.bloodGroup || null,
+      emergency_contact: appointmentData.emergencyContact.trim() || null,
+      emergency_contact_2: appointmentData.emergencyContact2?.trim() || null,
+      time_slot: appointmentData.timeSlot.trim() || null,
+      department: appointmentData.department.trim() || null,
+      doctor_name: appointmentData.doctor?.trim() || null,
+      doctor_id: doctorId,
+    };
+  };
 
   const appointmentSummary = useMemo(
     () => ({
@@ -170,21 +181,36 @@ const Appointments = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient.trim()) {
-      showToast('Please enter the patient full name.', 'warning');
-      return;
-    }
+    const errors = {};
+    if (!formData.patient.trim()) errors.patient = true;
     if (!formData.dateOfBirth && !formData.age) {
-      showToast('Please provide either date of birth or age.', 'warning');
+      errors.dateOfBirth = true;
+      errors.age = true;
+    }
+    if (!formData.appointment_date) errors.appointment_date = true;
+    if (!formData.department) errors.department = true;
+    if (!formData.gender) errors.gender = true;
+    if (!formData.type) errors.type = true;
+    if (!formData.bloodGroup) errors.bloodGroup = true;
+    if (!formData.timeSlot) errors.timeSlot = true;
+    if (!formData.phoneNumber.trim()) errors.phoneNumber = true;
+    if (!formData.emergencyContact.trim()) errors.emergencyContact = true;
+    if (!formData.address.trim()) errors.address = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
 
     try {
       const payload = buildAppointmentPayload(
         formData
       );
-      await addAppointment(payload);
-      showToast(`Appointment for ${formData.patient} scheduled successfully.`);
+      const created = await addAppointment(payload);
+      const apptId = created?.bookingId || '';
+      showToast(`Appointment booked! Appointment ID: ${apptId || 'generated'}`);
       setIsModalOpen(false);
       setFormData(createEmptyAppointmentForm());
     } catch (error) {
@@ -209,20 +235,36 @@ const Appointments = () => {
       emergencyContact2: app.emergencyContact2 || '',
       timeSlot: app.timeSlot || '',
       department: app.department || '',
+      doctor: app.doctor || '',
     });
     setIsEditModalOpen(true);
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    if (!editFormData.patient.trim()) {
-      showToast('Please enter the patient full name.', 'warning');
-      return;
-    }
+    const errors = {};
+    if (!editFormData.patient.trim()) errors.patient = true;
     if (!editFormData.dateOfBirth && !editFormData.age) {
-      showToast('Please provide either date of birth or age.', 'warning');
+      errors.dateOfBirth = true;
+      errors.age = true;
+    }
+    if (!editFormData.appointment_date) errors.appointment_date = true;
+    if (!editFormData.department) errors.department = true;
+    if (!editFormData.gender) errors.gender = true;
+    if (!editFormData.type) errors.type = true;
+    if (!editFormData.bloodGroup) errors.bloodGroup = true;
+    if (!editFormData.timeSlot) errors.timeSlot = true;
+    if (!editFormData.doctor) errors.doctor = true;
+    if (!editFormData.phoneNumber.trim()) errors.phoneNumber = true;
+    if (!editFormData.emergencyContact.trim()) errors.emergencyContact = true;
+    if (!editFormData.address.trim()) errors.address = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
       return;
     }
+    setValidationErrors({});
 
     try {
       const payload = buildAppointmentPayload(
@@ -251,7 +293,14 @@ const Appointments = () => {
       showToast('Please enter the doctor name.', 'warning');
       return;
     }
-    await handleStatusUpdate(scheduledModalApp, 'Scheduled', { doctor_name: scheduledDoctorName.trim() });
+    const selectedStaff = staff.find(s => s.name === scheduledDoctorName.trim());
+    // Use userStaffId (User.staff_id) as doctor_id — this is what the backend
+    // appointment filter reads. Fall back to staff_code only if no user account linked.
+    const doctorId = selectedStaff?.userStaffId || selectedStaff?.id || null;
+    await handleStatusUpdate(scheduledModalApp, 'Scheduled', { 
+      doctor_name: scheduledDoctorName.trim(),
+      doctor_id: doctorId
+    });
     setScheduledModalApp(null);
     setScheduledDoctorName('');
   };
@@ -261,10 +310,15 @@ const Appointments = () => {
       showToast('Please select an appointment date.', 'warning');
       return;
     }
+    const selectedStaff = staff.find(s => s.name === scheduledLaterDoctor?.trim());
+    // Use userStaffId (User.staff_id) as doctor_id — this is what the backend
+    // appointment filter reads. Fall back to staff_code only if no user account linked.
+    const doctorId = selectedStaff?.userStaffId || selectedStaff?.id || null;
     await handleStatusUpdate(scheduledLaterModalApp, 'Scheduled Later', { 
       appointment_date: scheduledLaterDate,
       time_slot: scheduledLaterTimeSlot || null,
-      doctor_name: scheduledLaterDoctor || null
+      doctor_name: scheduledLaterDoctor || null,
+      doctor_id: doctorId
     });
     setScheduledLaterModalApp(null);
     setScheduledLaterDate('');
@@ -335,6 +389,7 @@ const Appointments = () => {
             <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
+                <th className="px-4 py-3">Appointment ID</th>
                 <th className="px-4 py-3">Patient Name</th>
                 <th className="py-3">Appt Date / Time</th>
                 <th className="py-3">Age / Gender</th>
@@ -347,8 +402,8 @@ const Appointments = () => {
             </thead>
             <tbody>
               {appointments.length === 0 ? (
-                <tr>
-                  <td colSpan={user?.role === 'Admin' ? 8 : 7} className="p-0">
+                              <tr>
+                  <td colSpan={user?.role === 'Admin' ? 9 : 8} className="p-0">
                     <EmptyState
                       icon="bi-calendar-event"
                       title="No Appointments"
@@ -359,8 +414,8 @@ const Appointments = () => {
                   </td>
                 </tr>
               ) : paginatedAppointments.length === 0 ? (
-                <tr>
-                  <td colSpan={user?.role === 'Admin' ? 8 : 7} className="p-0">
+                              <tr>
+                  <td colSpan={user?.role === 'Admin' ? 9 : 8} className="p-0">
                     <EmptyState 
                       icon="bi-search"
                       title="No matching appointments"
@@ -372,6 +427,25 @@ const Appointments = () => {
                 </tr>
               ) : paginatedAppointments.map((app) => (
                 <tr key={app.id}>
+                  <td className="px-4 py-4">
+                    {app.appointmentId ? (
+                      <span
+                        className="badge fw-semibold font-monospace"
+                        style={{
+                          background: 'rgba(99, 102, 241, 0.1)',
+                          color: '#6366f1',
+                          border: '1px solid rgba(99, 102, 241, 0.25)',
+                          fontSize: '0.75rem',
+                          letterSpacing: '0.03em',
+                        }}
+                      >
+                        <i className="bi bi-ticket-perforated me-1" aria-hidden="true"></i>
+                        {app.appointmentId}
+                      </span>
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-4">
                     <div className="fw-bold">{app.patient}</div>
                     <small className="text-muted">{app.phoneNumber || '—'}</small>
@@ -496,11 +570,11 @@ const Appointments = () => {
               <h6 className="fw-bold mb-3">Patient Details</h6>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label htmlFor="appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Full Name</label>
+                  <label htmlFor="appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Full Name</label>
                   <input
                     id="appointment-patient"
                     type="text"
-                    className="form-control"
+                    className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
                     value={formData.patient}
                     onChange={(e) => setFormData((current) => syncPatientDetails(e.target.value, current))}
                     list="patient-options"
@@ -515,11 +589,11 @@ const Appointments = () => {
                   </datalist>
                 </div>
                 <div className="col-md-3">
-                  <label htmlFor="appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2">Date of Birth</label>
+                  <label htmlFor="appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Date of Birth</label>
                   <input
                     id="appointment-dob"
                     type="date"
-                    className="form-control"
+                    className={`form-control ${validationErrors.dateOfBirth ? 'is-invalid' : ''}`}
                     value={formData.dateOfBirth}
                     onChange={(e) => {
                       const dob = e.target.value;
@@ -529,22 +603,22 @@ const Appointments = () => {
                   />
                 </div>
                 <div className="col-md-3">
-                  <label htmlFor="appointment-age" className="form-label text-muted fw-bold small text-uppercase mb-2">Age</label>
+                  <label htmlFor="appointment-age" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Age</label>
                   <input
                     id="appointment-age"
                     type="number"
                     min="0"
-                    className="form-control"
+                    className={`form-control ${validationErrors.age ? 'is-invalid' : ''}`}
                     placeholder="If DOB not available"
                     value={formData.age}
                     onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                   />
                 </div>
                 <div className="col-md-12">
-                  <label htmlFor="appointment-gender" className="form-label text-muted fw-bold small text-uppercase mb-2">Gender</label>
+                  <label htmlFor="appointment-gender" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Gender</label>
                   <select
                     id="appointment-gender"
-                    className="form-select"
+                    className={`form-select ${validationErrors.gender ? 'is-invalid' : ''}`}
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   >
@@ -552,15 +626,25 @@ const Appointments = () => {
                   </select>
                 </div>
                 <div className="col-12">
-                  <label htmlFor="appointment-address" className="form-label text-muted fw-bold small text-uppercase mb-2">Address</label>
+                  <label htmlFor="appointment-address" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Address</label>
                   <textarea
                     id="appointment-address"
-                    className="form-control"
+                    className={`form-control ${validationErrors.address ? 'is-invalid' : ''}`}
                     rows="2"
-                    placeholder="Optional"
+                    placeholder="Physical Address"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   />
+                </div>
+                <div className="col-12">
+                  <div className="p-3 rounded-3" style={{ background: 'rgba(99, 102, 241, 0.05)', border: '1px dashed rgba(99, 102, 241, 0.3)' }}>
+                    <div className="d-flex align-items-center">
+                      <i className="bi bi-magic text-primary me-2" aria-hidden="true"></i>
+                      <small className="text-muted fw-medium">
+                        A unique <span className="text-primary fw-bold">Appointment ID</span> will be automatically generated upon confirmation.
+                      </small>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -568,21 +652,21 @@ const Appointments = () => {
               <h6 className="fw-bold mb-3">Appointment Details</h6>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label htmlFor="appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Date</label>
+                  <label htmlFor="appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Appointment Date</label>
                   <input
                     id="appointment-date"
                     type="date"
-                    className="form-control"
+                    className={`form-control ${validationErrors.appointment_date ? 'is-invalid' : ''}`}
                     value={formData.appointment_date}
                     onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
                     required
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Type</label>
+                  <label htmlFor="appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Appointment Type</label>
                   <select
                     id="appointment-type"
-                    className="form-select"
+                    className={`form-select ${validationErrors.type ? 'is-invalid' : ''}`}
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
@@ -590,11 +674,11 @@ const Appointments = () => {
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="appointment-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
+                  <label htmlFor="appointment-phone" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Phone Number</label>
                   <input
                     id="appointment-phone"
                     type="tel"
-                    className="form-control"
+                    className={`form-control ${validationErrors.phoneNumber ? 'is-invalid' : ''}`}
                     placeholder="e.g. +1 234 567 8900"
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
@@ -612,10 +696,10 @@ const Appointments = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="appointment-blood" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+                  <label htmlFor="appointment-blood" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Blood Group</label>
                   <select
                     id="appointment-blood"
-                    className="form-select"
+                    className={`form-select ${validationErrors.bloodGroup ? 'is-invalid' : ''}`}
                     value={formData.bloodGroup}
                     onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
                   >
@@ -626,11 +710,11 @@ const Appointments = () => {
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact 1</label>
+                  <label htmlFor="appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Emergency Contact 1</label>
                   <input
                     id="appointment-emergency-contact"
                     type="tel"
-                    className="form-control"
+                    className={`form-control ${validationErrors.emergencyContact ? 'is-invalid' : ''}`}
                     placeholder="Primary Contact Number"
                     value={formData.emergencyContact}
                     onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
@@ -648,10 +732,10 @@ const Appointments = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
+                  <label htmlFor="appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Time Slot</label>
                   <select
                     id="appointment-timeslot"
-                    className="form-select"
+                    className={`form-select ${validationErrors.timeSlot ? 'is-invalid' : ''}`}
                     value={formData.timeSlot}
                     onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
                   >
@@ -674,10 +758,10 @@ const Appointments = () => {
                   </select>
                 </div>
                 <div className="col-md-12">
-                  <label htmlFor="appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2">Department</label>
+                  <label htmlFor="appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Department</label>
                   <select
                     id="appointment-dept"
-                    className="form-select"
+                    className={`form-select ${validationErrors.department ? 'is-invalid' : ''}`}
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                   >
@@ -689,6 +773,8 @@ const Appointments = () => {
                     ))}
                   </select>
                 </div>
+                {/* Doctor assignment removed from Schedule form as per request */}
+
               </div>
             </div>
           </div>
@@ -712,11 +798,11 @@ const Appointments = () => {
                 <h6 className="fw-bold mb-3">Patient Details</h6>
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label htmlFor="edit-appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2">Full Name</label>
+                    <label htmlFor="edit-appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Full Name</label>
                     <input
                       id="edit-appointment-patient"
                       type="text"
-                      className="form-control"
+                      className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
                       value={editFormData.patient}
                       onChange={(e) => setEditFormData((current) => syncPatientDetails(e.target.value, current))}
                       list="patient-options"
@@ -724,11 +810,11 @@ const Appointments = () => {
                     />
                   </div>
                   <div className="col-md-3">
-                    <label htmlFor="edit-appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2">Date of Birth</label>
+                    <label htmlFor="edit-appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Date of Birth</label>
                     <input
                       id="edit-appointment-dob"
                       type="date"
-                      className="form-control"
+                      className={`form-control ${validationErrors.dateOfBirth ? 'is-invalid' : ''}`}
                       value={editFormData.dateOfBirth}
                       onChange={(e) => {
                         const dob = e.target.value;
@@ -738,21 +824,21 @@ const Appointments = () => {
                     />
                   </div>
                   <div className="col-md-3">
-                    <label htmlFor="edit-appointment-age" className="form-label text-muted fw-bold small text-uppercase mb-2">Age</label>
+                    <label htmlFor="edit-appointment-age" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Age</label>
                     <input
                       id="edit-appointment-age"
                       type="number"
                       min="0"
-                      className="form-control"
+                      className={`form-control ${validationErrors.age ? 'is-invalid' : ''}`}
                       value={editFormData.age}
                       onChange={(e) => setEditFormData({ ...editFormData, age: e.target.value })}
                     />
                   </div>
                     <div className="col-md-12">
-                      <label htmlFor="edit-appointment-gender" className="form-label text-muted fw-bold small text-uppercase mb-2">Gender</label>
+                      <label htmlFor="edit-appointment-gender" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Gender</label>
                       <select
                         id="edit-appointment-gender"
-                        className="form-select"
+                        className={`form-select ${validationErrors.gender ? 'is-invalid' : ''}`}
                         value={editFormData.gender}
                         onChange={(e) => setEditFormData({ ...editFormData, gender: e.target.value })}
                       >
@@ -760,36 +846,44 @@ const Appointments = () => {
                       </select>
                     </div>
                   <div className="col-12">
-                    <label htmlFor="edit-appointment-address" className="form-label text-muted fw-bold small text-uppercase mb-2">Address</label>
+                    <label htmlFor="edit-appointment-address" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Address</label>
                     <textarea
                       id="edit-appointment-address"
-                      className="form-control"
+                      className={`form-control ${validationErrors.address ? 'is-invalid' : ''}`}
                       rows="2"
                       value={editFormData.address}
                       onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
                     />
                   </div>
+                  {editingApp?.appointmentId && (
+                    <div className="col-12">
+                      <div className="p-2 px-3 rounded-2 bg-light border d-flex justify-content-between align-items-center">
+                        <span className="small text-muted fw-bold text-uppercase">Appointment Reference</span>
+                        <span className="font-monospace fw-bold text-primary">{editingApp.appointmentId}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
                 <div className="mb-4">
                   <h6 className="fw-bold mb-3">Appointment Details</h6>
                   <div className="row g-3">
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Date</label>
+                      <label htmlFor="edit-appointment-date" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Appointment Date</label>
                       <input
                         id="edit-appointment-date"
                         type="date"
-                        className="form-control"
+                        className={`form-control ${validationErrors.appointment_date ? 'is-invalid' : ''}`}
                         value={editFormData.appointment_date}
                         onChange={(e) => setEditFormData({ ...editFormData, appointment_date: e.target.value })}
                         required
                       />
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2">Appointment Type</label>
+                      <label htmlFor="edit-appointment-type" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Appointment Type</label>
                       <select
                         id="edit-appointment-type"
-                        className="form-select"
+                        className={`form-select ${validationErrors.type ? 'is-invalid' : ''}`}
                         value={editFormData.type}
                         onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
                       >
@@ -797,11 +891,11 @@ const Appointments = () => {
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-phone" className="form-label text-muted fw-bold small text-uppercase mb-2">Phone Number</label>
+                      <label htmlFor="edit-appointment-phone" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Phone Number</label>
                       <input
                         id="edit-appointment-phone"
                         type="tel"
-                        className="form-control"
+                        className={`form-control ${validationErrors.phoneNumber ? 'is-invalid' : ''}`}
                         placeholder="e.g. +1 234 567 8900"
                         value={editFormData.phoneNumber}
                         onChange={(e) => setEditFormData({ ...editFormData, phoneNumber: e.target.value })}
@@ -819,10 +913,10 @@ const Appointments = () => {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-blood" className="form-label text-muted fw-bold small text-uppercase mb-2">Blood Group</label>
+                      <label htmlFor="edit-appointment-blood" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Blood Group</label>
                       <select
                         id="edit-appointment-blood"
-                        className="form-select"
+                        className={`form-select ${validationErrors.bloodGroup ? 'is-invalid' : ''}`}
                         value={editFormData.bloodGroup}
                         onChange={(e) => setEditFormData({ ...editFormData, bloodGroup: e.target.value })}
                       >
@@ -833,11 +927,11 @@ const Appointments = () => {
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2">Emergency Contact 1</label>
+                      <label htmlFor="edit-appointment-emergency-contact" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Emergency Contact 1</label>
                       <input
                         id="edit-appointment-emergency-contact"
                         type="tel"
-                        className="form-control"
+                        className={`form-control ${validationErrors.emergencyContact ? 'is-invalid' : ''}`}
                         placeholder="Primary Contact Number"
                         value={editFormData.emergencyContact}
                         onChange={(e) => setEditFormData({ ...editFormData, emergencyContact: e.target.value })}
@@ -855,10 +949,10 @@ const Appointments = () => {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="edit-appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2">Time Slot</label>
+                      <label htmlFor="edit-appointment-timeslot" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Time Slot</label>
                       <select
                         id="edit-appointment-timeslot"
-                        className="form-select"
+                        className={`form-select ${validationErrors.timeSlot ? 'is-invalid' : ''}`}
                         value={editFormData.timeSlot}
                         onChange={(e) => setEditFormData({ ...editFormData, timeSlot: e.target.value })}
                       >
@@ -881,10 +975,10 @@ const Appointments = () => {
                       </select>
                     </div>
                     <div className="col-md-12">
-                      <label htmlFor="edit-appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2">Department</label>
+                      <label htmlFor="edit-appointment-dept" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Department</label>
                       <select
                         id="edit-appointment-dept"
-                        className="form-select"
+                        className={`form-select ${validationErrors.department ? 'is-invalid' : ''}`}
                         value={editFormData.department}
                         onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
                       >
@@ -894,6 +988,24 @@ const Appointments = () => {
                             {dept}
                           </option>
                         ))}
+                      </select>
+                    </div>
+                    <div className="col-md-12">
+                      <label htmlFor="edit-appointment-doctor" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Assign Doctor</label>
+                      <select
+                        id="edit-appointment-doctor"
+                        className={`form-select ${validationErrors.doctor ? 'is-invalid' : ''}`}
+                        value={editFormData.doctor}
+                        onChange={(e) => setEditFormData({ ...editFormData, doctor: e.target.value })}
+                      >
+                        <option value="">{editFormData.department ? 'Select a Doctor' : 'Please select department first'}</option>
+                        {staff
+                          .filter(s => s.role === 'Doctor' && (!editFormData.department || s.dept === editFormData.department))
+                          .map((s) => (
+                            <option key={s.id} value={s.name}>
+                              {s.name} ({s.id})
+                            </option>
+                          ))}
                       </select>
                     </div>
                   </div>
@@ -1017,6 +1129,7 @@ const Appointments = () => {
                 style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
                   textTransform: 'uppercase', letterSpacing: '0.06em',
                   color: '#6b7280', marginBottom: '0.5rem' }}
+                className="required-label"
               >
                 Doctor Name
               </label>
@@ -1043,7 +1156,9 @@ const Appointments = () => {
                   }}
                 >
                   <option value="" disabled>Select a Doctor</option>
-                  {doctorOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                  {staff
+                    .filter(s => s.role === 'Doctor' && (!scheduledModalApp?.department || s.dept === scheduledModalApp.department))
+                    .map((s) => <option key={s.id} value={s.name}>{s.name} ({s.id})</option>)}
                 </select>
               </div>
 
@@ -1264,7 +1379,9 @@ const Appointments = () => {
                     }}
                   >
                     <option value="">Not Assigned</option>
-                    {doctorOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                    {staff
+                      .filter(s => s.role === 'Doctor' && (!scheduledLaterModalApp?.department || s.dept === scheduledLaterModalApp.department))
+                      .map((s) => <option key={s.id} value={s.name}>{s.name} ({s.id})</option>)}
                   </select>
                 </div>
               </div>
