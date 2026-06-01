@@ -89,9 +89,9 @@ const ProductModules = () => {
       {!selectedProduct ? (
         <>
           <div className="mb-5">
-            <h2 className="fw-bold mb-1">GoMeds Product Modules</h2>
+            <h2 className="fw-bold mb-1">HMS Product Modules</h2>
             <p className="text-muted mb-0">
-              Product-specific workspaces aligned with the public GoMeds suite claim.
+              Product-specific workspaces aligned with the public HMS suite claim.
             </p>
           </div>
           <div className="row g-4">

@@ -51,9 +51,8 @@ const CashReceipts = () => {
     return receipts.filter(receipt => {
       const pId = String(getPatientId(receipt.patientName));
       const matchSearch = receipt.patientName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          pId.includes(searchTerm) || 
-                          String(receipt.id).includes(searchTerm) ||
-                          receipt.invoiceCode.toLowerCase().includes(searchTerm.toLowerCase());
+              pId.includes(searchTerm) || 
+              String(receipt.id).includes(searchTerm);
       return matchSearch;
     });
   }, [receipts, searchTerm, getPatientId]);
@@ -159,7 +158,6 @@ const CashReceipts = () => {
                   <th className="px-4 py-3">Receipt ID</th>
                   <th className="py-3">Patient ID</th>
                   <th className="py-3">Patient Name</th>
-                  <th className="py-3">Invoice Code</th>
                   <th className="py-3">Amount Paid</th>
                   <th className="py-3">Payment Date & Time</th>
                 </tr>
@@ -167,7 +165,7 @@ const CashReceipts = () => {
               <tbody>
                 {receipts.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="p-0">
+                    <td colSpan="5" className="p-0">
                       <EmptyState 
                         icon="bi-cash-coin"
                         title="No Cash Receipts"
@@ -177,7 +175,7 @@ const CashReceipts = () => {
                   </tr>
                 ) : paginatedReceipts.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="p-0">
+                    <td colSpan="5" className="p-0">
                       <EmptyState 
                         icon="bi-search"
                         title="No Matching Transactions"
@@ -197,9 +195,6 @@ const CashReceipts = () => {
                         {getPatientId(receipt.patientName)}
                       </td>
                       <td className="py-4 fw-bold">{receipt.patientName}</td>
-                      <td className="py-4 text-muted small" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {receipt.invoiceCode}
-                      </td>
                       <td className="py-4 text-success fw-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>
                         ₹{receipt.amountPaid.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>

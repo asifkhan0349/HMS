@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 
 const menuItems = [
-  { title: 'GoMeds Products', path: '/products', icon: 'bi bi-grid-1x2', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'] },
+  { title: 'HMS Product', path: '/products', icon: 'bi bi-grid-1x2', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'] },
   { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', adminOnly: true },
   { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
   { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Reception'] },

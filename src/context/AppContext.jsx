@@ -309,7 +309,7 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => localStorage.getItem('hms_theme') || 'light');
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [toast, setToast] = useState(null);
-  const [globalRefreshTime, setGlobalRefreshTime] = useState(Date.now());
+  const [globalRefreshTime, setGlobalRefreshTime] = useState(() => Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {

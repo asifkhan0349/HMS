@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useApp, mapInvoiceFromApi, mapPatientFromApi, mapMedicineFromApi, createCode, formatDate } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
 import { invoicesApi, patientsApi, medicinesApi } from '../lib/api';
@@ -14,9 +14,10 @@ const Billing = () => {
   const isDoctor = user?.role === 'Doctor';
   const isNurse = user?.role === 'Nurse';
   const isReception = user?.role === 'Reception';
-  // Read-only/view-only mode for Revenue Cycle
-  const canOperate = false;
-  const canManage = false;
+  // canOperate: Admin + Reception — create invoices, mark paid/cancelled, download, send email
+  const canOperate = !isDoctor && !isNurse;
+  // canManage: Admin only — can also edit and delete invoices
+  const canManage = canOperate && !isReception;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const { 
     data: invoices = [], 
@@ -33,11 +34,11 @@ const Billing = () => {
 
   const { data: patients = [] } = useCrud(patientsApi, mapPatientFromApi);
 
-  const getPatientId = (patientName) => {
+  const getPatientId = useCallback((patientName) => {
     if (!patientName) return '-';
     const patient = patients.find(p => p.name?.trim().toLowerCase() === patientName.trim().toLowerCase());
     return patient ? patient.id : '-';
-  };
+  }, [patients]);
 
   const totalPaidAmount = useMemo(() => {
     return invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
@@ -71,7 +72,7 @@ const Billing = () => {
       row.invoices.push(inv);
     }
     return Array.from(map.values());
-  }, [invoices, patients]);
+  }, [invoices, patients, getPatientId]);
 
   const filteredPatientRows = patientSummaryRows.filter(row =>
     row.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -302,6 +303,18 @@ const Billing = () => {
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [downloadingPdfId, setDownloadingPdfId] = useState(null);
+
+  const handleDownloadPdf = async (inv) => {
+    setDownloadingPdfId(inv.id);
+    try {
+      await invoicesApi.downloadPdf(inv.apiId, inv.id);
+      showToast(`Invoice ${inv.id} PDF downloaded successfully.`);
+    } catch (error) {
+      showToast(error.message || 'Failed to download PDF.', 'error');
+    } finally {
+      setDownloadingPdfId(null);
+    }
+  };
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -1602,6 +1615,7 @@ const Billing = () => {
                     <th className="py-2" style={{ whiteSpace: 'nowrap' }}>Paid Amt</th>
                     <th className="py-2" style={{ whiteSpace: 'nowrap' }}>Pending Amt</th>
                     <th className="py-2" style={{ whiteSpace: 'nowrap' }}>Status</th>
+                    {canOperate && <th className="py-2 text-center" style={{ whiteSpace: 'nowrap' }}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -1639,6 +1653,60 @@ const Billing = () => {
                             {inv.status}
                           </span>
                         </td>
+                        {canOperate && (
+                          <td className="py-3 text-center">
+                            <div className="d-flex gap-1 justify-content-center">
+                              {inv.status !== 'Paid' && inv.status !== 'Cancelled' && (
+                                <button
+                                  className="btn btn-sm btn-glass text-success p-1"
+                                  title="Receive Payment"
+                                  onClick={() => openPaymentModal(inv)}
+                                >
+                                  <i className="bi bi-cash-coin"></i>
+                                </button>
+                              )}
+                              {canUpdateInvoiceStatus(inv.status) && (
+                                <button
+                                  className="btn btn-sm btn-glass text-warning p-1"
+                                  title="Cancel Invoice"
+                                  onClick={() => handleUpdateStatus(inv, 'Cancelled')}
+                                >
+                                  <i className="bi bi-x-circle"></i>
+                                </button>
+                              )}
+                              {canManage && (
+                                <button
+                                  className="btn btn-sm btn-glass text-primary p-1"
+                                  title="Edit Invoice"
+                                  onClick={() => openEditModal(inv)}
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </button>
+                              )}
+                              {canManage && (
+                                <button
+                                  className="btn btn-sm btn-glass text-danger p-1"
+                                  title="Delete Invoice"
+                                  onClick={() => { setDeletingInvoice(inv); setIsDeleteModalOpen(true); }}
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              )}
+                              <button
+                                className="btn btn-sm btn-glass text-muted p-1"
+                                title="Download PDF"
+                                onClick={() => handleDownloadPdf(inv)}
+                                disabled={downloadingPdfId === inv.id}
+                              >
+                                {downloadingPdfId === inv.id ? (
+                                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                ) : (
+                                  <i className="bi bi-download"></i>
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -1656,6 +1724,7 @@ const Billing = () => {
                       ₹{selectedPatientForView.totalPendingAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td></td>
+                    {canOperate && <td></td>}
                   </tr>
                 </tfoot>
               </table>

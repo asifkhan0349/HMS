@@ -14,9 +14,11 @@ const AIInsights = () => {
   const [insights, setInsights] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const loadInsights = useCallback(() => {
-    setErrorMessage('');
-    setInsights(null);
+  const loadInsights = useCallback((shouldReset = true) => {
+    if (shouldReset) {
+      setErrorMessage('');
+      setInsights(null);
+    }
     aiInsightsApi.list({ include_health: true })
       .then(setInsights)
       .catch((error) => {
@@ -28,7 +30,7 @@ const AIInsights = () => {
   }, [showToast]);
 
   useEffect(() => {
-    loadInsights();
+    loadInsights(false);
   }, [loadInsights]);
 
   const grouped = useMemo(() => {
