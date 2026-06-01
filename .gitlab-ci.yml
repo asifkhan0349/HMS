@@ -2,6 +2,7 @@ stages:
   - lint
   - test
   - build
+  - deploy
 
 variables:
   # Using Node 20 as it's the current LTS and widely compatible
@@ -97,3 +98,13 @@ backend:test:
         - backend/requirements.txt
     paths:
       - ~/.cache/pip
+
+# ---- DEPLOY JOBS ----
+
+deploy:
+  image: $NODE_IMAGE
+  stage: deploy
+  script:
+    - node scripts/trigger-deploy.js
+  only:
+    - development

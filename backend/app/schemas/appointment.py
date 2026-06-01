@@ -24,6 +24,7 @@ class AppointmentBase(AppBaseModel):
     doctor_name: Optional[str] = Field(None, max_length=120)
     doctor_id: Optional[str] = Field(None, max_length=20)
     scheduled_later_reason: Optional[str] = Field(None, max_length=255)
+    symptoms: Optional[str] = Field(None, max_length=500)
 
     @model_validator(mode="after")
     def validate_age_or_dob(self):
@@ -55,6 +56,7 @@ class AppointmentPublicCreate(AppBaseModel):
     emergency_contact_2: Optional[str] = Field(None, max_length=20)
     time_slot: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
+    symptoms: Optional[str] = Field(None, max_length=500)
 
     @model_validator(mode="after")
     def validate_age_or_dob(self):
@@ -83,11 +85,13 @@ class AppointmentUpdate(AppBaseModel):
     doctor_name: Optional[str] = Field(None, max_length=120)
     doctor_id: Optional[str] = Field(None, max_length=20)
     scheduled_later_reason: Optional[str] = Field(None, max_length=255)
+    symptoms: Optional[str] = Field(None, max_length=500)
 
 
 class AppointmentRead(ORMBase):
     id: int
     booking_id: Optional[str] = None
+    appointment_code: Optional[str] = None
     patient_name: str = Field(..., min_length=2, max_length=120)
     patient_date_of_birth: Optional[date] = None
     patient_age: Optional[int] = Field(None, ge=0, le=130)
@@ -107,6 +111,7 @@ class AppointmentRead(ORMBase):
     doctor_name: Optional[str] = None
     doctor_id: Optional[str] = None
     scheduled_later_reason: Optional[str] = None
+    symptoms: Optional[str] = None
     created_at: datetime
     
     @field_serializer("created_at")

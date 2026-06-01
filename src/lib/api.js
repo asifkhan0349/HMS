@@ -178,6 +178,16 @@ export const bedsApi = createCrudClient('beds');
 export const bloodInventoryApi = createCrudClient('blood_inventory');
 export const bloodActivitiesApi = createCrudClient('blood_activities');
 export const inventoryApi = createCrudClient('inventory');
+export const cashReceiptsApi = {
+  list: () => request('/cash-receipts', { isProtected: true }),
+};
+
+export const ambulancesApi = {
+  ...createCrudClient('ambulances'),
+  listTrips: () => request('/ambulances/trips', { isProtected: true }),
+};
+
+
 
 export const dashboardApi = {
   getStats: async () => {

@@ -10,6 +10,9 @@ const Patients = lazy(() => import('./pages/Patients'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const EMR = lazy(() => import('./pages/EMR'));
 const Billing = lazy(() => import('./pages/Billing'));
+const InvoiceGeneration = lazy(() => import('./pages/InvoiceGeneration'));
+const CashReceipts = lazy(() => import('./pages/CashReceipts'));
+const AmbulanceService = lazy(() => import('./pages/AmbulanceService'));
 const Pharmacy = lazy(() => import('./pages/Pharmacy'));
 const Lab = lazy(() => import('./pages/Lab'));
 const Beds = lazy(() => import('./pages/Beds'));
@@ -53,6 +56,9 @@ const LAB_ROLES = ['Admin', 'Doctor'];
 
 // Roles that can access Facility Management
 const BEDS_ROLES = ['Admin', 'Nurse', 'Reception'];
+
+// Roles that can access Ambulance Service
+const AMBULANCE_ROLES = ['Admin', 'Reception', 'Nurse'];
 
 // Roles that can access Hospital Logistics
 const INVENTORY_ROLES = ['Admin'];
@@ -98,6 +104,9 @@ function App() {
               <Route path="/appointments" element={<ProtectedRoute allowedRoles={SCHEDULING_ROLES}><Appointments /></ProtectedRoute>} />
               <Route path="/emr" element={<ProtectedRoute allowedRoles={EMR_ROLES}><EMR /></ProtectedRoute>} />
               <Route path="/billing" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><Billing /></ProtectedRoute>} />
+              <Route path="/invoice-generation" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><InvoiceGeneration /></ProtectedRoute>} />
+              <Route path="/cash-receipts" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><CashReceipts /></ProtectedRoute>} />
+              <Route path="/ambulance-service" element={<ProtectedRoute allowedRoles={AMBULANCE_ROLES}><AmbulanceService /></ProtectedRoute>} />
               <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={PHARMACY_ROLES}><Pharmacy /></ProtectedRoute>} />
               <Route path="/lab" element={<ProtectedRoute allowedRoles={LAB_ROLES}><Lab /></ProtectedRoute>} />
               <Route path="/beds" element={<ProtectedRoute allowedRoles={BEDS_ROLES}><Beds /></ProtectedRoute>} />

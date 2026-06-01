@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { useApp, mapBedFromApi, createCode } from '../context/AppContext';
+import { useApp, mapBedFromApi, mapPatientFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { bedsApi } from '../lib/api';
+import { bedsApi, patientsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -13,30 +13,47 @@ const Beds = () => {
   const isNurse = user?.role === 'Nurse';
   const isReception = user?.role === 'Reception';
   const {
-    data: beds,
+    data: beds = [],
     loading,
     addData: addBed,
     updateData: updateBed,
     removeData: deleteBed
   } = useCrud(bedsApi, mapBedFromApi);
 
+  const { data: patients = [] } = useCrud(patientsApi, mapPatientFromApi);
+  const inpatientList = patients.filter(p => p.status === 'Inpatient');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingBed, setEditingBed] = useState(null);
   const [deletingBed, setDeletingBed] = useState(null);
+
+  // Filter available inpatients who are not already assigned to an occupied bed
+  const availableInpatientsForAdd = inpatientList.filter(p => {
+    return !beds.some(b => b.status === 'Occupied' && b.patientName === p.name);
+  });
+
+  const availableInpatientsForEdit = inpatientList.filter(p => {
+    const assignedBed = beds.find(b => b.status === 'Occupied' && b.patientName === p.name);
+    return !assignedBed || assignedBed.id === editingBed?.id;
+  });
   const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     ward_name: 'General Ward',
     type: 'Standard',
-    status: 'Available'
+    status: 'Available',
+    patient_name: '',
+    allotment_reason: ''
   });
 
   const [editFormData, setEditFormData] = useState({
     ward_name: '',
     type: '',
-    status: ''
+    status: '',
+    patient_name: '',
+    allotment_reason: ''
   });
 
   const handleSubmit = async (e) => {
@@ -45,6 +62,10 @@ const Beds = () => {
     if (!formData.ward_name) errors.ward_name = true;
     if (!formData.type) errors.type = true;
     if (!formData.status) errors.status = true;
+    if (formData.status === 'Occupied') {
+      if (!formData.patient_name) errors.patient_name = true;
+      if (!formData.allotment_reason) errors.allotment_reason = true;
+    }
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -56,11 +77,13 @@ const Beds = () => {
     try {
       await addBed({
         ...formData,
-        bed_number: createCode('BED'),
+        patient_name: formData.status === 'Occupied' ? formData.patient_name : null,
+        allotment_reason: formData.status === 'Occupied' ? formData.allotment_reason : null,
+        bed_number: `BED-${Math.floor(100000 + Math.random() * 900000)}`,
       });
       showToast(`Bed successfully added to ${formData.ward_name}.`);
       setIsModalOpen(false);
-      setFormData({ ward_name: 'General Ward', type: 'Standard', status: 'Available' });
+      setFormData({ ward_name: 'General Ward', type: 'Standard', status: 'Available', patient_name: '', allotment_reason: '' });
     } catch (error) {
       showToast(error.message || 'Unable to add the bed.', 'error');
     }
@@ -71,7 +94,9 @@ const Beds = () => {
     setEditFormData({
       ward_name: bed.ward,
       type: bed.type,
-      status: bed.status
+      status: bed.status,
+      patient_name: bed.patientName || '',
+      allotment_reason: bed.allotmentReason || ''
     });
     setIsEditModalOpen(true);
   };
@@ -82,6 +107,10 @@ const Beds = () => {
     if (!editFormData.ward_name) errors.ward_name = true;
     if (!editFormData.type) errors.type = true;
     if (!editFormData.status) errors.status = true;
+    if (editFormData.status === 'Occupied') {
+      if (!editFormData.patient_name) errors.patient_name = true;
+      if (!editFormData.allotment_reason) errors.allotment_reason = true;
+    }
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -91,7 +120,11 @@ const Beds = () => {
     setValidationErrors({});
 
     try {
-      await updateBed(editingBed.apiId, editFormData);
+      await updateBed(editingBed.apiId, {
+        ...editFormData,
+        patient_name: editFormData.status === 'Occupied' ? editFormData.patient_name : null,
+        allotment_reason: editFormData.status === 'Occupied' ? editFormData.allotment_reason : null,
+      });
       showToast(`Bed ${editingBed.id} updated successfully.`);
       setIsEditModalOpen(false);
       setEditingBed(null);
@@ -117,7 +150,22 @@ const Beds = () => {
       if (!wardMap[bed.ward]) wardMap[bed.ward] = [];
       wardMap[bed.ward].push(bed);
     });
-    return Object.keys(wardMap).map(key => ({ name: key, beds: wardMap[key] }));
+    return Object.keys(wardMap).map(key => {
+      const wardBeds = wardMap[key];
+      const available = wardBeds.filter(b => b.status === 'Available').length;
+      const occupied = wardBeds.filter(b => b.status === 'Occupied').length;
+      const maintenance = wardBeds.filter(b => b.status === 'Maintenance').length;
+      return {
+        name: key,
+        beds: wardBeds,
+        stats: {
+          available,
+          occupied,
+          maintenance,
+          total: wardBeds.length
+        }
+      };
+    });
   }, [beds]);
 
   return (
@@ -148,10 +196,19 @@ const Beds = () => {
       <Skeleton name="beds-grid" loading={loading}>
         {wards.map((ward, wIdx) => (
           <section key={wIdx} className="mb-5" aria-labelledby={`ward-${wIdx}`}>
-            <h5 id={`ward-${wIdx}`} className="fw-bold mb-4 d-flex align-items-center">
-              {ward.name}
-              <span className="badge rounded-pill ms-3" style={{ fontSize: '0.7rem', background: 'var(--accents-1)', border: '1px solid var(--accents-2)', color: 'var(--geist-foreground)' }}>
-                {ward.beds.length} TOTAL
+            <h5 id={`ward-${wIdx}`} className="fw-bold mb-4 d-flex align-items-center flex-wrap gap-2">
+              <span>{ward.name}</span>
+              <span className="badge rounded-pill ms-2" style={{ fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', color: '#10b981', fontVariantNumeric: 'tabular-nums' }}>
+                {ward.stats.available} Available
+              </span>
+              <span className="badge rounded-pill" style={{ fontSize: '0.7rem', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#ef4444', fontVariantNumeric: 'tabular-nums' }}>
+                {ward.stats.occupied} Occupied
+              </span>
+              <span className="badge rounded-pill" style={{ fontSize: '0.7rem', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', color: '#f59e0b', fontVariantNumeric: 'tabular-nums' }}>
+                {ward.stats.maintenance} Maintenance
+              </span>
+              <span className="badge rounded-pill" style={{ fontSize: '0.7rem', background: 'var(--accents-1)', border: '1px solid var(--accents-2)', color: 'var(--geist-foreground)', fontVariantNumeric: 'tabular-nums' }}>
+                {ward.stats.total} Total
               </span>
             </h5>
             <div className="row g-4">
@@ -269,6 +326,33 @@ const Beds = () => {
               </select>
             </div>
           </div>
+          {formData.status === 'Occupied' && (
+            <div className="row g-3 mb-4">
+              <div className="col-md-6">
+                <label htmlFor="bed-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Patient</label>
+                <select
+                  id="bed-patient"
+                  className={`form-select ${validationErrors.patient_name ? 'is-invalid' : ''}`}
+                  value={formData.patient_name}
+                  onChange={e => setFormData({ ...formData, patient_name: e.target.value })}
+                >
+                  <option value="">Select Inpatient...</option>
+                  {availableInpatientsForAdd.map(p => <option key={p.id} value={p.name}>{p.name} ({p.patientCode})</option>)}
+                </select>
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="bed-reason" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Allotment Reason</label>
+                <input
+                  id="bed-reason"
+                  type="text"
+                  className={`form-control ${validationErrors.allotment_reason ? 'is-invalid' : ''}`}
+                  placeholder="e.g. Post-surgery recovery"
+                  value={formData.allotment_reason}
+                  onChange={e => setFormData({ ...formData, allotment_reason: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
           <div className="d-flex gap-2 mt-5">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsModalOpen(false)}>Cancel</button>
             <button type="submit" className="btn btn-primary w-100 py-2">Add Bed</button>
@@ -322,6 +406,33 @@ const Beds = () => {
               </select>
             </div>
           </div>
+          {editFormData.status === 'Occupied' && (
+            <div className="row g-3 mb-4">
+              <div className="col-md-6">
+                <label htmlFor="edit-bed-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Patient</label>
+                <select
+                  id="edit-bed-patient"
+                  className={`form-select ${validationErrors.patient_name ? 'is-invalid' : ''}`}
+                  value={editFormData.patient_name}
+                  onChange={e => setEditFormData({ ...editFormData, patient_name: e.target.value })}
+                >
+                  <option value="">Select Inpatient...</option>
+                  {availableInpatientsForEdit.map(p => <option key={p.id} value={p.name}>{p.name} ({p.patientCode})</option>)}
+                </select>
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="edit-bed-reason" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Allotment Reason</label>
+                <input
+                  id="edit-bed-reason"
+                  type="text"
+                  className={`form-control ${validationErrors.allotment_reason ? 'is-invalid' : ''}`}
+                  placeholder="e.g. Post-surgery recovery"
+                  value={editFormData.allotment_reason}
+                  onChange={e => setEditFormData({ ...editFormData, allotment_reason: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
           <div className="d-flex gap-2 mt-5">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
             <button type="submit" className="btn btn-primary w-100 py-2">Save Changes</button>

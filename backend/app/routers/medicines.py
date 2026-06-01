@@ -8,7 +8,7 @@ from .common import PositiveId
 
 # Roles permitted to access Pharmacy — must stay in sync with
 # PHARMACY_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Reception"]
+_ALLOWED_ROLES = ["Admin", "Nurse", "Reception", "Pharmacist"]
 
 router = APIRouter(
     prefix="/medicines",

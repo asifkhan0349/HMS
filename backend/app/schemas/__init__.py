@@ -25,3 +25,7 @@ from .blood_bank import (
     BloodActivityBase, BloodActivityCreate, BloodActivityUpdate, BloodActivityRead
 )
 from .inventory import InventoryItemBase, InventoryItemCreate, InventoryItemUpdate, InventoryItemRead
+from .ambulance import AmbulanceBase, AmbulanceCreate, AmbulanceUpdate, AmbulanceRead, AmbulanceTripRead
+from .cash_receipt import CashReceiptBase, CashReceiptRead
+
+

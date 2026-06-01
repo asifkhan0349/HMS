@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useApp, mapRecordFromApi, mapPatientFromApi, mapStaffFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { recordsApi, patientsApi, staffApi } from '../lib/api';
+import { recordsApi, patientsApi, staffApi, testsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -15,10 +15,11 @@ const EMR = () => {
     doctor: '',
     diagnosis: '',
     prescription: '',
+    description: '',
     clinicalId: createCode('CID'),
   });
 
-  const { showToast, user } = useApp();
+  const { showToast, user, triggerGlobalRefresh } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
   const isDoctor = user?.role === 'Doctor';
   const isNurse = user?.role === 'Nurse';
@@ -56,9 +57,55 @@ const EMR = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [deletingRecord, setDeletingRecord] = useState(null);
+  const [viewingRecord, setViewingRecord] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+
+  const [isOrderTestModalOpen, setIsOrderTestModalOpen] = useState(false);
+  const [orderTestFormData, setOrderTestFormData] = useState({
+    testName: '',
+    doctorName: ''
+  });
+  const [orderTestErrors, setOrderTestErrors] = useState({});
+
+  const handleOpenOrderTestModal = (record) => {
+    setOrderTestFormData({
+      testName: '',
+      doctorName: record.doctor || ''
+    });
+    setOrderTestErrors({});
+    setIsOrderTestModalOpen(true);
+  };
+
+  const handleOrderTestSubmit = async (e) => {
+    e.preventDefault();
+    const errors = {};
+    if (!orderTestFormData.testName.trim()) errors.testName = true;
+    if (!orderTestFormData.doctorName.trim()) errors.doctorName = true;
+
+    if (Object.keys(errors).length > 0) {
+      setOrderTestErrors(errors);
+      showToast('Please fill in all mandatory fields.', 'warning');
+      return;
+    }
+
+    try {
+      await testsApi.create({
+        patient_name: viewingRecord.patient,
+        test_name: orderTestFormData.testName.trim(),
+        doctor_name: orderTestFormData.doctorName.trim(),
+        status: 'Initialized',
+        test_code: createCode('LAB'),
+      });
+      showToast(`Diagnostic test ordered successfully for ${viewingRecord.patient}.`);
+      setIsOrderTestModalOpen(false);
+      triggerGlobalRefresh();
+    } catch (error) {
+      showToast(error.message || 'Unable to place the diagnostic test order.', 'error');
+    }
+  };
   
   const [formData, setFormData] = useState(createDraftRecord);
   const [editFormData, setEditFormData] = useState({
@@ -66,8 +113,19 @@ const EMR = () => {
     doctor: '',
     diagnosis: '',
     prescription: '',
+    description: '',
     clinicalId: '',
   });
+  const [isPatientSuggestionsVisible, setPatientSuggestionsVisible] = useState(false);
+
+  const filteredPatients = useMemo(() => {
+    const query = formData.patient.trim().toLowerCase();
+    if (!query) return patients.slice(0, 8);
+    return patients.filter((p) =>
+      p.name.toLowerCase().includes(query) ||
+      p.id.toString().toLowerCase().includes(query)
+    ).slice(0, 8);
+  }, [patients, formData.patient]);
 
   const recordSummary = useMemo(
     () => ({
@@ -76,6 +134,12 @@ const EMR = () => {
     }),
     [records]
   );
+
+  const getPatientId = (patientName) => {
+    if (!patientName) return '-';
+    const patient = patients.find(p => p.name?.trim().toLowerCase() === patientName.trim().toLowerCase());
+    return patient ? patient.id : '-';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,6 +163,7 @@ const EMR = () => {
         doctor_name: formData.doctor,
         diagnosis: formData.diagnosis,
         prescription: formData.prescription,
+        description: formData.description,
         record_code: createCode('REC'),
       });
       showToast(`Medical record for ${formData.patient} successfully encrypted and stored.`);
@@ -109,6 +174,11 @@ const EMR = () => {
     }
   };
 
+  const openViewModal = (record) => {
+    setViewingRecord(record);
+    setIsViewModalOpen(true);
+  };
+
   const openEditModal = (record) => {
     setEditingRecord(record);
     setEditFormData({
@@ -116,6 +186,7 @@ const EMR = () => {
       doctor: record.doctor,
       diagnosis: record.diagnosis,
       prescription: record.prescription || '',
+      description: record.description || '',
       clinicalId: record.clinicalId,
     });
     setIsEditModalOpen(true);
@@ -141,6 +212,7 @@ const EMR = () => {
         doctor_name: editFormData.doctor,
         diagnosis: editFormData.diagnosis,
         prescription: editFormData.prescription,
+        description: editFormData.description,
       };
       await updateRecord(editingRecord.apiId, payload);
       showToast(`Medical record for ${editFormData.patient} updated successfully.`);
@@ -186,19 +258,18 @@ const EMR = () => {
           <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
-                <th className="px-4 py-4">Record ID</th>
-                <th className="py-4">Clinical ID</th>
-                <th className="py-4">Entry Date</th>
-                <th className="py-4">Patient Identity</th>
+                <th className="px-4 py-4">Clinical ID</th>
+                <th className="py-4">Patient ID</th>
+                <th className="py-4">Patient Name</th>
                 <th className="py-4">Clinician</th>
-                <th className="py-4">Primary Diagnosis</th>
-                {canEditDelete && <th className="px-4 py-4 text-end">Electronic Validation</th>}
+                <th className="py-4">Entry Date</th>
+                <th className="px-4 py-4 text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
                 <tr>
-                  <td colSpan={isPatient ? "6" : "7"} className="p-0">
+                  <td colSpan="6" className="p-0">
                     <EmptyState 
                       icon="bi-file-earmark-medical"
                       title="No Clinical Records"
@@ -210,35 +281,43 @@ const EMR = () => {
                 </tr>
               ) : paginatedRecords.map((record) => (
                 <tr key={record.id}>
-                  <td className="px-4 py-4 fw-bold gradient-text">{record.id}</td>
-                  <td className="py-4 text-white opacity-75">{record.clinicalId}</td>
-                  <td className="py-4 text-white opacity-50 small">{record.date}</td>
+                  <td className="px-4 py-4 fw-bold gradient-text">{record.clinicalId}</td>
+                  <td className="py-4 text-white opacity-75">{getPatientId(record.patient)}</td>
                   <td className="py-4 fw-bold text-white">{record.patient}</td>
                   <td className="py-4 text-white-50 small">{record.doctor}</td>
-                  <td className="py-4">
-                    <span className="badge-soft-success px-3 py-1 rounded-pill">{record.diagnosis}</span>
+                  <td className="py-4 text-white opacity-50 small">{record.date}</td>
+                  <td className="px-4 py-4 text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <button
+                        className="btn btn-sm btn-glass"
+                        onClick={() => openViewModal(record)}
+                        title="View Record Details"
+                      >
+                        <i className="bi bi-eye"></i>
+                      </button>
+                      {canEditDelete && (
+                        <>
+                          <button
+                            className="btn btn-sm btn-glass"
+                            onClick={() => openEditModal(record)}
+                            title="Edit Record"
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-glass text-danger"
+                            onClick={() => {
+                              setDeletingRecord(record);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            title="Delete Record"
+                          >
+                            <i className="bi bi-trash3"></i>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
-                  {canEditDelete && (
-                    <td className="px-4 py-4 text-end">
-                      <button
-                        className="btn btn-sm btn-glass me-2"
-                        onClick={() => openEditModal(record)}
-                        title="Edit Record"
-                      >
-                        <i className="bi bi-pencil-square"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-glass text-danger"
-                        onClick={() => {
-                          setDeletingRecord(record);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        title="Delete Record"
-                      >
-                        <i className="bi bi-trash3"></i>
-                      </button>
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>
@@ -257,26 +336,42 @@ const EMR = () => {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Electronic Clinical Entry Protocol">
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          <div className="mb-4 position-relative">
             <label htmlFor="emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
-              Patient Identity
+              Patient Name
             </label>
             <input
               id="emr-patient"
               type="text"
+              autoComplete="off"
               className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
-              placeholder="Enter patient name..."
+              placeholder="Search or enter patient name"
               value={formData.patient}
-              onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-              list="patient-datalist"
+              onChange={(e) => {
+                setPatientSuggestionsVisible(true);
+                setFormData({ ...formData, patient: e.target.value });
+              }}
+              onFocus={() => setPatientSuggestionsVisible(true)}
+              onBlur={() => setTimeout(() => setPatientSuggestionsVisible(false), 150)}
             />
-            <datalist id="patient-datalist">
-              {patients.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.id}
-                </option>
-              ))}
-            </datalist>
+            {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
+              <div className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
+                {filteredPatients.map((patient) => (
+                  <button
+                    key={patient.id}
+                    type="button"
+                    className="list-group-item list-group-item-action text-start"
+                    onMouseDown={() => {
+                      setFormData({ ...formData, patient: patient.name });
+                      setPatientSuggestionsVisible(false);
+                    }}
+                  >
+                    <div className="fw-bold">{patient.name}</div>
+                    <small className="text-muted">{patient.id}</small>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="mb-4">
             <label htmlFor="emr-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
@@ -302,6 +397,19 @@ const EMR = () => {
               placeholder="List pharmaceutical interventions..."
               value={formData.prescription}
               onChange={(e) => setFormData({ ...formData, prescription: e.target.value })}
+            ></textarea>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="emr-description" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              Description
+            </label>
+            <textarea
+              id="emr-description"
+              className="form-control"
+              rows="3"
+              placeholder="Enter additional description, notes, or patient history details..."
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             ></textarea>
           </div>
           <div className="row g-3 mb-4">
@@ -348,7 +456,7 @@ const EMR = () => {
           <form onSubmit={handleEditSubmit}>
             <div className="mb-4">
               <label htmlFor="edit-emr-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
-                Patient Identity
+                Patient Name
               </label>
               <input
                 id="edit-emr-patient"
@@ -357,7 +465,6 @@ const EMR = () => {
                 placeholder="Enter patient name..."
                 value={editFormData.patient}
                 onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-                list="patient-datalist"
               />
             </div>
             <div className="mb-4">
@@ -382,6 +489,19 @@ const EMR = () => {
                 rows="3"
                 value={editFormData.prescription}
                 onChange={(e) => setEditFormData({ ...editFormData, prescription: e.target.value })}
+              ></textarea>
+            </div>
+            <div className="mb-4">
+              <label htmlFor="edit-emr-description" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                Description
+              </label>
+              <textarea
+                id="edit-emr-description"
+                className="form-control"
+                rows="3"
+                placeholder="Enter additional description, notes, or patient history details..."
+                value={editFormData.description}
+                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
               ></textarea>
             </div>
             <div className="row g-3 mb-4">
@@ -425,6 +545,135 @@ const EMR = () => {
         itemName={`Record for ${deletingRecord?.patient}`}
         itemType="Medical Record"
       />
+
+      {/* View EMR Modal */}
+      <Modal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title="Clinical Record Details">
+        {viewingRecord && (
+          <div className="p-1">
+            <div className="mb-4">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                Patient Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={viewingRecord.patient}
+                readOnly
+                disabled
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                Patient ID
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={getPatientId(viewingRecord.patient)}
+                readOnly
+                disabled
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                Primary Diagnosis
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={viewingRecord.diagnosis}
+                readOnly
+                disabled
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                Medical Prescription Protocol
+              </label>
+              <textarea
+                className="form-control"
+                rows="3"
+                value={viewingRecord.prescription || 'No prescription protocols entered.'}
+                readOnly
+                disabled
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+                Description
+              </label>
+              <textarea
+                className="form-control"
+                rows="3"
+                value={viewingRecord.description || 'No additional description provided.'}
+                readOnly
+                disabled
+              />
+            </div>
+
+            <div className="d-flex gap-3 mt-5">
+              <button type="button" className="btn btn-glass w-100 py-3" onClick={() => setIsViewModalOpen(false)}>
+                Close Details
+              </button>
+              {!isPatient && (
+                <button type="button" className="btn btn-primary w-100 py-3" onClick={() => handleOpenOrderTestModal(viewingRecord)}>
+                  Order Test
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Order Test Modal */}
+      <Modal isOpen={isOrderTestModalOpen} onClose={() => setIsOrderTestModalOpen(false)} title="Order Diagnostic Test">
+        <form onSubmit={handleOrderTestSubmit}>
+          <div className="mb-4">
+            <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
+              Diagnostic Test Classification
+            </label>
+            <input
+              type="text"
+              className={`form-control ${orderTestErrors.testName ? 'is-invalid' : ''}`}
+              placeholder="e.g. Pathology, Radiology, Blood Panel"
+              value={orderTestFormData.testName}
+              onChange={(e) => setOrderTestFormData({ ...orderTestFormData, testName: e.target.value })}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
+              Ordering Physician
+            </label>
+            <input
+              type="text"
+              className={`form-control ${orderTestErrors.doctorName ? 'is-invalid' : ''}`}
+              placeholder="Enter physician name..."
+              value={orderTestFormData.doctorName}
+              onChange={(e) => setOrderTestFormData({ ...orderTestFormData, doctorName: e.target.value })}
+              list="order-test-doctor-options"
+            />
+            <datalist id="order-test-doctor-options">
+              {doctorOptions.map((doc, idx) => (
+                <option key={idx} value={doc} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="d-flex gap-3 mt-5">
+            <button type="button" className="btn btn-glass w-100 py-3" onClick={() => setIsOrderTestModalOpen(false)}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary w-100 py-3">
+              Submit Order
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

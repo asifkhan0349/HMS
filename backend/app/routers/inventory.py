@@ -14,7 +14,7 @@ from .common import PositiveId
 
 # Roles permitted to access Hospital Logistics — must stay in sync with
 # INVENTORY_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Pharmacist"]
+_ALLOWED_ROLES = ["Admin", "Nurse", "Reception", "Pharmacist"]
 
 router = APIRouter(
     prefix="/inventory",

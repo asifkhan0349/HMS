@@ -10,7 +10,8 @@
     "build:dev": "npm run build:bones && vite build",
     "build:ci": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "node scripts/trigger-deploy.js"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

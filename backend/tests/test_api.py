@@ -5,36 +5,45 @@ Comprehensive backend test suite covering:
 - Security: accessing protected routes without / with expired tokens
 """
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from app.main import app
-from app.config import API_PREFIX
+from app.core.config import API_PREFIX
 
 # ────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ────────────────────────────────────────────────────────────────────────────
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
 
-@pytest.fixture
-async def auth_token(client: AsyncClient) -> str:
-    """Register a test user and return a valid Bearer token."""
-    await client.post(f"{API_PREFIX}/auth/signup", json={
-        "full_name": "Test User",
-        "username": "pytest_user",
-        "email": "pytest@hms.test",
-        "password": "StrongPass123!",
-        "role": "Admin",
-    })
-    resp = await client.post(f"{API_PREFIX}/auth/login", json={
-        "username": "pytest_user",
-        "password": "StrongPass123!",
-    })
-    return resp.json()["token"]
+@pytest_asyncio.fixture
+async def auth_token() -> str:
+    """Create a test user directly in the database and return a valid Bearer token."""
+    import uuid
+    from app.core.database import SessionLocal
+    from app.models import User
+    from app.core.security import hash_password, create_access_token
+
+    suffix = uuid.uuid4().hex[:10]
+    username = f"pytest_user_{suffix}"
+    
+    with SessionLocal() as db:
+        user = User(
+            full_name="Test User",
+            username=username,
+            email=f"{username}@hms.test",
+            role="Admin",
+            password_hash=hash_password("StrongPass123!"),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return create_access_token(user.id)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -53,45 +62,53 @@ async def test_health_check(client: AsyncClient):
 # ────────────────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_signup_success(client: AsyncClient):
-    resp = await client.post(f"{API_PREFIX}/auth/signup", json={
+async def test_signup_success(client: AsyncClient, auth_token: str):
+    import uuid
+    suffix = uuid.uuid4().hex[:6]
+    resp = await client.post(f"{API_PREFIX}/auth/create-user", json={
         "full_name": "Alice Smith",
-        "username": "alice_test",
-        "email": "alice@hms.test",
+        "username": f"alice_{suffix}",
+        "email": f"alice_{suffix}@hms.test",
         "password": "AlicePass99!",
-        "role": "Admin",
-    })
+        "role": "Doctor",
+    }, headers={"Authorization": f"Bearer {auth_token}"})
     assert resp.status_code == 201
     data = resp.json()
     assert "token" in data
-    assert data["user"]["username"] == "alice_test"
+    assert data["user"]["username"] == f"alice_{suffix}"
 
 
 @pytest.mark.asyncio
-async def test_signup_duplicate_rejected(client: AsyncClient):
+async def test_signup_duplicate_rejected(client: AsyncClient, auth_token: str):
+    import uuid
+    suffix = uuid.uuid4().hex[:6]
+    headers = {"Authorization": f"Bearer {auth_token}"}
     payload = {
         "full_name": "Bob Dup",
-        "username": "bob_dup",
-        "email": "bob@hms.test",
+        "username": f"bob_{suffix}",
+        "email": f"bob_{suffix}@hms.test",
         "password": "BobPass99!",
-        "role": "Admin",
+        "role": "Nurse",
     }
-    await client.post(f"{API_PREFIX}/auth/signup", json=payload)
-    resp = await client.post(f"{API_PREFIX}/auth/signup", json=payload)
-    assert resp.status_code == 409
+    resp1 = await client.post(f"{API_PREFIX}/auth/create-user", json=payload, headers=headers)
+    assert resp1.status_code == 201
+    resp2 = await client.post(f"{API_PREFIX}/auth/create-user", json=payload, headers=headers)
+    assert resp2.status_code == 409
 
 
 @pytest.mark.asyncio
-async def test_login_wrong_password(client: AsyncClient):
-    await client.post(f"{API_PREFIX}/auth/signup", json={
+async def test_login_wrong_password(client: AsyncClient, auth_token: str):
+    import uuid
+    suffix = uuid.uuid4().hex[:6]
+    await client.post(f"{API_PREFIX}/auth/create-user", json={
         "full_name": "Carol T",
-        "username": "carol_test",
-        "email": "carol@hms.test",
+        "username": f"carol_{suffix}",
+        "email": f"carol_{suffix}@hms.test",
         "password": "RealPass99!",
-        "role": "Admin",
-    })
+        "role": "Reception",
+    }, headers={"Authorization": f"Bearer {auth_token}"})
     resp = await client.post(f"{API_PREFIX}/auth/login", json={
-        "username": "carol_test",
+        "username": f"carol_{suffix}",
         "password": "WrongPassword!",
     })
     assert resp.status_code == 401
@@ -158,6 +175,7 @@ async def test_patients_crud(client: AsyncClient, auth_token: str):
     resp = await client.post(f"{API_PREFIX}/patients", json={
         "name": "John Doe", "age": 45, "gender": "Male",
         "blood_group": "A+", "status": "Outpatient",
+        "phone_number": "1234567890",
     }, headers=headers)
     assert resp.status_code in (200, 201)
     patient_id = resp.json()["id"]

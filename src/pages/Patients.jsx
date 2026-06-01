@@ -1,8 +1,8 @@
 import React, { memo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useApp, mapPatientFromApi, createCode } from '../context/AppContext';
+import { useApp, mapPatientFromApi, mapActivityFromApi, mapBedFromApi, mapInvoiceFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { patientsApi } from '../lib/api';
+import { patientsApi, bloodActivitiesApi, bedsApi, invoicesApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -11,7 +11,7 @@ import { Skeleton } from 'boneyard-js/react';
 import { usePagination } from '../hooks/usePagination';
 
 // Memoized individual row
-const PatientRow = memo(({ patient, onEdit, onDelete, isPatient, isDoctor, isNurse, isReception }) => {
+const PatientRow = memo(({ patient, onEdit, onDelete, onViewProfile, isPatient, isDoctor, isNurse, isReception }) => {
   const navigate = useNavigate();
   return (
     <tr>
@@ -19,7 +19,16 @@ const PatientRow = memo(({ patient, onEdit, onDelete, isPatient, isDoctor, isNur
       <td className="py-4">
         <div className="d-flex align-items-center">
           <div>
-            <h6 className="mb-0 fw-bold">{patient.name}</h6>
+            <h6 className="mb-0 fw-bold">
+              <button 
+                className="btn btn-link p-0 text-decoration-none fw-bold text-start" 
+                style={{ color: 'var(--geist-foreground)', border: 'none', background: 'none' }}
+                onClick={() => onViewProfile(patient)}
+                title="View Profile Details"
+              >
+                {patient.name}
+              </button>
+            </h6>
             <small className="text-muted">{patient.gender}, {patient.age}y</small>
           </div>
         </div>
@@ -49,14 +58,14 @@ const PatientRow = memo(({ patient, onEdit, onDelete, isPatient, isDoctor, isNur
       </td>
       {!isPatient && (
         <td className="px-4 py-4 text-end">
-          {!(isDoctor || isNurse || isReception) && (
-            <button 
-              className="btn btn-primary btn-sm px-3 me-2"
-              onClick={() => navigate('/emr')}
-            >
-              EHR
-            </button>
-          )}
+          <button 
+            className="btn btn-sm btn-glass me-2"
+            onClick={() => onViewProfile(patient)}
+            title="View Patient Profile"
+          >
+            <i className="bi bi-eye"></i>
+          </button>
+
           {!(isDoctor || isNurse || isReception) && (
             <>
             <button 
@@ -89,6 +98,7 @@ const Patients = () => {
   const isReception = user?.role === 'Reception';
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
+  
   const { 
     data: patients, 
     loading, 
@@ -96,6 +106,22 @@ const Patients = () => {
     updateData: updatePatient,
     removeData: deletePatient
   } = useCrud(patientsApi, mapPatientFromApi);
+
+  const {
+    data: activities,
+    loading: loadingActivities
+  } = useCrud(bloodActivitiesApi, mapActivityFromApi);
+
+  const { data: beds } = useCrud(bedsApi, mapBedFromApi);
+  const { data: invoices } = useCrud(invoicesApi, mapInvoiceFromApi);
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  const handleViewProfile = (p) => {
+    setSelectedPatient(p);
+    setIsProfileModalOpen(true);
+  };
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -284,7 +310,7 @@ const Patients = () => {
                 <th className="py-3">Email</th>
                 <th className="py-3">Last Visit</th>
                 <th className="py-3">Status</th>
-                {!isPatient && !(isDoctor || isNurse || isReception) && <th className="px-4 py-3 text-end">Actions</th>}
+                {!isPatient && <th className="px-4 py-3 text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -318,6 +344,7 @@ const Patients = () => {
                   patient={p} 
                   onEdit={openEditModal}
                   onDelete={(p) => { setDeletingPatient(p); setIsDeleteModalOpen(true); }}
+                  onViewProfile={handleViewProfile}
                   isPatient={isPatient}
                   isDoctor={isDoctor}
                   isNurse={isNurse}
@@ -607,6 +634,225 @@ const Patients = () => {
         itemName={deletingPatient?.name}
         itemType="Patient Record"
       />
+
+      {/* Patient Profile Modal */}
+      <Modal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => { setIsProfileModalOpen(false); setSelectedPatient(null); }} 
+        title="Patient Profile Card"
+      >
+        {selectedPatient && (
+          <div className="patient-profile-card">
+            {/* Header Summary */}
+            <div className="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+              <div 
+                className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                style={{ 
+                  width: '56px', 
+                  height: '56px', 
+                  fontSize: '1.5rem',
+                  background: 'linear-gradient(135deg, #0070f3 0%, #00259e 100%)'
+                }}
+              >
+                {selectedPatient.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h4 className="fw-bold mb-1 text-dark">{selectedPatient.name}</h4>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted small">ID: {selectedPatient.id}</span>
+                  <span className="text-muted small">•</span>
+                  <span className="text-muted small">Code: {selectedPatient.patientCode}</span>
+                  <span className="text-muted small">•</span>
+                  <span className={`badge rounded-pill px-2 py-0.5 border`} style={{ 
+                      background: selectedPatient.status === 'Inpatient' ? 'rgba(0, 112, 243, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                      color: 'var(--geist-success)',
+                      borderColor: selectedPatient.status === 'Inpatient' ? 'rgba(0, 112, 243, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                      fontSize: '0.65rem'
+                  }}>
+                    {selectedPatient.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="row g-4 mb-4">
+              <div className="col-md-6">
+                <div className="p-3 border rounded h-100" style={{ background: 'rgba(0,0,0,0.03)' }}>
+                  <h6 className="fw-bold text-muted small text-uppercase mb-3"><i className="bi bi-person me-2"></i>Personal Info</h6>
+                  <div className="mb-2 d-flex justify-content-between">
+                    <span className="text-muted small">Age:</span>
+                    <span className="fw-semibold small text-dark">{selectedPatient.age} years</span>
+                  </div>
+                  <div className="mb-2 d-flex justify-content-between">
+                    <span className="text-muted small">Gender:</span>
+                    <span className="fw-semibold small text-dark">{selectedPatient.gender}</span>
+                  </div>
+                  <div className="mb-0 d-flex justify-content-between align-items-center">
+                    <span className="text-muted small">Blood Group:</span>
+                    <span className="badge bg-danger px-2 py-1">{selectedPatient.bloodGroup}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="p-3 border rounded h-100" style={{ background: 'rgba(0,0,0,0.03)' }}>
+                  <h6 className="fw-bold text-muted small text-uppercase mb-3"><i className="bi bi-telephone me-2"></i>Contact Details</h6>
+                  <div className="mb-2 d-flex justify-content-between">
+                    <span className="text-muted small">Phone:</span>
+                    <span className="fw-semibold small text-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>{selectedPatient.phoneNumber || '-'}</span>
+                  </div>
+                  <div className="mb-0 d-flex justify-content-between align-items-center">
+                    <span className="text-muted small">Email:</span>
+                    <span className="fw-semibold small text-dark text-truncate ms-2" style={{ maxWidth: '160px' }} title={selectedPatient.email}>{selectedPatient.email || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Contacts */}
+            <div className="p-3 border rounded mb-4" style={{ background: 'rgba(0,0,0,0.03)' }}>
+              <h6 className="fw-bold text-muted small text-uppercase mb-3"><i className="bi bi-shield-exclamation me-2"></i>Emergency Contacts</h6>
+              <div className="row">
+                <div className="col-md-6 mb-2 mb-md-0">
+                  <div className="small text-muted mb-1">Primary Contact:</div>
+                  <div className="fw-semibold small text-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>{selectedPatient.emergencyContact1 || '-'}</div>
+                </div>
+                <div className="col-md-6">
+                  <div className="small text-muted mb-1">Secondary Contact:</div>
+                  <div className="fw-semibold small text-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>{selectedPatient.emergencyContact2 || '-'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bed Assignment Details */}
+            {(() => {
+              const assignedBed = beds.find(b => b.patientName === selectedPatient.name);
+              if (assignedBed) {
+                return (
+                  <div className="p-3 border rounded mb-4" style={{ background: 'rgba(0,0,0,0.03)' }}>
+                    <h6 className="fw-bold text-muted small text-uppercase mb-3"><i className="bi bi-hospital me-2"></i>Bed Assignment</h6>
+                    <div className="row">
+                      <div className="col-md-4 mb-2 mb-md-0">
+                        <div className="small text-muted mb-1">Ward / Room:</div>
+                        <div className="fw-semibold small text-dark">{assignedBed.ward}</div>
+                      </div>
+                      <div className="col-md-4 mb-2 mb-md-0">
+                        <div className="small text-muted mb-1">Bed Number:</div>
+                        <div className="fw-semibold small text-dark">{assignedBed.id}</div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="small text-muted mb-1">Allotment Reason:</div>
+                        <div className="fw-semibold small text-dark">{assignedBed.allotmentReason || '-'}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Invoices History */}
+            <div className="p-3 border rounded mb-4" style={{ background: 'rgba(0,0,0,0.03)' }}>
+              <h6 className="fw-bold text-muted small text-uppercase mb-3 d-flex align-items-center justify-content-between">
+                <span><i className="bi bi-receipt me-2 text-primary"></i>Invoices & Billing History</span>
+                <span className="badge rounded-pill bg-primary-soft text-primary px-2.5 py-1 small fw-bold" style={{ fontSize: '0.65rem', background: 'rgba(0, 112, 243, 0.08)' }}>
+                  {invoices.filter(inv => inv.patient?.toLowerCase() === selectedPatient.name?.toLowerCase()).length} Invoices
+                </span>
+              </h6>
+              <div className="invoice-history-list" style={{ maxHeight: '180px', overflowY: 'auto' }}>
+                {invoices.filter(inv => inv.patient?.toLowerCase() === selectedPatient.name?.toLowerCase()).length === 0 ? (
+                  <div className="text-center py-4 text-muted small">
+                    <i className="bi bi-receipt fs-4 text-muted opacity-50 mb-2 d-block"></i>
+                    No billing records or invoices found for this patient.
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-sm table-borderless align-middle mb-0">
+                      <thead>
+                        <tr className="border-bottom small text-muted">
+                          <th className="py-1">Invoice Code</th>
+                          <th className="py-1">Billing Type</th>
+                          <th className="py-1">Amount</th>
+                          <th className="py-1">Status</th>
+                          <th className="py-1 text-end">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invoices
+                          .filter(inv => inv.patient?.toLowerCase() === selectedPatient.name?.toLowerCase())
+                          .map((inv) => (
+                            <tr key={inv.apiId} className="small border-bottom-subtle">
+                              <td className="py-2 fw-semibold text-dark">{inv.id}</td>
+                              <td className="py-2 text-muted">{inv.billingType}</td>
+                              <td className="py-2 fw-bold text-dark">{inv.amount}</td>
+                              <td className="py-2">
+                                <span className={`badge rounded-pill px-2 py-0.5`} style={{
+                                  background: inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                  color: inv.status === 'Paid' ? 'var(--geist-success)' : 'var(--geist-warning)',
+                                  fontSize: '0.65rem'
+                                }}>
+                                  {inv.status}
+                                </span>
+                              </td>
+                              <td className="py-2 text-muted text-end" style={{ fontVariantNumeric: 'tabular-nums' }}>{inv.date}</td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Transfusion / Blood Usage History */}
+            <div className="p-3 border rounded" style={{ background: 'rgba(0,0,0,0.03)' }}>
+              <h6 className="fw-bold text-muted small text-uppercase mb-3 d-flex align-items-center justify-content-between">
+                <span><i className="bi bi-droplet-half text-danger me-2"></i>Transfusion & Blood Usage History</span>
+                <span className="badge rounded-pill bg-danger-soft text-danger px-2.5 py-1 small fw-bold" style={{ fontSize: '0.65rem', background: 'rgba(238, 0, 0, 0.08)' }}>
+                  {activities.filter(act => act.type === 'Usage' && act.donor?.toLowerCase() === selectedPatient.name?.toLowerCase()).length} Logs
+                </span>
+              </h6>
+              <div className="transfusion-history-list" style={{ maxHeight: '180px', overflowY: 'auto' }}>
+                {activities.filter(act => act.type === 'Usage' && act.donor?.toLowerCase() === selectedPatient.name?.toLowerCase()).length === 0 ? (
+                  <div className="text-center py-4 text-muted small">
+                    <i className="bi bi-heart-pulse fs-4 text-muted opacity-50 mb-2 d-block"></i>
+                    No blood activities or transfusion cycles logged for this patient.
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-sm table-borderless align-middle mb-0">
+                      <thead>
+                        <tr className="border-bottom small text-muted">
+                          <th className="py-1">Group</th>
+                          <th className="py-1">Units (Bags)</th>
+                          <th className="py-1 text-end">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activities
+                          .filter(act => act.type === 'Usage' && act.donor?.toLowerCase() === selectedPatient.name?.toLowerCase())
+                          .map((act) => (
+                            <tr key={act.id} className="small border-bottom-subtle">
+                              <td className="py-2 fw-bold text-danger"><i className="bi bi-droplet-fill me-1"></i>{act.group}</td>
+                              <td className="py-2 fw-semibold text-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>{act.units} Bags</td>
+                              <td className="py-2 text-muted text-end" style={{ fontVariantNumeric: 'tabular-nums' }}>{act.date}</td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="d-flex gap-2 mt-5">
+              <button type="button" className="btn btn-glass w-100 py-2" onClick={() => { setIsProfileModalOpen(false); setSelectedPatient(null); }}>Close Profile</button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </main>
   );
 };

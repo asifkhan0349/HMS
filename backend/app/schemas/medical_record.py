@@ -11,6 +11,7 @@ class MedicalRecordBase(AppBaseModel):
     doctor_name: str = Field("", max_length=120)
     diagnosis: str = Field("", min_length=0)
     prescription: str = Field("", min_length=0)
+    description: Optional[str] = Field("", min_length=0)
 
 
 class MedicalRecordCreate(MedicalRecordBase):
@@ -25,6 +26,7 @@ class MedicalRecordUpdate(AppBaseModel):
     doctor_name: Optional[str] = Field(None, min_length=2, max_length=120)
     diagnosis: Optional[str] = Field(None, min_length=0)
     prescription: Optional[str] = Field(None, min_length=0)
+    description: Optional[str] = Field(None, min_length=0)
 
 
 class MedicalRecordRead(MedicalRecordBase, ORMBase):

@@ -9,6 +9,8 @@ class BedBase(AppBaseModel):
     ward_name: str = Field(..., min_length=2, max_length=100)
     type: str = Field(..., min_length=2, max_length=50)
     status: str = Field(..., min_length=2, max_length=50)
+    patient_name: Optional[str] = Field(None, max_length=120)
+    allotment_reason: Optional[str] = Field(None, max_length=255)
 
 
 class BedCreate(BedBase):
@@ -20,6 +22,8 @@ class BedUpdate(AppBaseModel):
     ward_name: Optional[str] = Field(None, min_length=2, max_length=100)
     type: Optional[str] = Field(None, min_length=2, max_length=50)
     status: Optional[str] = Field(None, min_length=2, max_length=50)
+    patient_name: Optional[str] = Field(None, max_length=120)
+    allotment_reason: Optional[str] = Field(None, max_length=255)
 
 
 class BedRead(BedBase, ORMBase):

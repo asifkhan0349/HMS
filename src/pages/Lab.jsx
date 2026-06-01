@@ -9,6 +9,40 @@ import Pagination from '../components/UI/Pagination';
 import { Skeleton } from 'boneyard-js/react';
 import { usePagination } from '../hooks/usePagination';
 
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'Completed':
+      return {
+        bg: 'rgba(16, 185, 129, 0.15)',
+        text: '#10B981',
+        border: 'rgba(16, 185, 129, 0.3)',
+        dot: '#10B981',
+      };
+    case 'Processing':
+      return {
+        bg: 'rgba(245, 166, 35, 0.15)',
+        text: '#F5A623',
+        border: 'rgba(245, 166, 35, 0.3)',
+        dot: '#F5A623',
+      };
+    case 'Sample Taken':
+      return {
+        bg: 'rgba(0, 180, 216, 0.15)',
+        text: '#00B4D8',
+        border: 'rgba(0, 180, 216, 0.3)',
+        dot: '#00B4D8',
+      };
+    case 'Initialized':
+    default:
+      return {
+        bg: 'rgba(156, 163, 175, 0.15)',
+        text: '#9CA3AF',
+        border: 'rgba(156, 163, 175, 0.3)',
+        dot: '#9CA3AF',
+      };
+  }
+};
+
 const Lab = () => {
   const { showToast, user } = useApp();
   const isPatient = user?.role?.toLowerCase() === 'patient';
@@ -61,6 +95,16 @@ const Lab = () => {
     test: '',
     doctor: '',
   });
+  const [isPatientSuggestionsVisible, setPatientSuggestionsVisible] = useState(false);
+
+  const filteredPatients = useMemo(() => {
+    const query = formData.patient.trim().toLowerCase();
+    if (!query) return patients.slice(0, 8);
+    return patients.filter((p) =>
+      p.name.toLowerCase().includes(query) ||
+      p.id.toString().toLowerCase().includes(query)
+    ).slice(0, 8);
+  }, [patients, formData.patient]);
 
   const [editFormData, setEditFormData] = useState({
     patient: '',
@@ -76,6 +120,12 @@ const Lab = () => {
     }),
     [tests]
   );
+
+  const getPatientId = (patientName) => {
+    if (!patientName) return '-';
+    const patient = patients.find(p => p.name?.trim().toLowerCase() === patientName.trim().toLowerCase());
+    return patient ? patient.id : '-';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -182,7 +232,8 @@ const Lab = () => {
               <thead>
                 <tr>
                   <th className="px-4 py-4">Lab ID</th>
-                  <th className="py-4">Patient Identity</th>
+                  <th className="py-4">Patient ID</th>
+                  <th className="py-4">Patient Name</th>
                   <th className="py-4">Diagnostic Test</th>
                   <th className="py-4">Ordering Clinician</th>
                   <th className="py-4 text-center">Protocol Status</th>
@@ -192,7 +243,7 @@ const Lab = () => {
               <tbody>
                 {tests.length === 0 ? (
                   <tr>
-                    <td colSpan={isPatient ? "5" : "6"} className="p-0">
+                    <td colSpan={isPatient ? "6" : "7"} className="p-0">
                       <EmptyState
                         icon="bi-thermometer-half"
                         title="No Lab Tests"
@@ -205,55 +256,37 @@ const Lab = () => {
                 ) : paginatedTests.map((test) => (
                   <tr key={test.id}>
                     <td className="px-4 py-4 fw-bold gradient-text">{test.id}</td>
+                    <td className="py-4 text-white opacity-75">{getPatientId(test.patient)}</td>
                     <td className="py-4 fw-bold text-white">{test.patient}</td>
                     <td className="py-4 text-white opacity-75 small">{test.test}</td>
                     <td className="py-4 text-white-50 small">{test.doctor}</td>
                     <td className="py-4 text-center">
-                      <span
-                        className="badge rounded-pill px-4 py-2 border"
-                        style={{
-                          background:
-                            test.status === 'Completed'
-                              ? 'rgba(16, 185, 129, 0.15)'
-                              : test.status === 'Processing'
-                                ? 'rgba(245, 166, 35, 0.15)'
-                                : 'rgba(239, 68, 68, 0.15)',
-
-                          color:
-                            test.status === 'Completed'
-                              ? 'green'
-                              : test.status === 'Processing'
-                                ? 'orange'
-                                : 'red',
-
-                          borderColor:
-                            test.status === 'Completed'
-                              ? 'rgba(16, 185, 129, 0.3)'
-                              : test.status === 'Processing'
-                                ? 'rgba(245, 166, 35, 0.3)'
-                                : 'rgba(239, 68, 68, 0.3)',
-
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        <span
-                          className="pulsing-dot me-2"
-                          style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            display: 'inline-block',
-                            background:
-                              test.status === 'Completed'
-                                ? 'green'
-                                : test.status === 'Processing'
-                                  ? 'orange'
-                                  : 'red'
-                          }}
-                        ></span>
-
-                        {test.status}
-                      </span>
+                      {(() => {
+                        const style = getStatusColor(test.status);
+                        return (
+                          <span
+                            className="badge rounded-pill px-4 py-2 border"
+                            style={{
+                              background: style.bg,
+                              color: style.text,
+                              borderColor: style.border,
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            <span
+                              className="pulsing-dot me-2"
+                              style={{
+                                width: '6px',
+                                height: '6px',
+                                borderRadius: '50%',
+                                display: 'inline-block',
+                                background: style.dot
+                              }}
+                            ></span>
+                            {test.status}
+                          </span>
+                        );
+                      })()}
                     </td>
                     {!isPatient && !(isDoctor || isNurse || isReception) && (
                       <td className="px-4 py-4 text-end">
@@ -303,26 +336,42 @@ const Lab = () => {
       {/* New Test Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Laboratory Test Ordering Protocol">
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          <div className="mb-4 position-relative">
             <label htmlFor="lab-patient" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
               Subject Identity
             </label>
             <input
               id="lab-patient"
               type="text"
+              autoComplete="off"
               className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
-              placeholder="Enter patient name..."
+              placeholder="Search or enter patient name"
               value={formData.patient}
-              onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-              list="patient-datalist"
+              onChange={(e) => {
+                setPatientSuggestionsVisible(true);
+                setFormData({ ...formData, patient: e.target.value });
+              }}
+              onFocus={() => setPatientSuggestionsVisible(true)}
+              onBlur={() => setTimeout(() => setPatientSuggestionsVisible(false), 150)}
             />
-            <datalist id="patient-datalist">
-              {patients.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.id}
-                </option>
-              ))}
-            </datalist>
+            {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
+              <div className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
+                {filteredPatients.map((patient) => (
+                  <button
+                    key={patient.id}
+                    type="button"
+                    className="list-group-item list-group-item-action text-start"
+                    onMouseDown={() => {
+                      setFormData({ ...formData, patient: patient.name });
+                      setPatientSuggestionsVisible(false);
+                    }}
+                  >
+                    <div className="fw-bold">{patient.name}</div>
+                    <small className="text-muted">{patient.id}</small>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="mb-4">
             <label htmlFor="lab-test" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
@@ -379,7 +428,6 @@ const Lab = () => {
               placeholder="Enter patient name..."
               value={editFormData.patient}
               onChange={(e) => setEditFormData({ ...editFormData, patient: e.target.value })}
-              list="patient-datalist"
             />
           </div>
           <div className="mb-4">
@@ -417,7 +465,8 @@ const Lab = () => {
                 value={editFormData.status}
                 onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
               >
-                <option>Pending</option>
+                <option>Initialized</option>
+                <option>Sample Taken</option>
                 <option>Processing</option>
                 <option>Completed</option>
               </select>

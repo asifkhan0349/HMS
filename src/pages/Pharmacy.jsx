@@ -42,9 +42,12 @@ const Pharmacy = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDispenseModalOpen, setIsDispenseModalOpen] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState(null);
   const [deletingMedicine, setDeletingMedicine] = useState(null);
+  const [dispensingMedicine, setDispensingMedicine] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const [dispenseQuantity, setDispenseQuantity] = useState('');
 
   const [formData, setFormData] = useState({
     name: '', batch: '', stock: '', expiry: ''
@@ -139,6 +142,46 @@ const Pharmacy = () => {
       setEditingMedicine(null);
     } catch (error) {
       showToast(error.message || 'Unable to update medicine.', 'error');
+    }
+  };
+
+  const openDispenseModal = (med) => {
+    setDispensingMedicine(med);
+    setDispenseQuantity('');
+    setValidationErrors({});
+    setIsDispenseModalOpen(true);
+  };
+
+  const handleDispenseSubmit = async (e) => {
+    e.preventDefault();
+    const qty = parseInt(dispenseQuantity, 10);
+    if (!dispenseQuantity || isNaN(qty) || qty <= 0) {
+      setValidationErrors({ quantity: 'Please enter a valid positive integer quantity.' });
+      showToast('Please enter a valid positive integer quantity.', 'warning');
+      return;
+    }
+    if (qty > dispensingMedicine.stock) {
+      setValidationErrors({ quantity: 'Dispense quantity cannot exceed available stock.' });
+      showToast('Dispense quantity cannot exceed available stock.', 'warning');
+      return;
+    }
+    setValidationErrors({});
+    try {
+      const newStock = dispensingMedicine.stock - qty;
+      const newStatus = newStock > 20 ? 'In Stock' : (newStock > 0 ? 'Low Stock' : 'Out of Stock');
+      await updateMedicine(dispensingMedicine.apiId, {
+        name: dispensingMedicine.name,
+        batch: dispensingMedicine.batch,
+        stock: newStock,
+        expiry_date: dispensingMedicine.rawExpiry,
+        status: newStatus
+      });
+      showToast(`Successfully dispensed ${qty} units of ${dispensingMedicine.name}.`);
+      setIsDispenseModalOpen(false);
+      setDispensingMedicine(null);
+      setDispenseQuantity('');
+    } catch (error) {
+      showToast(error.message || 'Unable to dispense medicine.', 'error');
     }
   };
 
@@ -275,7 +318,7 @@ const Pharmacy = () => {
                         {!(isDoctor || isNurse || isReception) && (
                           <button
                             className="btn btn-primary btn-sm px-3"
-                            onClick={() => showToast(`Dispensing ${med.name}…`)}
+                            onClick={() => openDispenseModal(med)}
                           >
                             Dispense
                           </button>
@@ -458,6 +501,78 @@ const Pharmacy = () => {
         itemName={deletingMedicine?.name}
         itemType="Medication Inventory"
       />
+
+      {/* Dispense Medicine Modal */}
+      <Modal
+        isOpen={isDispenseModalOpen}
+        onClose={() => {
+          setIsDispenseModalOpen(false);
+          setDispensingMedicine(null);
+          setDispenseQuantity('');
+          setValidationErrors({});
+        }}
+        title="Dispense Medication"
+      >
+        <form onSubmit={handleDispenseSubmit}>
+          {dispensingMedicine && (
+            <div className="glass-card p-3 mb-4 border" style={{ background: 'var(--accents-1)' }}>
+              <div className="row g-2">
+                <div className="col-6">
+                  <span className="text-muted small d-block">Medicine Name</span>
+                  <strong className="text-truncate d-block">{dispensingMedicine.name}</strong>
+                </div>
+                <div className="col-6">
+                  <span className="text-muted small d-block">Batch ID</span>
+                  <span className="font-monospace small">{dispensingMedicine.batch}</span>
+                </div>
+                <div className="col-6 mt-3">
+                  <span className="text-muted small d-block">Available Stock</span>
+                  <strong>{dispensingMedicine.stock} Units</strong>
+                </div>
+                <div className="col-6 mt-3">
+                  <span className="text-muted small d-block">Expiration Date</span>
+                  <span>{dispensingMedicine.expiry}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mb-4">
+            <label htmlFor="dispense-quantity" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Quantity to Dispense</label>
+            <input
+              id="dispense-quantity"
+              type="number"
+              className={`form-control ${validationErrors.quantity ? 'is-invalid' : ''}`}
+              placeholder="Enter units to dispense…"
+              value={dispenseQuantity}
+              onChange={e => setDispenseQuantity(e.target.value)}
+            />
+            {validationErrors.quantity && (
+              <div className="invalid-feedback">
+                {validationErrors.quantity}
+              </div>
+            )}
+          </div>
+
+          <div className="d-flex gap-2 mt-5">
+            <button
+              type="button"
+              className="btn btn-glass w-100 py-2"
+              onClick={() => {
+                setIsDispenseModalOpen(false);
+                setDispensingMedicine(null);
+                setDispenseQuantity('');
+                setValidationErrors({});
+              }}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary w-100 py-2">
+              Dispense Units
+            </button>
+          </div>
+        </form>
+      </Modal>
     </main>
   );
 };

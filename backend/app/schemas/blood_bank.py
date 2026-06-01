@@ -33,6 +33,7 @@ class BloodActivityBase(AppBaseModel):
     units: int = Field(..., gt=0)
     donor_name: str = Field(..., min_length=2, max_length=120)
     date: datetime = Field(default_factory=datetime.now)
+    sample_id: Optional[str] = Field(None, max_length=50)
 
 
 class BloodActivityCreate(BloodActivityBase):
@@ -45,6 +46,7 @@ class BloodActivityUpdate(AppBaseModel):
     units: Optional[int] = Field(None, gt=0)
     donor_name: Optional[str] = Field(None, min_length=2, max_length=120)
     date: Optional[datetime] = None
+    sample_id: Optional[str] = Field(None, max_length=50)
 
 
 class BloodActivityRead(BloodActivityBase, ORMBase):

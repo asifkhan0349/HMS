@@ -46,8 +46,14 @@ from .routers import (
     records,
     staff,
     tests,
+    ambulances,
+    cash_receipts,
 )
 from .routers.appointments import public_router as appointments_public_router
+from .routers.records import public_router as records_public_router
+from .routers.tests import public_router as tests_public_router
+from .routers.invoices import public_router as invoices_public_router
+from .routers.cash_receipts import public_router as cash_receipts_public_router
 from .seed import seed_database
 
 
@@ -152,9 +158,12 @@ app.include_router(auth.router, prefix=API_PREFIX)
 # the wildcard /{appointment_id} route defined in the protected router.
 app.include_router(appointments_public_router, prefix=API_PREFIX)
 app.include_router(appointments.router, prefix=API_PREFIX)
+app.include_router(records_public_router, prefix=API_PREFIX)
 app.include_router(records.router, prefix=API_PREFIX)
+app.include_router(invoices_public_router, prefix=API_PREFIX)
 app.include_router(invoices.router, prefix=API_PREFIX)
 app.include_router(medicines.router, prefix=API_PREFIX)
+app.include_router(tests_public_router, prefix=API_PREFIX)
 app.include_router(tests.router, prefix=API_PREFIX)
 app.include_router(staff.router, prefix=API_PREFIX)
 app.include_router(dashboard.router, prefix=API_PREFIX)
@@ -162,6 +171,10 @@ app.include_router(beds.router, prefix=API_PREFIX)
 app.include_router(blood_inventory.router, prefix=API_PREFIX)
 app.include_router(blood_activities.router, prefix=API_PREFIX)
 app.include_router(inventory.router, prefix=API_PREFIX)
+app.include_router(ambulances.router, prefix=API_PREFIX)
+app.include_router(cash_receipts_public_router, prefix=API_PREFIX)
+app.include_router(cash_receipts.router, prefix=API_PREFIX)
+
 
 # Serve static files
 # This resolves to the parent of the parent of 'app', which is the root project directory locally, or '/app' in Docker

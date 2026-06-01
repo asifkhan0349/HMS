@@ -1,16 +1,22 @@
 import React, { useState, useMemo } from 'react';
 import { useApp, mapAppointmentFromApi } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { appointmentsApi } from '../lib/api';
+import { appointmentsApi, recordsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import { Skeleton } from 'boneyard-js/react';
 
 const DoctorCalendar = () => {
-  const { user } = useApp();
+  const { user, showToast, triggerGlobalRefresh } = useApp();
   const { data: appointments, loading } = useCrud(appointmentsApi, mapAppointmentFromApi);
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateAppointments, setSelectedDateAppointments] = useState(null);
+
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [recordAppointment, setRecordAppointment] = useState(null);
+  const [recordFormData, setRecordFormData] = useState({ diagnosis: '', prescription: '', description: '' });
+  const [recordValidationErrors, setRecordValidationErrors] = useState({});
+  const [isSubmittingRecord, setIsSubmittingRecord] = useState(false);
 
   // Calendar Helpers
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -67,6 +73,48 @@ const DoctorCalendar = () => {
 
   const handleToday = () => {
     setCurrentDate(new Date());
+  };
+
+  const handleOpenRecordModal = (app) => {
+    setRecordAppointment(app);
+    setRecordFormData({ diagnosis: '', prescription: '', description: '' });
+    setRecordValidationErrors({});
+    setIsRecordModalOpen(true);
+  };
+
+  const handleRecordSubmit = async (e) => {
+    e.preventDefault();
+    const errors = {};
+    if (!recordFormData.diagnosis.trim()) errors.diagnosis = true;
+    if (!recordFormData.prescription.trim()) errors.prescription = true;
+
+    if (Object.keys(errors).length > 0) {
+      setRecordValidationErrors(errors);
+      showToast('Please fill in all mandatory fields highlighted in red.', 'warning');
+      return;
+    }
+
+    setRecordValidationErrors({});
+    setIsSubmittingRecord(true);
+
+    try {
+      await recordsApi.create({
+        record_date: new Date().toISOString().slice(0, 10),
+        patient_name: recordAppointment.patient,
+        doctor_name: recordAppointment.doctor || user?.name || 'TBD',
+        diagnosis: recordFormData.diagnosis,
+        prescription: recordFormData.prescription,
+        description: recordFormData.description,
+      });
+
+      showToast(`Medical record for ${recordAppointment.patient} successfully encrypted and saved.`);
+      setIsRecordModalOpen(false);
+      triggerGlobalRefresh();
+    } catch (error) {
+      showToast(error.message || 'Unable to save the EMR entry.', 'error');
+    } finally {
+      setIsSubmittingRecord(false);
+    }
   };
 
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
@@ -206,7 +254,15 @@ const DoctorCalendar = () => {
                       className="extra-small font-monospace text-muted fw-bold"
                       style={{ fontSize: '0.65rem', letterSpacing: '0.5px' }}
                     >
-                      ID: {app.appointmentId}
+                      Booking ID: {app.appointmentId}
+                    </div>
+                  )}
+                  {app.appointmentCode && (
+                    <div 
+                      className="extra-small font-monospace text-muted fw-bold text-success"
+                      style={{ fontSize: '0.65rem', letterSpacing: '0.5px' }}
+                    >
+                      Appointment ID: {app.appointmentCode}
                     </div>
                   )}
                 </div>
@@ -297,6 +353,17 @@ const DoctorCalendar = () => {
                   </div>
                 )}
               </div>
+              {(user?.role === 'Doctor' || user?.role === 'Nurse' || user?.role === 'Admin') && (
+                <div className="d-flex justify-content-end mt-4 pt-3 border-top">
+                  <button
+                    className="btn btn-sm btn-glass text-primary fw-bold px-3 py-2 d-flex align-items-center gap-2"
+                    onClick={() => handleOpenRecordModal(app)}
+                    style={{ borderRadius: '10px' }}
+                  >
+                    <i className="bi bi-file-earmark-plus"></i> Add Record
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -305,6 +372,116 @@ const DoctorCalendar = () => {
             Dismiss Details
           </button>
         </div>
+      </Modal>
+
+      {/* Add Record Modal */}
+      <Modal
+        isOpen={isRecordModalOpen}
+        onClose={() => setIsRecordModalOpen(false)}
+        title={`New EMR Entry Protocol: ${recordAppointment?.patient}`}
+      >
+        <form onSubmit={handleRecordSubmit}>
+          <div className="mb-4">
+            <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              Patient Name
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={recordAppointment?.patient || ''}
+              disabled
+              readOnly
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              Assigned Clinician
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={recordAppointment?.doctor || user?.name || ''}
+              disabled
+              readOnly
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="record-diagnosis" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
+              Clinical Diagnosis Telemetry
+            </label>
+            <textarea
+              id="record-diagnosis"
+              rows="3"
+              className={`form-control ${recordValidationErrors.diagnosis ? 'is-invalid' : ''}`}
+              placeholder="Enter clinical findings, symptoms, diagnosis details..."
+              value={recordFormData.diagnosis}
+              onChange={(e) => setRecordFormData({ ...recordFormData, diagnosis: e.target.value })}
+            />
+            {recordValidationErrors.diagnosis && (
+              <div className="invalid-feedback">Clinical diagnosis is required.</div>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="record-prescription" className="form-label text-accent fw-bold small text-uppercase mb-2 required-label" style={{ letterSpacing: '1px' }}>
+              Medical Prescription Protocol
+            </label>
+            <textarea
+              id="record-prescription"
+              rows="3"
+              className={`form-control ${recordValidationErrors.prescription ? 'is-invalid' : ''}`}
+              placeholder="Enter prescription instructions, medications, dosages..."
+              value={recordFormData.prescription}
+              onChange={(e) => setRecordFormData({ ...recordFormData, prescription: e.target.value })}
+            />
+            {recordValidationErrors.prescription && (
+              <div className="invalid-feedback">Medical prescription protocol is required.</div>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="record-description" className="form-label text-accent fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+              Description
+            </label>
+            <textarea
+              id="record-description"
+              rows="3"
+              className="form-control"
+              placeholder="Enter additional description, notes, or history details..."
+              value={recordFormData.description}
+              onChange={(e) => setRecordFormData({ ...recordFormData, description: e.target.value })}
+            />
+          </div>
+
+          <div className="pt-3 border-top d-flex gap-2">
+            <button
+              type="button"
+              className="btn btn-glass border w-50 py-3"
+              onClick={() => setIsRecordModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary w-50 py-3 d-flex align-items-center justify-content-center gap-2"
+              disabled={isSubmittingRecord}
+            >
+              {isSubmittingRecord ? (
+                <>
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-shield-check"></i>
+                  Encrypt & Save
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </Modal>
 
       <style dangerouslySetInnerHTML={{ __html: `

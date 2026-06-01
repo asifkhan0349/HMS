@@ -113,7 +113,6 @@ const Settings = () => {
     setValidationErrors({});
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
       showToast('New passwords do not match.', 'error');
       return;
     }

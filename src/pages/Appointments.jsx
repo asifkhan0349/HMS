@@ -41,6 +41,7 @@ const createEmptyAppointmentForm = () => ({
   timeSlot: '',
   department: '',
   doctor: '',
+  symptoms: '',
 });
 
 const Appointments = () => {
@@ -62,6 +63,7 @@ const Appointments = () => {
   const filteredAppointments = appointments.filter(app => 
     app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
     app.appointmentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.appointmentCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
     app.id.toString().includes(searchTerm)
   );
 
@@ -103,9 +105,20 @@ const Appointments = () => {
   const [scheduledLaterDate, setScheduledLaterDate] = useState('');
   const [scheduledLaterTimeSlot, setScheduledLaterTimeSlot] = useState('');
   const [scheduledLaterDoctor, setScheduledLaterDoctor] = useState('');
+  const [scheduledLaterReason, setScheduledLaterReason] = useState('');
 
   const [formData, setFormData] = useState(createEmptyAppointmentForm);
   const [validationErrors, setValidationErrors] = useState({});
+  const [isPatientSuggestionsVisible, setPatientSuggestionsVisible] = useState(false);
+
+  const filteredPatients = useMemo(() => {
+    const query = formData.patient.trim().toLowerCase();
+    if (!query) return patients.slice(0, 8);
+    return patients.filter((p) =>
+      p.name.toLowerCase().includes(query) ||
+      p.id.toString().toLowerCase().includes(query)
+    ).slice(0, 8);
+  }, [patients, formData.patient]);
 
   const [editFormData, setEditFormData] = useState({
     patient: '',
@@ -169,6 +182,7 @@ const Appointments = () => {
       department: appointmentData.department.trim() || null,
       doctor_name: appointmentData.doctor?.trim() || null,
       doctor_id: doctorId,
+      symptoms: appointmentData.symptoms?.trim() || null,
     };
   };
 
@@ -196,6 +210,7 @@ const Appointments = () => {
     if (!formData.phoneNumber.trim()) errors.phoneNumber = true;
     if (!formData.emergencyContact.trim()) errors.emergencyContact = true;
     if (!formData.address.trim()) errors.address = true;
+    if (!formData.symptoms?.trim()) errors.symptoms = true;
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -236,6 +251,7 @@ const Appointments = () => {
       timeSlot: app.timeSlot || '',
       department: app.department || '',
       doctor: app.doctor || '',
+      symptoms: app.symptoms || '',
     });
     setIsEditModalOpen(true);
   };
@@ -258,6 +274,7 @@ const Appointments = () => {
     if (!editFormData.phoneNumber.trim()) errors.phoneNumber = true;
     if (!editFormData.emergencyContact.trim()) errors.emergencyContact = true;
     if (!editFormData.address.trim()) errors.address = true;
+    if (!editFormData.symptoms?.trim()) errors.symptoms = true;
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -318,12 +335,14 @@ const Appointments = () => {
       appointment_date: scheduledLaterDate,
       time_slot: scheduledLaterTimeSlot || null,
       doctor_name: scheduledLaterDoctor || null,
-      doctor_id: doctorId
+      doctor_id: doctorId,
+      scheduled_later_reason: scheduledLaterReason || null
     });
     setScheduledLaterModalApp(null);
     setScheduledLaterDate('');
     setScheduledLaterTimeSlot('');
     setScheduledLaterDoctor('');
+    setScheduledLaterReason('');
   };
 
   const handleDelete = async () => {
@@ -389,7 +408,8 @@ const Appointments = () => {
             <table className="table table-hover mb-0 align-middle">
             <thead>
               <tr>
-                <th className="px-4 py-3">Appointment ID</th>
+                <th className="px-4 py-3">Booking ID</th>
+                <th className="px-3 py-3">Appt ID</th>
                 <th className="px-4 py-3">Patient Name</th>
                 <th className="py-3">Appt Date / Time</th>
                 <th className="py-3">Age / Gender</th>
@@ -403,7 +423,7 @@ const Appointments = () => {
             <tbody>
               {appointments.length === 0 ? (
                               <tr>
-                  <td colSpan={user?.role === 'Admin' ? 9 : 8} className="p-0">
+                  <td colSpan={user?.role === 'Admin' ? 10 : 9} className="p-0">
                     <EmptyState
                       icon="bi-calendar-event"
                       title="No Appointments"
@@ -415,7 +435,7 @@ const Appointments = () => {
                 </tr>
               ) : paginatedAppointments.length === 0 ? (
                               <tr>
-                  <td colSpan={user?.role === 'Admin' ? 9 : 8} className="p-0">
+                  <td colSpan={user?.role === 'Admin' ? 10 : 9} className="p-0">
                     <EmptyState 
                       icon="bi-search"
                       title="No matching appointments"
@@ -441,6 +461,24 @@ const Appointments = () => {
                       >
                         <i className="bi bi-ticket-perforated me-1" aria-hidden="true"></i>
                         {app.appointmentId}
+                      </span>
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-4">
+                    {app.appointmentCode ? (
+                      <span
+                        className="badge fw-semibold font-monospace"
+                        style={{
+                          background: 'rgba(16, 185, 129, 0.08)',
+                          color: '#10b981',
+                          border: '1px solid rgba(16, 185, 129, 0.25)',
+                          fontSize: '0.75rem',
+                          letterSpacing: '0.03em',
+                        }}
+                      >
+                        {app.appointmentCode}
                       </span>
                     ) : (
                       <span className="text-muted">—</span>
@@ -514,6 +552,7 @@ const Appointments = () => {
                               setScheduledLaterDate(app.appointmentDate || ''); 
                               setScheduledLaterTimeSlot(app.timeSlot || '');
                               setScheduledLaterDoctor(app.doctor || '');
+                              setScheduledLaterReason(app.scheduledLaterReason || '');
                               setScheduledLaterModalApp(app); 
                             }}
                             disabled={loading}
@@ -569,24 +608,40 @@ const Appointments = () => {
             <div className="mb-4">
               <h6 className="fw-bold mb-3">Patient Details</h6>
               <div className="row g-3">
-                <div className="col-md-6">
+                <div className="col-md-6 position-relative">
                   <label htmlFor="appointment-patient" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Full Name</label>
                   <input
                     id="appointment-patient"
                     type="text"
+                    autoComplete="off"
                     className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
                     value={formData.patient}
-                    onChange={(e) => setFormData((current) => syncPatientDetails(e.target.value, current))}
-                    list="patient-options"
+                    onChange={(e) => {
+                      setPatientSuggestionsVisible(true);
+                      setFormData((current) => syncPatientDetails(e.target.value, current));
+                    }}
+                    onFocus={() => setPatientSuggestionsVisible(true)}
+                    onBlur={() => setTimeout(() => setPatientSuggestionsVisible(false), 150)}
                     placeholder="Search or enter patient name"
                   />
-                  <datalist id="patient-options">
-                    {patients.map((p) => (
-                      <option key={p.id} value={p.name}>
-                        {p.id}
-                      </option>
-                    ))}
-                  </datalist>
+                  {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
+                    <div className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
+                      {filteredPatients.map((patient) => (
+                        <button
+                          key={patient.id}
+                          type="button"
+                          className="list-group-item list-group-item-action text-start"
+                          onMouseDown={() => {
+                            setFormData((current) => syncPatientDetails(patient.name, current));
+                            setPatientSuggestionsVisible(false);
+                          }}
+                        >
+                          <div className="fw-bold">{patient.name}</div>
+                          <small className="text-muted">{patient.id}</small>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="col-md-3">
                   <label htmlFor="appointment-dob" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Date of Birth</label>
@@ -635,16 +690,6 @@ const Appointments = () => {
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   />
-                </div>
-                <div className="col-12">
-                  <div className="p-3 rounded-3" style={{ background: 'rgba(99, 102, 241, 0.05)', border: '1px dashed rgba(99, 102, 241, 0.3)' }}>
-                    <div className="d-flex align-items-center">
-                      <i className="bi bi-magic text-primary me-2" aria-hidden="true"></i>
-                      <small className="text-muted fw-medium">
-                        A unique <span className="text-primary fw-bold">Appointment ID</span> will be automatically generated upon confirmation.
-                      </small>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -775,10 +820,29 @@ const Appointments = () => {
                 </div>
                 {/* Doctor assignment removed from Schedule form as per request */}
 
+                <div className="col-md-12">
+                  <label htmlFor="appointment-symptoms" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Symptoms</label>
+                  <textarea
+                    id="appointment-symptoms"
+                    className={`form-control ${validationErrors.symptoms ? 'is-invalid' : ''}`}
+                    rows="3"
+                    placeholder="Enter patient symptoms here..."
+                    value={formData.symptoms}
+                    onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="d-flex gap-2 mt-5">
+          <div className="p-3 rounded-3 mt-3" style={{ background: 'rgba(99, 102, 241, 0.05)', border: '1px dashed rgba(99, 102, 241, 0.3)' }}>
+            <div className="d-flex align-items-center">
+              <i className="bi bi-magic text-primary me-2" aria-hidden="true"></i>
+              <small className="text-muted fw-medium">
+                A unique <span className="text-primary fw-bold">Booking ID</span> will be automatically generated upon confirmation.
+              </small>
+            </div>
+          </div>
+          <div className="d-flex gap-2 mt-4">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsModalOpen(false)}>
               Cancel
             </button>
@@ -805,7 +869,6 @@ const Appointments = () => {
                       className={`form-control ${validationErrors.patient ? 'is-invalid' : ''}`}
                       value={editFormData.patient}
                       onChange={(e) => setEditFormData((current) => syncPatientDetails(e.target.value, current))}
-                      list="patient-options"
                       placeholder="Search or enter patient name"
                     />
                   </div>
@@ -857,9 +920,17 @@ const Appointments = () => {
                   </div>
                   {editingApp?.appointmentId && (
                     <div className="col-12">
-                      <div className="p-2 px-3 rounded-2 bg-light border d-flex justify-content-between align-items-center">
-                        <span className="small text-muted fw-bold text-uppercase">Appointment Reference</span>
-                        <span className="font-monospace fw-bold text-primary">{editingApp.appointmentId}</span>
+                      <div className="p-2 px-3 rounded-2 bg-light border">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <span className="small text-muted fw-bold text-uppercase">Booking ID</span>
+                          <span className="font-monospace fw-bold" style={{ color: '#6366f1' }}>{editingApp.appointmentId}</span>
+                        </div>
+                        {editingApp.appointmentCode && (
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="small text-muted fw-bold text-uppercase">Appointment ID</span>
+                            <span className="font-monospace fw-bold" style={{ color: '#10b981' }}>{editingApp.appointmentCode}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1007,6 +1078,18 @@ const Appointments = () => {
                             </option>
                           ))}
                       </select>
+                    </div>
+
+                    <div className="col-md-12">
+                      <label htmlFor="edit-appointment-symptoms" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Symptoms</label>
+                      <textarea
+                        id="edit-appointment-symptoms"
+                        className={`form-control ${validationErrors.symptoms ? 'is-invalid' : ''}`}
+                        rows="3"
+                        placeholder="Enter patient symptoms here..."
+                        value={editFormData.symptoms}
+                        onChange={(e) => setEditFormData({ ...editFormData, symptoms: e.target.value })}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1383,6 +1466,31 @@ const Appointments = () => {
                       .filter(s => s.role === 'Doctor' && (!scheduledLaterModalApp?.department || s.dept === scheduledLaterModalApp.department))
                       .map((s) => <option key={s.id} value={s.name}>{s.name} ({s.id})</option>)}
                   </select>
+                </div>
+
+                <div className="col-md-12">
+                  <label
+                    htmlFor="schedule-later-reason"
+                    style={{ display: 'block', fontWeight: 700, fontSize: '0.75rem',
+                      textTransform: 'uppercase', letterSpacing: '0.06em',
+                      color: '#6b7280', marginBottom: '0.5rem' }}
+                  >
+                    Reason for Schedule Later
+                  </label>
+                  <textarea
+                    id="schedule-later-reason"
+                    className="form-control"
+                    placeholder="Enter reason here..."
+                    rows="3"
+                    value={scheduledLaterReason}
+                    onChange={(e) => setScheduledLaterReason(e.target.value)}
+                    style={{
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '0.95rem',
+                      resize: 'none',
+                    }}
+                  />
                 </div>
               </div>
 

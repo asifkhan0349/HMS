@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from .. import crud, models, schemas
-from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_shared_staff_owner_id_filter
+from ..auth_context import get_current_user_id, get_current_user, require_roles, exclude_roles, get_shared_staff_owner_id_filter
 from ..core.database import get_db
 from .common import PositiveId
 
-# Roles permitted to access Emergency Blood Bank — must stay in sync with
-# BLOOD_BANK_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
-_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse"]
+# Roles permitted to read / list Blood Bank operations.
+# Note: only Admin, Doctor, and Nurse can create/modify.
+_ALLOWED_ROLES = ["Admin", "Doctor", "Nurse", "Patient", "Reception"]
 
 router = APIRouter(
     prefix="/blood_activities",
@@ -79,12 +79,18 @@ def sync_activity_to_inventory(db: Session, user_id: int, blood_group: str, unit
 @router.get("", response_model=list[schemas.BloodActivityRead])
 def list_blood_activities(
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
     owner_id: int | None = Depends(get_shared_staff_owner_id_filter),
 ):
+    if current_user.role == "Patient":
+        return db.query(models.BloodActivity).filter(
+            models.BloodActivity.type == "Usage",
+            models.BloodActivity.donor_name == current_user.full_name
+        ).order_by(models.BloodActivity.id.desc()).all()
     return crud.list_entities(db, models.BloodActivity, owner_id)
 
 
-@router.post("", response_model=schemas.BloodActivityRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.BloodActivityRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse"]))])
 def create_blood_activity(
     payload: schemas.BloodActivityCreate,
     db: Session = Depends(get_db),

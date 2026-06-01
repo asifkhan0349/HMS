@@ -19,7 +19,7 @@ const getWebSocketUrl = () => {
   return `${protocol}//${window.location.host}/api/ws`;
 };
 
-const formatDate = (value, options = { day: '2-digit', month: 'short', year: 'numeric' }) => {
+export const formatDate = (value, options = { day: '2-digit', month: 'short', year: 'numeric' }) => {
   if (!value) {
     return '-';
   }
@@ -29,8 +29,14 @@ const formatDate = (value, options = { day: '2-digit', month: 'short', year: 'nu
     return value;
   }
 
-  return new Intl.DateTimeFormat('en-GB', options).format(parsed);
+  const formatOptions = { ...options };
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+    formatOptions.timeZone = 'UTC';
+  }
+
+  return new Intl.DateTimeFormat('en-GB', formatOptions).format(parsed);
 };
+
 
 const formatTime = (value) => {
   if (!value) {
@@ -133,6 +139,7 @@ export const mapAppointmentFromApi = (appointment) => ({
   id: appointment.id,
   apiId: appointment.id,
   appointmentId: appointment.booking_id || '',
+  appointmentCode: appointment.appointment_code || '',
   patient: appointment.patient_name,
   patientDateOfBirth: appointment.patient_date_of_birth || '',
   patientAge: appointment.patient_age ?? '',
@@ -150,6 +157,8 @@ export const mapAppointmentFromApi = (appointment) => ({
   department: appointment.department || '',
   doctor: appointment.doctor_name || '',
   doctorId: appointment.doctor_id || '',
+  scheduledLaterReason: appointment.scheduled_later_reason || '',
+  symptoms: appointment.symptoms || '',
 });
 
 export const mapRecordFromApi = (record) => ({
@@ -162,6 +171,7 @@ export const mapRecordFromApi = (record) => ({
   doctor: record.doctor_name,
   diagnosis: record.diagnosis,
   prescription: record.prescription,
+  description: record.description || '',
 });
 
 export const mapInvoiceFromApi = (invoice) => ({
@@ -172,8 +182,19 @@ export const mapInvoiceFromApi = (invoice) => ({
   rawDate: invoice.invoice_date ? invoice.invoice_date.split('T')[0] : '',
   amount: formatCurrency(invoice.amount),
   amountValue: Number(invoice.amount),
+  amountPaid: Number(invoice.amount_paid || 0),
+  dueAmount: Number(invoice.due_amount || 0),
+  taxTotal: Number(invoice.tax_total || 0),
+  discountTotal: Number(invoice.discount_total || 0),
+  cgst: Number(invoice.cgst || 0),
+  sgst: Number(invoice.sgst || 0),
+  igst: Number(invoice.igst || 0),
   status: invoice.status,
+  paymentStatus: invoice.payment_status,
   method: invoice.payment_method,
+  billingType: invoice.billing_type,
+  insuranceProvider: invoice.insurance_provider || '',
+  expectedPaymentDate: invoice.expected_payment_date ? invoice.expected_payment_date.split('T')[0] : '',
 });
 
 export const mapMedicineFromApi = (medicine) => ({
@@ -215,7 +236,24 @@ export const mapBedFromApi = (bed) => ({
   ward: bed.ward_name,
   type: bed.type,
   status: bed.status,
+  patientName: bed.patient_name || '',
+  allotmentReason: bed.allotment_reason || '',
 });
+
+export const mapAmbulanceFromApi = (amb) => ({
+  id: amb.ambulance_code,
+  apiId: amb.id,
+  vehicleNumber: amb.vehicle_number,
+  type: amb.type,
+  status: amb.status,
+  driverName: amb.driver_name || '',
+  driverContact: amb.driver_contact || '',
+  paramedicName: amb.paramedic_name || '',
+  equipmentChecklist: amb.equipment_checklist || '',
+  currentTripPatient: amb.current_trip_patient || '',
+  currentTripDestination: amb.current_trip_destination || '',
+});
+
 
 export const mapBloodGroupFromApi = (bg) => ({
   id: bg.blood_group,
@@ -236,6 +274,7 @@ export const mapActivityFromApi = (act) => ({
   hospital: act.donor_name,
   date: formatDate(act.date),
   rawDate: act.date ? act.date.split('T')[0] : '',
+  sampleId: act.sample_id || '',
 });
 
 export const mapInventoryFromApi = (inv) => ({
@@ -414,6 +453,10 @@ export const AppProvider = ({ children }) => {
     setTimeout(() => setToast(null), 4000);
   }, []);
 
+  const triggerGlobalRefresh = React.useCallback(() => {
+    setGlobalRefreshTime(Date.now());
+  }, []);
+
   const value = {
     user,
     setUser,
@@ -429,6 +472,7 @@ export const AppProvider = ({ children }) => {
     showToast,
     isAppLoading,
     globalRefreshTime,
+    triggerGlobalRefresh,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

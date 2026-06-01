@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useApp, mapBloodGroupFromApi, mapActivityFromApi } from '../context/AppContext';
+import { useApp, mapBloodGroupFromApi, mapActivityFromApi, mapPatientFromApi } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { bloodInventoryApi, bloodActivitiesApi } from '../lib/api';
+import { bloodInventoryApi, bloodActivitiesApi, patientsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -30,6 +30,8 @@ const BloodBank = () => {
     removeData: deleteActivity
   } = useCrud(bloodActivitiesApi, mapActivityFromApi);
 
+  const { data: patients } = useCrud(patientsApi, mapPatientFromApi);
+
   const {
     paginatedData: paginatedActivities,
     currentPage,
@@ -55,14 +57,16 @@ const BloodBank = () => {
     type: 'Donation',
     blood_group: 'O+',
     units: '',
-    donor_name: ''
+    donor_name: '',
+    sample_id: ''
   });
 
   const [activityEditFormData, setActivityEditFormData] = useState({
     type: 'Donation',
     blood_group: 'O+',
     units: '',
-    donor_name: ''
+    donor_name: '',
+    sample_id: ''
   });
 
   const [inventoryEditFormData, setInventoryEditFormData] = useState({
@@ -76,6 +80,7 @@ const BloodBank = () => {
     const errors = {};
     if (!formData.units) errors.units = true;
     if (!formData.donor_name.trim()) errors.donor_name = true;
+    if (!formData.sample_id.trim()) errors.sample_id = true;
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -90,7 +95,7 @@ const BloodBank = () => {
       });
       showToast(`Blood ${formData.type.toLowerCase()} logged successfully.`);
       setIsModalOpen(false);
-      setFormData({ type: 'Donation', blood_group: 'O+', units: '', donor_name: '' });
+      setFormData({ type: 'Donation', blood_group: 'O+', units: '', donor_name: '', sample_id: '' });
       await loadBlood(); // refresh totals
     } catch (error) {
       showToast(error.message || 'Unable to log activity.', 'error');
@@ -103,7 +108,8 @@ const BloodBank = () => {
       type: act.type,
       blood_group: act.group,
       units: act.units,
-      donor_name: act.donor || act.hospital || ''
+      donor_name: act.donor || act.hospital || '',
+      sample_id: act.sampleId || ''
     });
     setIsActivityEditModalOpen(true);
   };
@@ -113,6 +119,7 @@ const BloodBank = () => {
     const errors = {};
     if (!activityEditFormData.units) errors.units = true;
     if (!activityEditFormData.donor_name.trim()) errors.donor_name = true;
+    if (!activityEditFormData.sample_id.trim()) errors.sample_id = true;
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -240,9 +247,9 @@ const BloodBank = () => {
                 if (activities.length > 0) {
                   autoTable(doc, {
                     startY: nextY + 5,
-                    head: [['Type', 'Blood Group', 'Units', 'Donor / Entity', 'Date']],
+                    head: [['Type', 'Sample ID', 'Blood Group', 'Units', 'Donor / Entity', 'Date']],
                     body: activities.map(a => [
-                      a.type, a.group, String(a.units),
+                      a.type, a.sampleId || '—', a.group, String(a.units),
                       a.donor || a.hospital || '—', a.date
                     ]),
                     theme: 'grid',
@@ -348,6 +355,7 @@ const BloodBank = () => {
             <thead>
               <tr>
                 <th>Type</th>
+                <th>Sample ID</th>
                 <th>Group</th>
                 <th>Units</th>
                 <th>Entity/Person</th>
@@ -358,7 +366,7 @@ const BloodBank = () => {
             <tbody>
               {activities.length === 0 ? (
                 <tr>
-                   <td colSpan="6" className="p-0">
+                   <td colSpan="7" className="p-0">
                       <EmptyState 
                         icon="bi-journal-text"
                         title="No Activity"
@@ -373,6 +381,7 @@ const BloodBank = () => {
                       {act.type}
                     </span>
                   </td>
+                  <td className="fw-bold text-info" style={{ letterSpacing: '0.05em' }}>{act.sampleId || '—'}</td>
                   <td className="fw-bold">{act.group}</td>
                   <td style={{ fontVariantNumeric: 'tabular-nums' }}>{act.units}</td>
                   <td className="text-muted">{act.donor || act.hospital}</td>
@@ -418,12 +427,31 @@ const BloodBank = () => {
               id="blood-activity-type"
               className="form-select" 
               value={formData.type}
-              onChange={e => setFormData({...formData, type: e.target.value})}
+              onChange={e => {
+                const newType = e.target.value;
+                setFormData({
+                  ...formData,
+                  type: newType,
+                  donor_name: newType === 'Usage' ? '' : formData.donor_name
+                });
+              }}
             >
               <option>Donation</option>
               <option>Usage</option>
               <option>Transfer</option>
             </select>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="blood-sample-id" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Sample ID</label>
+            <input 
+              id="blood-sample-id"
+              type="text" 
+              className={`form-control ${validationErrors.sample_id ? 'is-invalid' : ''}`} 
+              placeholder="e.g. SMP-99182" 
+              value={formData.sample_id}
+              onChange={e => setFormData({...formData, sample_id: e.target.value})}
+              required
+            />
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
@@ -454,18 +482,36 @@ const BloodBank = () => {
               />
             </div>
           </div>
-          <div className="mb-4">
-            <label htmlFor="blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Entity or Donor Name</label>
-            <input 
-              id="blood-donor-name"
-              type="text" 
-              className={`form-control ${validationErrors.donor_name ? 'is-invalid' : ''}`} 
-              placeholder="e.g. John Doe / City Hospital" 
-              value={formData.donor_name}
-              onChange={e => setFormData({...formData, donor_name: e.target.value})}
-              required
-            />
-          </div>
+          {formData.type === 'Usage' ? (
+            <div className="mb-4">
+              <label htmlFor="blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Patient Name</label>
+              <select 
+                id="blood-donor-name"
+                className={`form-select ${validationErrors.donor_name ? 'is-invalid' : ''}`}
+                value={formData.donor_name}
+                onChange={e => setFormData({...formData, donor_name: e.target.value})}
+                required
+              >
+                <option value="">Select Inpatient...</option>
+                {patients.filter(p => p.status === 'Inpatient').map(p => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <label htmlFor="blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Entity or Donor Name</label>
+              <input 
+                id="blood-donor-name"
+                type="text" 
+                className={`form-control ${validationErrors.donor_name ? 'is-invalid' : ''}`} 
+                placeholder="e.g. John Doe / City Hospital" 
+                value={formData.donor_name}
+                onChange={e => setFormData({...formData, donor_name: e.target.value})}
+                required
+              />
+            </div>
+          )}
           <div className="d-flex gap-2 mt-5">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsModalOpen(false)}>Cancel</button>
             <button type="submit" className="btn btn-primary w-100 py-2">Log Activity</button>
@@ -482,12 +528,30 @@ const BloodBank = () => {
               id="edit-activity-type"
               className="form-select" 
               value={activityEditFormData.type}
-              onChange={e => setActivityEditFormData({...activityEditFormData, type: e.target.value})}
+              onChange={e => {
+                const newType = e.target.value;
+                setActivityEditFormData({
+                  ...activityEditFormData,
+                  type: newType,
+                  donor_name: newType === 'Usage' ? '' : activityEditFormData.donor_name
+                });
+              }}
             >
               <option>Donation</option>
               <option>Usage</option>
               <option>Transfer</option>
             </select>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="edit-blood-sample-id" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Sample ID</label>
+            <input 
+              id="edit-blood-sample-id"
+              type="text" 
+              className={`form-control ${validationErrors.sample_id ? 'is-invalid' : ''}`} 
+              value={activityEditFormData.sample_id}
+              onChange={e => setActivityEditFormData({...activityEditFormData, sample_id: e.target.value})}
+              required
+            />
           </div>
           <div className="row g-3 mb-4">
             <div className="col-md-6">
@@ -517,17 +581,35 @@ const BloodBank = () => {
               />
             </div>
           </div>
-          <div className="mb-4">
-            <label htmlFor="edit-blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Entity or Donor Name</label>
-            <input 
-              id="edit-blood-donor-name"
-              type="text" 
-              className={`form-control ${validationErrors.donor_name ? 'is-invalid' : ''}`} 
-              value={activityEditFormData.donor_name}
-              onChange={e => setActivityEditFormData({...activityEditFormData, donor_name: e.target.value})}
-              required
-            />
-          </div>
+          {activityEditFormData.type === 'Usage' ? (
+            <div className="mb-4">
+              <label htmlFor="edit-blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Patient Name</label>
+              <select 
+                id="edit-blood-donor-name"
+                className={`form-select ${validationErrors.donor_name ? 'is-invalid' : ''}`}
+                value={activityEditFormData.donor_name}
+                onChange={e => setActivityEditFormData({...activityEditFormData, donor_name: e.target.value})}
+                required
+              >
+                <option value="">Select Inpatient...</option>
+                {patients.filter(p => p.status === 'Inpatient').map(p => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <label htmlFor="edit-blood-donor-name" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Entity or Donor Name</label>
+              <input 
+                id="edit-blood-donor-name"
+                type="text" 
+                className={`form-control ${validationErrors.donor_name ? 'is-invalid' : ''}`} 
+                value={activityEditFormData.donor_name}
+                onChange={e => setActivityEditFormData({...activityEditFormData, donor_name: e.target.value})}
+                required
+              />
+            </div>
+          )}
           <div className="d-flex gap-2 mt-5">
             <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsActivityEditModalOpen(false)}>Cancel</button>
             <button type="submit" className="btn btn-primary w-100 py-2">Save Changes</button>

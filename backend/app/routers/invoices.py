@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import StreamingResponse
 import io
 from sqlalchemy.orm import Session
@@ -27,7 +27,72 @@ def list_invoices(db: Session = Depends(get_db), owner_id: int | None = Depends(
 
 @router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
 def create_invoice(payload: schemas.InvoiceCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
-    return crud.create_entity(db, models.Invoice, payload, current_user_id)
+    # 1. First validate stock for all pharmacy items in the invoice payload
+    if payload.line_items:
+        for item in payload.line_items:
+            if item.category == "Medicines/Pharmacy":
+                # Find medicine by medicine_code or name
+                medicine = None
+                if item.medicine_code:
+                    medicine = db.query(models.Medicine).filter(models.Medicine.medicine_code == item.medicine_code).first()
+                if not medicine:
+                    medicine = db.query(models.Medicine).filter(models.Medicine.name == item.name).first()
+                
+                if not medicine:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Medicine '{item.name}' not found in pharmacy inventory."
+                    )
+                
+                # Check stock sufficiency
+                if medicine.stock < item.quantity:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Insufficient stock for '{item.name}'. Available: {medicine.stock}, Requested: {item.quantity}"
+                    )
+
+    # 2. Now perform the stock updates and write transaction logs
+    if payload.line_items:
+        for item in payload.line_items:
+            if item.category == "Medicines/Pharmacy":
+                medicine = None
+                if item.medicine_code:
+                    medicine = db.query(models.Medicine).filter(models.Medicine.medicine_code == item.medicine_code).first()
+                if not medicine:
+                    medicine = db.query(models.Medicine).filter(models.Medicine.name == item.name).first()
+                
+                if medicine:
+                    # Reduce stock
+                    medicine.stock -= item.quantity
+                    db.add(medicine)
+                    
+                    # Store transaction log
+                    tx_log = models.MedicineTransaction(
+                        owner_user_id=current_user_id,
+                        medicine_id=medicine.id,
+                        medicine_name=medicine.name,
+                        transaction_type="Sale",
+                        quantity=item.quantity,
+                        invoice_code=payload.invoice_code
+                    )
+                    db.add(tx_log)
+
+    entity = crud.create_entity(db, models.Invoice, payload, current_user_id)
+    if entity.amount_paid > 0:
+        receipt = models.CashReceipt(
+            owner_user_id=current_user_id,
+            invoice_code=entity.invoice_code,
+            patient_name=entity.patient_name,
+            amount_paid=entity.amount_paid,
+            payment_date=entity.created_at
+        )
+        db.add(receipt)
+        db.commit()
+        # Broadcast CashReceipt creation
+        from ..core.websockets import manager
+        import json
+        manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
+    return entity
 
 
 @router.get("/{invoice_id}", response_model=schemas.InvoiceRead)
@@ -38,7 +103,24 @@ def get_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), owner_id:
 @router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
-    return crud.update_entity(db, invoice, payload)
+    old_paid = invoice.amount_paid
+    updated_invoice = crud.update_entity(db, invoice, payload)
+    new_paid = updated_invoice.amount_paid
+    if new_paid > old_paid:
+        diff = new_paid - old_paid
+        receipt = models.CashReceipt(
+            owner_user_id=invoice.owner_user_id,
+            invoice_code=updated_invoice.invoice_code,
+            patient_name=updated_invoice.patient_name,
+            amount_paid=diff,
+        )
+        db.add(receipt)
+        db.commit()
+        # Broadcast CashReceipt creation
+        from ..core.websockets import manager
+        import json
+        manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
+    return updated_invoice
 
 
 @router.post(
@@ -53,6 +135,7 @@ def send_paid_invoice_email(
     owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
+    old_paid = invoice.amount_paid
     invoice_update_data = payload.model_dump(
         exclude={"recipient_email", "line_items"},
         exclude_none=True,
@@ -62,12 +145,27 @@ def send_paid_invoice_email(
         invoice,
         schemas.InvoiceUpdate(**invoice_update_data),
     )
+    new_paid = updated_invoice.amount_paid
+    if new_paid > old_paid:
+        diff = new_paid - old_paid
+        receipt = models.CashReceipt(
+            owner_user_id=invoice.owner_user_id,
+            invoice_code=updated_invoice.invoice_code,
+            patient_name=updated_invoice.patient_name,
+            amount_paid=diff,
+        )
+        db.add(receipt)
+        db.commit()
+        # Broadcast CashReceipt creation
+        from ..core.websockets import manager
+        import json
+        manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
 
-    if updated_invoice.status != "Paid":
+    if updated_invoice.status not in ("Paid", "Partially Paid"):
         return schemas.InvoicePaidEmailResponse(
             invoice=updated_invoice,
             email_sent=False,
-            message="Invoice was updated, but no email was sent because the status is not Paid.",
+            message="Invoice was updated, but no email was sent because the status is not Paid or Partially Paid.",
         )
 
     try:
@@ -115,3 +213,34 @@ def download_invoice_pdf_endpoint(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Public Router ─────────────────────────────────────────────────────────────
+public_router = APIRouter(
+    prefix="/invoices",
+    tags=["invoices – public"],
+)
+
+@public_router.get("/public", response_model=list[schemas.InvoiceRead])
+def list_public_invoices(db: Session = Depends(get_db)):
+    return crud.list_entities(db, models.Invoice)
+
+@public_router.get("/public/{invoice_id}", response_model=schemas.InvoiceRead)
+def get_public_invoice(invoice_id: PositiveId, db: Session = Depends(get_db)):
+    return crud.get_entity_or_404(db, models.Invoice, invoice_id)
+
+@public_router.get("/public/{invoice_id}/download-pdf")
+def download_public_invoice_pdf(invoice_id: PositiveId, db: Session = Depends(get_db)):
+    invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id)
+    try:
+        pdf_bytes = download_invoice_pdf(invoice)
+    except InvoiceDeliveryError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+    filename = f"{invoice.invoice_code}.pdf"
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+

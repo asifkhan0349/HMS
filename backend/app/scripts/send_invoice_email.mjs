@@ -132,19 +132,48 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
       }
       tr:last-child td { border-bottom: none; }
       /* ── Total ── */
-      .total-row {
+      .amount-summary {
         display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 16px;
-        padding: 16px 14px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 10px;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
         margin-top: 4px;
       }
-      .total-label { font-size: 13px; font-weight: 600; color: #475569; }
-      .total-amount { font-size: 22px; font-weight: 700; color: #166534; }
+      .summary-item {
+        flex: 1;
+        min-width: 150px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+      }
+      .summary-item:nth-child(2) { background: #f1f5f9; }
+      .summary-item:nth-child(3) { background: #fff7ed; }
+      .summary-label { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; }
+      .summary-value { display: block; margin-top: 8px; font-size: 18px; font-weight: 700; color: #0f172a; }
+      .summary-value.grand { color: #166534; }
+      .summary-value.pending { color: #c2410c; }
+      .gst-breakdown {
+        display: flex;
+        justify-content: flex-end;
+        gap: 20px;
+        margin-bottom: 12px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+      }
+      .gst-item {
+        font-size: 13px;
+        color: #475569;
+      }
+      .gst-val {
+        font-weight: 600;
+        color: #0f172a;
+      }
       /* ── Footer ── */
       .footer {
         margin-top: 32px;
@@ -194,6 +223,11 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
           <div class="info-label">Payment Status</div>
           <div class="info-value">${escapeHtml(invoice.status)}</div>
         </div>
+        ${invoice.expected_payment_date ? `
+        <div class="info-card">
+          <div class="info-label">Expected Payment Date</div>
+          <div class="info-value">${escapeHtml(invoice.expected_payment_date)}</div>
+        </div>` : ''}
         <div class="info-card">
           <div class="info-label">Total Amount</div>
           <div class="info-value" style="color:#0f766e">${escapeHtml(currency(invoice.amount))}</div>
@@ -229,10 +263,27 @@ const renderInvoiceHtml = (invoice, lineItems = []) => `<!DOCTYPE html>
         </tbody>
       </table>
 
-      <!-- Grand Total -->
-      <div class="total-row">
-        <span class="total-label">Grand Total</span>
-        <span class="total-amount">${escapeHtml(currency(invoice.amount))}</span>
+      ${(Number(invoice.cgst) > 0 || Number(invoice.sgst) > 0 || Number(invoice.igst) > 0) ? `
+      <div class="gst-breakdown">
+        ${Number(invoice.cgst) > 0 ? `<div class="gst-item">CGST: <span class="gst-val">${escapeHtml(currency(invoice.cgst))}</span></div>` : ''}
+        ${Number(invoice.sgst) > 0 ? `<div class="gst-item">SGST: <span class="gst-val">${escapeHtml(currency(invoice.sgst))}</span></div>` : ''}
+        ${Number(invoice.igst) > 0 ? `<div class="gst-item">IGST: <span class="gst-val">${escapeHtml(currency(invoice.igst))}</span></div>` : ''}
+      </div>
+      ` : ''}
+
+      <div class="amount-summary">
+        <div class="summary-item">
+          <div class="summary-label">Pending Amount</div>
+          <div class="summary-value pending">${escapeHtml(currency(invoice.amount - invoice.amount_paid))}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Amount Paid</div>
+          <div class="summary-value">${escapeHtml(currency(invoice.amount_paid))}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Grand Total</div>
+          <div class="summary-value grand">${escapeHtml(currency(invoice.amount))}</div>
+        </div>
       </div>
 
       <div class="footer">
@@ -286,8 +337,14 @@ const main = async () => {
     await transporter.sendMail({
       from: payload.mail_from,
       to: payload.recipient_email,
-      subject: `Paid invoice ${invoice.invoice_code}`,
-      text: `Hello,\n\nPlease find attached the paid invoice ${invoice.invoice_code} for ${invoice.patient_name}.\n\nAmount: ${currency(invoice.amount)}\nPayment method: ${invoice.payment_method}\nDate: ${invoice.invoice_date}\n\nRegards,\nHospital Management System`,
+      subject: `Invoice ${invoice.invoice_code}`,
+      text: `Hello,\n\nPlease find attached the invoice ${invoice.invoice_code} for ${invoice.patient_name}.\n\nTotal Amount: ${currency(invoice.amount)}\n` +
+        (Number(invoice.cgst) > 0 ? `CGST: ${currency(invoice.cgst)}\n` : '') +
+        (Number(invoice.sgst) > 0 ? `SGST: ${currency(invoice.sgst)}\n` : '') +
+        (Number(invoice.igst) > 0 ? `IGST: ${currency(invoice.igst)}\n` : '') +
+        `Amount Paid: ${currency(invoice.amount_paid)}\nPending Amount: ${currency(invoice.amount - invoice.amount_paid)}\n` +
+        (invoice.expected_payment_date ? `Expected Payment Date: ${invoice.expected_payment_date}\n` : '') +
+        `Payment method: ${invoice.payment_method}\nDate: ${invoice.invoice_date}\n\nRegards,\nHospital Management System`,
       attachments: [
         {
           filename: `${invoice.invoice_code}.pdf`,

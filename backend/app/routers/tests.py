@@ -45,3 +45,19 @@ def update_test(test_id: PositiveId, payload: schemas.LabTestUpdate, db: Session
 def delete_test(test_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, owner_id)
     return crud.delete_entity(db, test)
+
+
+# ── Public Router ─────────────────────────────────────────────────────────────
+public_router = APIRouter(
+    prefix="/tests",
+    tags=["tests – public"],
+)
+
+@public_router.get("/public", response_model=list[schemas.LabTestRead])
+def list_public_tests(db: Session = Depends(get_db)):
+    return crud.list_entities(db, models.LabTest)
+
+@public_router.get("/public/{test_id}", response_model=schemas.LabTestRead)
+def get_public_test(test_id: PositiveId, db: Session = Depends(get_db)):
+    return crud.get_entity_or_404(db, models.LabTest, test_id)
+

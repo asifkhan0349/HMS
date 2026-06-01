@@ -22,8 +22,11 @@ else:
         "pool_pre_ping": True,
     })
 
+import json
+
 engine = create_engine(
     DATABASE_URL,
+    json_serializer=lambda obj: json.dumps(obj, default=str),
     **engine_kwargs
 )
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)

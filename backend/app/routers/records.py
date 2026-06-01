@@ -45,3 +45,19 @@ def update_record(record_id: PositiveId, payload: schemas.MedicalRecordUpdate, d
 def delete_record(record_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
     record = crud.get_entity_or_404(db, models.MedicalRecord, record_id, owner_id)
     return crud.delete_entity(db, record)
+
+
+# ── Public Router ─────────────────────────────────────────────────────────────
+public_router = APIRouter(
+    prefix="/records",
+    tags=["records – public"],
+)
+
+@public_router.get("/public", response_model=list[schemas.MedicalRecordRead])
+def list_public_records(db: Session = Depends(get_db)):
+    return crud.list_entities(db, models.MedicalRecord)
+
+@public_router.get("/public/{record_id}", response_model=schemas.MedicalRecordRead)
+def get_public_record(record_id: PositiveId, db: Session = Depends(get_db)):
+    return crud.get_entity_or_404(db, models.MedicalRecord, record_id)
+

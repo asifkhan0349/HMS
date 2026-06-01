@@ -36,6 +36,17 @@ def create_bed(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
+    from fastapi import HTTPException
+    if payload.status == "Occupied" and payload.patient_name:
+        existing_bed = db.query(models.Bed).filter(
+            models.Bed.patient_name == payload.patient_name,
+            models.Bed.status == "Occupied"
+        ).first()
+        if existing_bed:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Patient '{payload.patient_name}' is already assigned to Bed '{existing_bed.bed_number}'."
+            )
     return crud.create_entity(db, models.Bed, payload, user_id)
 
 
@@ -46,7 +57,19 @@ def update_bed(
     db: Session = Depends(get_db),
     owner_id: int | None = Depends(get_facility_owner_id_filter),
 ):
+    from fastapi import HTTPException
     bed = crud.get_entity_or_404(db, models.Bed, bed_id, owner_id)
+    if payload.status == "Occupied" and payload.patient_name:
+        existing_bed = db.query(models.Bed).filter(
+            models.Bed.patient_name == payload.patient_name,
+            models.Bed.status == "Occupied",
+            models.Bed.id != bed_id
+        ).first()
+        if existing_bed:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Patient '{payload.patient_name}' is already assigned to Bed '{existing_bed.bed_number}'."
+            )
     return crud.update_entity(db, bed, payload)
 
 
