@@ -27,5 +27,5 @@ from .blood_bank import (
 from .inventory import InventoryItemBase, InventoryItemCreate, InventoryItemUpdate, InventoryItemRead
 from .ambulance import AmbulanceBase, AmbulanceCreate, AmbulanceUpdate, AmbulanceRead, AmbulanceTripRead
 from .cash_receipt import CashReceiptBase, CashReceiptRead
-
-
+from .ai_insight import AIInsightRead, InsightSeverity, InsightStatus
+from .product import ProductModuleRead

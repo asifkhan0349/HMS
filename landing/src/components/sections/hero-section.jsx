@@ -43,7 +43,7 @@ export function HeroSection({ onAuthRedirect }) {
             <motion.div className="space-y-6" variants={itemVariants}>
               <div className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold bg-black text-white">
                 <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse" />
-                Trusted by 500+ Hospitals
+                Built for multi-site healthcare teams
               </div>
               
               <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9] text-black">
@@ -80,7 +80,7 @@ export function HeroSection({ onAuthRedirect }) {
             </motion.div>
 
             <motion.div variants={itemVariants} className="pt-4 flex flex-wrap gap-8">
-              {["ABDM Certified", "ISO 27001 Ready", "24/7 Support"].map((text) => (
+              {["ABDM-ready workflows", "Security-first architecture", "Operational support model"].map((text) => (
                 <div key={text} className="flex items-center text-sm font-bold text-black/60">
                   <CheckCircle2 className="h-4 w-4 text-primary mr-2" />
                   {text}
@@ -136,8 +136,8 @@ export function HeroSection({ onAuthRedirect }) {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 1, duration: 0.5 }}
               >
-                <div className="text-3xl font-black text-black">99.9%</div>
-                <div className="text-xs font-bold text-muted-foreground uppercase">System Uptime</div>
+                <div className="text-3xl font-black text-black">24/7</div>
+                <div className="text-xs font-bold text-muted-foreground uppercase">Operational Visibility</div>
               </motion.div>
 
               {/* Decorative elements */}
@@ -149,4 +149,3 @@ export function HeroSection({ onAuthRedirect }) {
     </section>
   )
 }
-

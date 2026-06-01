@@ -9,8 +9,8 @@ const securityFeatures = [
   },
   {
     icon: Binary,
-    title: "SOC2 Compliance",
-    desc: "Adherence to highest standards for security, availability, and processing integrity."
+    title: "Audit-ready Controls",
+    desc: "Security controls are designed to support formal compliance review as the product matures."
   },
   {
     icon: Server,
@@ -20,11 +20,11 @@ const securityFeatures = [
 ]
 
 const certifications = [
-  "HIPAA Compliant Infrastructure",
-  "GDPR Readiness",
-  "ISO 27001 Certified Data Centers",
+  "HIPAA-aligned architecture",
+  "DPDPA readiness planning",
+  "ISO 27001-ready operating controls",
   "ABDM (M1, M2, M3) Integrated",
-  "Regular Third-party Pen Tests",
+  "Third-party testing roadmap",
   "Role-based Access Controls (RBAC)"
 ]
 
@@ -42,7 +42,7 @@ export function TrustComplianceSection() {
               <span className="text-primary italic">Cybersecurity.</span>
             </h2>
             <p className="text-xl text-white/50 font-medium leading-relaxed mb-10">
-              Healthcare data is the most sensitive information in the world. We don't just secure it—we bulletproof it. HMS is built on a Zero-Trust architecture ensuring HIPAA and global compliance from day one.
+              Healthcare data requires careful controls, clear access boundaries, and evidence-backed operations. GoMeds is designed around secure workflows, role-based access, and compliance-ready implementation practices.
             </p>
             <div className="space-y-6">
               {securityFeatures.map((feature, i) => (

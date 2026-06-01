@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { dashboardApi } from '../lib/api';
+import { aiInsightsApi, dashboardApi } from '../lib/api';
 import EmptyState from '../components/UI/EmptyState';
 import { Skeleton } from 'boneyard-js/react';
 import { SkeletonStatCard } from '../components/UI/SkeletonShimmer';
@@ -86,9 +86,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { showToast } = useApp();
   const [statsData, setStatsData] = React.useState(null);
+  const [aiInsights, setAiInsights] = React.useState([]);
 
   React.useEffect(() => {
     dashboardApi.getStats().then(setStatsData).catch(() => showToast('Failed to load dashboard metrics.'));
+    aiInsightsApi.list().then(setAiInsights).catch(() => setAiInsights([]));
   }, [showToast]);
 
   const queueData = statsData?.queue || [];
@@ -234,15 +236,35 @@ const Dashboard = () => {
                 </button>
               </div>
             </div>
-            <div
-              className="rounded-3 d-flex align-items-center justify-content-center overflow-hidden"
-              style={{ height: '320px', background: 'var(--accents-1)', border: '1px dashed var(--accents-2)' }}
-            >
-              <EmptyState 
-                icon="bi-cpu"
-                title="Telemetry Unavailable"
-                description="Live clinical telemetry data will appear here once analytics sensors are synchronized."
-              />
+            <div className="d-flex flex-column gap-3">
+              {aiInsights.length === 0 ? (
+                <div
+                  className="rounded-3 d-flex align-items-center justify-content-center overflow-hidden"
+                  style={{ minHeight: '240px', background: 'var(--accents-1)', border: '1px dashed var(--accents-2)' }}
+                >
+                  <EmptyState
+                    icon="bi-stars"
+                    title="No Active AI Alerts"
+                    description="Bed, inventory, lab, pharmacy, and billing signals are currently within configured thresholds."
+                  />
+                </div>
+              ) : aiInsights.slice(0, 4).map((insight) => (
+                <div key={insight.id} className="border rounded-3 p-3">
+                  <div className="d-flex justify-content-between gap-3 mb-2">
+                    <h6 className="fw-bold mb-0">{insight.title}</h6>
+                    <span className={`badge ${insight.severity === 'critical' ? 'text-bg-danger' : insight.severity === 'warning' ? 'text-bg-warning' : 'text-bg-info'}`}>
+                      {insight.severity}
+                    </span>
+                  </div>
+                  <p className="text-muted small mb-1">{insight.message}</p>
+                  <p className="small mb-0"><strong>Action:</strong> {insight.recommendation}</p>
+                </div>
+              ))}
+              {aiInsights.length > 4 && (
+                <button className="btn btn-glass align-self-start" onClick={() => navigate('/ai-insights')}>
+                  View All AI Insights
+                </button>
+              )}
             </div>
           </div>
         </div>

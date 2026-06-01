@@ -22,4 +22,8 @@ class Patient(Base):
     emergency_contact_2: Mapped[str | None] = mapped_column(String(20), nullable=True)
     last_visit: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(String(30), index=True)
+    booking_id: Mapped[str | None] = mapped_column(String(20), unique=True, index=True, nullable=True)
+    address: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    doctor_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    appointment_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

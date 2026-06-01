@@ -18,7 +18,7 @@ const legalPolicies = [
     id: "terms",
     summary: "By using HMS, you agree to follow our professional standards of care and data management. Our terms are designed to protect both the hospital and the patient.",
     bullets: [
-      "99.9% High Availability SLA",
+      "High-availability production architecture plan",
       "Professional medical ethics compliance required",
       "Clear data export and portability rights",
       "Fair usage policies for enterprise cloud"

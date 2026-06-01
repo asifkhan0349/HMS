@@ -18,6 +18,8 @@ const Lab = lazy(() => import('./pages/Lab'));
 const Beds = lazy(() => import('./pages/Beds'));
 const Staff = lazy(() => import('./pages/Staff'));
 const Reports = lazy(() => import('./pages/Reports'));
+const ProductModules = lazy(() => import('./pages/ProductModules'));
+const AIInsights = lazy(() => import('./pages/AIInsights'));
 const Inventory = lazy(() => import('./pages/Inventory'));
 const BloodBank = lazy(() => import('./pages/BloodBank'));
 const Settings = lazy(() => import('./pages/Settings'));
@@ -46,13 +48,13 @@ const SCHEDULING_ROLES = ['Admin', 'Doctor', 'Patient', 'Reception'];
 const BILLING_ROLES = ['Admin', 'Reception'];
 
 // Roles that can access Pharmacy
-const PHARMACY_ROLES = ['Admin'];
+const PHARMACY_ROLES = ['Admin', 'Pharmacist'];
 
 // Roles that can access Medical Records (EMR)
 const EMR_ROLES = ['Admin', 'Doctor', 'Nurse'];
 
 // Roles that can access Diagnostics & Lab
-const LAB_ROLES = ['Admin', 'Doctor'];
+const LAB_ROLES = ['Admin', 'Doctor', 'Lab Technician'];
 
 // Roles that can access Facility Management
 const BEDS_ROLES = ['Admin', 'Nurse', 'Reception'];
@@ -61,13 +63,15 @@ const BEDS_ROLES = ['Admin', 'Nurse', 'Reception'];
 const AMBULANCE_ROLES = ['Admin', 'Reception', 'Nurse'];
 
 // Roles that can access Hospital Logistics
-const INVENTORY_ROLES = ['Admin'];
+const INVENTORY_ROLES = ['Admin', 'Pharmacist'];
 
 // Roles that can access Emergency Blood Bank
 const BLOOD_BANK_ROLES = ['Admin', 'Doctor', 'Nurse'];
 
 // Roles that can access Doctor Calendar
 const CALENDAR_ROLES = ['Admin', 'Doctor'];
+
+const PRODUCT_ROLES = ['Admin', 'Doctor', 'Nurse', 'Patient', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'];
 
 /**
  * Send each role to its appropriate home page after login / root visit.
@@ -112,6 +116,9 @@ function App() {
               <Route path="/beds" element={<ProtectedRoute allowedRoles={BEDS_ROLES}><Beds /></ProtectedRoute>} />
               <Route path="/staff" element={<ProtectedRoute adminOnly><Staff /></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute adminOnly><Reports /></ProtectedRoute>} />
+              <Route path="/products" element={<ProtectedRoute allowedRoles={PRODUCT_ROLES}><ProductModules /></ProtectedRoute>} />
+              <Route path="/products/:productId" element={<ProtectedRoute allowedRoles={PRODUCT_ROLES}><ProductModules /></ProtectedRoute>} />
+              <Route path="/ai-insights" element={<ProtectedRoute allowedRoles={PRODUCT_ROLES}><AIInsights /></ProtectedRoute>} />
               <Route path="/inventory" element={<ProtectedRoute allowedRoles={INVENTORY_ROLES}><Inventory /></ProtectedRoute>} />
               <Route path="/blood-bank" element={<ProtectedRoute allowedRoles={BLOOD_BANK_ROLES}><BloodBank /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

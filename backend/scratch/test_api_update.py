@@ -5,10 +5,10 @@ BASE_URL = "http://127.0.0.1:8000/api"
 
 def get_auth_token():
     # Login as admin using correct hrmsadmin123 credentials and json payload
-    payload = {"username": "admin", "password": "hrmsadmin123"}
+    payload = {"username": "admin_hms", "password": "ham33dSh@ika7m1n4m5"}
     r = requests.post(f"{BASE_URL}/auth/login", json=payload)
     r.raise_for_status()
-    token = r.json()["access_token"]
+    token = r.json()["token"]
     return {"Authorization": f"Bearer {token}"}
 
 def run_test():

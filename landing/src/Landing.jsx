@@ -1,20 +1,21 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { MouseGlow } from './components/ui/effects/mouse-glow';
 import { SiteHeader } from './components/sections/site-header';
 import { HeroSection } from './components/sections/hero-section';
 import { FeaturesSection } from './components/sections/features-section';
 import { SolutionsSection } from './components/sections/solutions-section';
-import { TestimonialsSection } from './components/sections/testimonials-section';
-import { FaqSection } from './components/sections/faq-section';
-import { ContactSection } from './components/sections/contact-section';
-import { PricingSection } from './components/sections/pricing-section';
-import { AppPreviewSection } from './components/sections/app-preview-section';
-import { RoiSection } from './components/sections/roi-section';
-import { AboutCareersSection } from './components/sections/about-careers-section';
-import { BlogSection } from './components/sections/blog-section';
-import { TrustComplianceSection } from './components/sections/trust-compliance-section';
-import { LegalSection } from './components/sections/legal-section';
 import { SiteFooter } from './components/sections/site-footer';
+
+const TestimonialsSection = lazy(() => import('./components/sections/testimonials-section').then((m) => ({ default: m.TestimonialsSection })));
+const FaqSection = lazy(() => import('./components/sections/faq-section').then((m) => ({ default: m.FaqSection })));
+const ContactSection = lazy(() => import('./components/sections/contact-section').then((m) => ({ default: m.ContactSection })));
+const PricingSection = lazy(() => import('./components/sections/pricing-section').then((m) => ({ default: m.PricingSection })));
+const AppPreviewSection = lazy(() => import('./components/sections/app-preview-section').then((m) => ({ default: m.AppPreviewSection })));
+const RoiSection = lazy(() => import('./components/sections/roi-section').then((m) => ({ default: m.RoiSection })));
+const AboutCareersSection = lazy(() => import('./components/sections/about-careers-section').then((m) => ({ default: m.AboutCareersSection })));
+const BlogSection = lazy(() => import('./components/sections/blog-section').then((m) => ({ default: m.BlogSection })));
+const TrustComplianceSection = lazy(() => import('./components/sections/trust-compliance-section').then((m) => ({ default: m.TrustComplianceSection })));
+const LegalSection = lazy(() => import('./components/sections/legal-section').then((m) => ({ default: m.LegalSection })));
 
 // Styles
 import './Landing.css';
@@ -49,17 +50,19 @@ const Landing = () => {
       <main className="flex flex-col items-center relative">
         <HeroSection onAuthRedirect={handleAuthRedirect} />
         <FeaturesSection />
-        <AppPreviewSection />
-        <SolutionsSection />
-        <PricingSection onAuthRedirect={handleAuthRedirect} />
-        <RoiSection />
-        <TestimonialsSection />
-        <AboutCareersSection />
-        <BlogSection />
-        <FaqSection />
-        <TrustComplianceSection />
-        <LegalSection />
-        <ContactSection />
+        <Suspense fallback={<div className="py-16 text-center text-muted-foreground">Loading sections...</div>}>
+          <AppPreviewSection />
+          <SolutionsSection />
+          <PricingSection onAuthRedirect={handleAuthRedirect} />
+          <RoiSection />
+          <TestimonialsSection />
+          <AboutCareersSection />
+          <BlogSection />
+          <FaqSection />
+          <TrustComplianceSection />
+          <LegalSection />
+          <ContactSection />
+        </Suspense>
       </main>
 
       <SiteFooter />

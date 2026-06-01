@@ -77,13 +77,20 @@ def list_appointments(
 @router.post("", response_model=schemas.AppointmentRead, status_code=status.HTTP_201_CREATED)
 def create_appointment(
     payload: schemas.AppointmentCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     if current_user.role == "Patient":
         payload.patient_name = current_user.full_name
 
-    return crud.create_entity(db, models.Appointment, payload, current_user.id)
+    appointment = crud.create_entity(db, models.Appointment, payload, current_user.id)
+    appointment_data = schemas.AppointmentRead.model_validate(appointment).model_dump(mode='json')
+    background_tasks.add_task(
+        send_appointment_webhook,
+        appointment_data
+    )
+    return appointment
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentRead)
@@ -153,6 +160,7 @@ def delete_appointment(
 )
 def create_public_appointment(
     payload: schemas.AppointmentPublicCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     """
@@ -176,4 +184,10 @@ def create_public_appointment(
         default_user = db.query(models.User).first()
     owner_id = default_user.id if default_user else 1
 
-    return crud.create_entity(db, models.Appointment, full_payload, owner_id)
+    appointment = crud.create_entity(db, models.Appointment, full_payload, owner_id)
+    appointment_data = schemas.AppointmentRead.model_validate(appointment).model_dump(mode='json')
+    background_tasks.add_task(
+        send_appointment_webhook,
+        appointment_data
+    )
+    return appointment

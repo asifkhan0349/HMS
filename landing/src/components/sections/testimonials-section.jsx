@@ -1,4 +1,3 @@
-import { motion } from "framer-motion"
 import { Quote } from "lucide-react"
 import { ScrollReveal } from "../ui/effects/scroll-reveal"
 
@@ -13,7 +12,7 @@ export function TestimonialsSection() {
                 <Quote className="h-20 w-20 text-primary/10 mb-8 -ml-6" />
                 <blockquote className="relative z-10">
                   <p className="text-4xl md:text-5xl font-black leading-[1.1] text-black mb-12">
-                    "HMS transformed our operations. It's the first system that feels designed for <span className="text-black/40">modern healthcare humans."</span>
+                    "GoMeds is being built around the workflows healthcare teams repeat every day: patient flow, billing, diagnostics, pharmacy, and operational visibility."
                   </p>
                   
                   <footer className="flex items-center gap-6">
@@ -21,8 +20,8 @@ export function TestimonialsSection() {
                       SC
                     </div>
                     <div>
-                      <cite className="not-italic font-extrabold text-xl text-black block">Dr. Sarah Chen</cite>
-                      <span className="text-lg font-medium text-muted-foreground">Chief of Staff, Metro General</span>
+                      <cite className="not-italic font-extrabold text-xl text-black block">GoMeds Product Team</cite>
+                      <span className="text-lg font-medium text-muted-foreground">Implementation roadmap statement</span>
                     </div>
                   </footer>
                 </blockquote>
@@ -32,16 +31,16 @@ export function TestimonialsSection() {
               
               <div className="flex flex-col gap-10">
                 <div className="flex flex-col">
-                  <div className="text-5xl font-black text-black">500+</div>
-                  <div className="text-lg font-bold text-muted-foreground mt-1">Hospitals</div>
+                  <div className="text-5xl font-black text-black">10</div>
+                  <div className="text-lg font-bold text-muted-foreground mt-1">Product Workspaces</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="text-5xl font-black text-black">99.9%</div>
-                  <div className="text-lg font-bold text-muted-foreground mt-1">Satisfaction</div>
+                  <div className="text-5xl font-black text-black">4</div>
+                  <div className="text-lg font-bold text-muted-foreground mt-1">AI Alert Types</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="text-5xl font-black text-black">1M+</div>
-                  <div className="text-lg font-bold text-muted-foreground mt-1">Patients</div>
+                  <div className="text-5xl font-black text-black">85+</div>
+                  <div className="text-lg font-bold text-muted-foreground mt-1">Performance Target</div>
                 </div>
               </div>
             </div>
@@ -51,4 +50,3 @@ export function TestimonialsSection() {
     </section>
   )
 }
-

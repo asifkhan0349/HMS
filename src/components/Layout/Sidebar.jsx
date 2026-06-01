@@ -3,6 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 
 const menuItems = [
+  { title: 'GoMeds Products', path: '/products', icon: 'bi bi-grid-1x2', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'] },
   { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', adminOnly: true },
   { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
   { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Reception'] },
@@ -18,6 +19,7 @@ const menuItems = [
   { title: 'Facility Management', path: '/beds', icon: 'bi bi-hospital', allowedRoles: ['Admin', 'Nurse', 'Reception'] },
   { title: 'Human Capital', path: '/staff', icon: 'bi bi-person-badge', adminOnly: true },
   { title: 'Intelligence', path: '/reports', icon: 'bi bi-bar-chart-line', allowedRoles: ['Admin', 'Accountant'] },
+  { title: 'AI Insights', path: '/ai-insights', icon: 'bi bi-stars', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'] },
   { title: 'Hospital Logistics', path: '/inventory', icon: 'bi bi-boxes', allowedRoles: ['Admin', 'Pharmacist'] },
   { title: 'Emergency Blood Bank', path: '/blood-bank', icon: 'bi bi-droplet-half', allowedRoles: ['Admin', 'Doctor', 'Nurse'] },
 ];

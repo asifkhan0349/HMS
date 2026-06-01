@@ -1,10 +1,30 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy.orm import Session
+import httpx
+import logging
 
 from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
 from .. import crud, models, schemas
 from ..core.database import get_db
+from ..core.config import settings
 from .common import PositiveId
+
+logger = logging.getLogger(__name__)
+
+async def send_lab_test_webhook(lab_test_data: dict):
+    url = settings.LAB_STATUS_WEBHOOK_URL
+    if not url:
+        logger.warning("Lab status webhook URL not configured. Skipping.")
+        return
+
+    headers = {"Content-Type": "application/json"}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=lab_test_data, headers=headers, timeout=10.0)
+            response.raise_for_status()
+            logger.info(f"Lab webhook sent to {url} successfully: {response.status_code}")
+    except Exception as e:
+        logger.error(f"Failed to send lab webhook to {url}: {e}")
 
 # Roles permitted to access Diagnostics & Lab — must stay in sync with
 # LAB_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
@@ -26,8 +46,16 @@ def list_tests(
 
 
 @router.post("", response_model=schemas.LabTestRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
-def create_test(payload: schemas.LabTestCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
-    return crud.create_entity(db, models.LabTest, payload, current_user_id)
+def create_test(
+    payload: schemas.LabTestCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    test = crud.create_entity(db, models.LabTest, payload, current_user_id)
+    test_data = schemas.LabTestRead.model_validate(test).model_dump(mode='json')
+    background_tasks.add_task(send_lab_test_webhook, test_data)
+    return test
 
 
 @router.get("/{test_id}", response_model=schemas.LabTestRead)
@@ -36,9 +64,22 @@ def get_test(test_id: PositiveId, db: Session = Depends(get_db), owner_id: int |
 
 
 @router.put("/{test_id}", response_model=schemas.LabTestRead, dependencies=[Depends(require_roles(["Admin"]))])
-def update_test(test_id: PositiveId, payload: schemas.LabTestUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+def update_test(
+    test_id: PositiveId,
+    payload: schemas.LabTestUpdate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    owner_id: int | None = Depends(get_owner_id_for_filtering)
+):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, owner_id)
-    return crud.update_entity(db, test, payload)
+    old_status = test.status
+    updated_test = crud.update_entity(db, test, payload)
+    
+    if payload.status is not None and payload.status != old_status:
+        test_data = schemas.LabTestRead.model_validate(updated_test).model_dump(mode='json')
+        background_tasks.add_task(send_lab_test_webhook, test_data)
+        
+    return updated_test
 
 
 @router.delete("/{test_id}", response_model=schemas.MessageResponse, dependencies=[Depends(require_roles(["Admin"]))])

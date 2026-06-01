@@ -48,6 +48,8 @@ from .routers import (
     tests,
     ambulances,
     cash_receipts,
+    ai_insights,
+    products,
 )
 from .routers.appointments import public_router as appointments_public_router
 from .routers.records import public_router as records_public_router
@@ -174,6 +176,8 @@ app.include_router(inventory.router, prefix=API_PREFIX)
 app.include_router(ambulances.router, prefix=API_PREFIX)
 app.include_router(cash_receipts_public_router, prefix=API_PREFIX)
 app.include_router(cash_receipts.router, prefix=API_PREFIX)
+app.include_router(ai_insights.router, prefix=API_PREFIX)
+app.include_router(products.router, prefix=API_PREFIX)
 
 
 # Serve static files

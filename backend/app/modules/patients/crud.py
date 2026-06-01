@@ -58,6 +58,14 @@ def get_patient_or_404(db: Session, patient_id: int, owner_id: int | None):
     return patient
 
 def create_patient(db: Session, payload, owner_user_id: int):
+    if payload.booking_id:
+        existing_booking = db.query(models.Patient).filter(models.Patient.booking_id == payload.booking_id).first()
+        if existing_booking:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Booking ID {payload.booking_id} has already been registered."
+            )
+
     check_duplicate_patient(
         db,
         name=payload.name,
@@ -79,6 +87,15 @@ def create_patient(db: Session, payload, owner_user_id: int):
 
 def update_patient(db: Session, patient, payload):
     data = payload.model_dump(exclude_unset=True)
+    new_booking_id = data.get("booking_id")
+    if new_booking_id and new_booking_id != patient.booking_id:
+        existing_booking = db.query(models.Patient).filter(models.Patient.booking_id == new_booking_id).first()
+        if existing_booking:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Booking ID {new_booking_id} has already been registered."
+            )
+
     new_name = data.get("name", patient.name)
     new_blood_group = data.get("blood_group", patient.blood_group)
     new_phone_number = data.get("phone_number", patient.phone_number)

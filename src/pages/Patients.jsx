@@ -1,8 +1,8 @@
 import React, { memo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useApp, mapPatientFromApi, mapActivityFromApi, mapBedFromApi, mapInvoiceFromApi, createCode } from '../context/AppContext';
+import { useApp, mapPatientFromApi, mapActivityFromApi, mapBedFromApi, mapInvoiceFromApi, mapAppointmentFromApi, createCode } from '../context/AppContext';
 import { useCrud } from '../hooks/useCrud';
-import { patientsApi, bloodActivitiesApi, bedsApi, invoicesApi } from '../lib/api';
+import { patientsApi, bloodActivitiesApi, bedsApi, invoicesApi, appointmentsApi } from '../lib/api';
 import Modal from '../components/UI/Modal';
 import EmptyState from '../components/UI/EmptyState';
 import DeleteConfirmation from '../components/UI/DeleteConfirmation';
@@ -123,6 +123,103 @@ const Patients = () => {
     setIsProfileModalOpen(true);
   };
   
+  const [isOnlineRegModalOpen, setIsOnlineRegModalOpen] = useState(false);
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState('');
+  const [selectedApptDetails, setSelectedApptDetails] = useState(null);
+  const [isRegisteringOnline, setIsRegisteringOnline] = useState(false);
+
+  const openOnlineRegModal = async () => {
+    setIsOnlineRegModalOpen(true);
+    setLoadingAppointments(true);
+    setSelectedBookingId('');
+    setSelectedApptDetails(null);
+    try {
+      const apptsData = await appointmentsApi.list();
+      const mapped = apptsData.map(mapAppointmentFromApi);
+      setAppointments(mapped);
+    } catch (err) {
+      showToast(err.message || 'Unable to fetch appointments.', 'error');
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
+
+  const handleBookingIdChange = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    const appt = appointments.find(a => a.appointmentId === bookingId);
+    setSelectedApptDetails(appt || null);
+  };
+
+  const handleRegisterOnlinePatient = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!selectedApptDetails) return;
+    
+    setIsRegisteringOnline(true);
+    try {
+      const isDuplicate = patients.some(p => p.bookingId === selectedApptDetails.appointmentId);
+      if (isDuplicate) {
+        showToast(`Booking ID ${selectedApptDetails.appointmentId} has already been registered.`, 'warning');
+        setIsRegisteringOnline(false);
+        return;
+      }
+
+      let age = selectedApptDetails.patientAge;
+      if (!age && selectedApptDetails.patientDateOfBirth) {
+        const dob = new Date(selectedApptDetails.patientDateOfBirth);
+        const today = new Date();
+        age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+          age--;
+        }
+      }
+      if (typeof age !== 'number' || Number.isNaN(age) || age < 0) {
+        age = 30;
+      }
+
+      let gender = 'Other';
+      const gLower = selectedApptDetails.patientGender?.toLowerCase();
+      if (gLower === 'male') gender = 'Male';
+      else if (gLower === 'female') gender = 'Female';
+
+      const validBloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+      let bloodGroup = selectedApptDetails.bloodGroup || 'O+';
+      if (!validBloodGroups.includes(bloodGroup)) {
+        bloodGroup = 'O+';
+      }
+
+      const payload = {
+        name: selectedApptDetails.patient,
+        age: parseInt(age),
+        gender: gender,
+        blood_group: bloodGroup,
+        phone_number: selectedApptDetails.phoneNumber || '000-0000',
+        email: selectedApptDetails.patientEmail || null,
+        emergency_contact_1: selectedApptDetails.emergencyContact || '000-0000',
+        emergency_contact_2: selectedApptDetails.emergencyContact2 || null,
+        patient_code: createCode('P'),
+        status: 'Outpatient',
+        last_visit: selectedApptDetails.appointmentDate || new Date().toISOString().split('T')[0],
+        booking_id: selectedApptDetails.appointmentId,
+        address: selectedApptDetails.patientAddress || null,
+        doctor_name: selectedApptDetails.doctor || null,
+        appointment_date: selectedApptDetails.appointmentDate || null
+      };
+
+      await addPatient(payload);
+      showToast(`Patient ${selectedApptDetails.patient} registered successfully from booking ${selectedApptDetails.appointmentId}.`);
+      setIsOnlineRegModalOpen(false);
+      setSelectedBookingId('');
+      setSelectedApptDetails(null);
+    } catch (error) {
+      showToast(error.message || 'Unable to register the patient from online booking.', 'error');
+    } finally {
+      setIsRegisteringOnline(false);
+    }
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -271,13 +368,24 @@ const Patients = () => {
           <h2 className="fw-bold mb-1">Patient Registry</h2>
           <p className="text-muted mb-0">Manage patient records and hospital admissions.</p>
         </div>
-        <button 
-          className="btn btn-primary px-4 py-2"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <i className="bi bi-person-plus me-2" aria-hidden="true"></i>
-          Register Patient
-        </button>
+        {!isPatient && (
+          <div className="d-flex gap-2">
+            <button 
+              className="btn btn-glass px-4 py-2"
+              onClick={openOnlineRegModal}
+            >
+              <i className="bi bi-globe me-2"></i>
+              Online Patient Registration
+            </button>
+            <button 
+              className="btn btn-primary px-4 py-2"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <i className="bi bi-person-plus me-2" aria-hidden="true"></i>
+              Register Patient
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="glass-card p-0 overflow-hidden border">
@@ -364,6 +472,137 @@ const Patients = () => {
           totalItems={totalItems}
         />
       </div>
+
+      {/* Online Registration Modal */}
+      <Modal 
+        isOpen={isOnlineRegModalOpen} 
+        onClose={() => setIsOnlineRegModalOpen(false)} 
+        title="Online Patient Registration"
+      >
+        <div className="mb-4">
+          <label htmlFor="booking-select" className="form-label text-muted fw-bold small text-uppercase mb-2 required-label">Select Online Booking ID</label>
+          {loadingAppointments ? (
+            <div className="d-flex align-items-center gap-2 py-2 text-muted">
+              <div className="spinner-border spinner-border-sm text-primary" role="status"></div>
+              <span className="small">Fetching pending online bookings...</span>
+            </div>
+          ) : (
+            <select 
+              id="booking-select"
+              className="form-select"
+              value={selectedBookingId}
+              onChange={(e) => handleBookingIdChange(e.target.value)}
+            >
+              <option value="">-- Choose Booking ID --</option>
+              {(() => {
+                const unregistered = appointments.filter(
+                  appt => appt.appointmentId && !patients.some(p => p.bookingId === appt.appointmentId)
+                );
+                if (unregistered.length === 0) {
+                  return <option disabled value="">No unregistered bookings available</option>;
+                }
+                return unregistered.map(appt => (
+                  <option key={appt.apiId} value={appt.appointmentId}>
+                    {appt.appointmentId} - {appt.patient} ({appt.appointmentDate})
+                  </option>
+                ));
+              })()}
+            </select>
+          )}
+        </div>
+
+        {selectedApptDetails ? (
+          <div className="card border-0 rounded-3 overflow-hidden mb-4" style={{ background: 'var(--accents-1)', border: '1px solid var(--accents-2)' }}>
+            <div className="card-header py-3 px-4 border-0" style={{ background: 'rgba(0, 112, 243, 0.05)' }}>
+              <div className="d-flex justify-content-between align-items-center">
+                <h6 className="mb-0 fw-bold text-primary"><i className="bi bi-card-text me-2"></i>Patient Booking Details</h6>
+                <span className="badge rounded-pill bg-primary px-3 py-1 font-monospace" style={{ fontSize: '0.75rem' }}>{selectedApptDetails.appointmentId}</span>
+              </div>
+            </div>
+            <div className="card-body p-4">
+              <div className="row g-4">
+                <div className="col-12 border-bottom pb-3">
+                  <div className="text-muted small text-uppercase fw-bold mb-1">Patient Name</div>
+                  <h5 className="fw-bold mb-0 text-dark">{selectedApptDetails.patient}</h5>
+                </div>
+                
+                <div className="col-md-6">
+                  <div className="text-muted small text-uppercase fw-bold mb-1">Gender / Age</div>
+                  <div className="fw-semibold text-dark">{selectedApptDetails.patientGender || 'Other'} / {selectedApptDetails.patientAge ? `${selectedApptDetails.patientAge} years` : (selectedApptDetails.patientDateOfBirth ? 'DOB provided' : 'Not specified')}</div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="text-muted small text-uppercase fw-bold mb-1">Contact Phone</div>
+                  <div className="fw-semibold text-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>{selectedApptDetails.phoneNumber || '-'}</div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="text-muted small text-uppercase fw-bold mb-1">Email Address</div>
+                  <div className="fw-semibold text-dark text-truncate" title={selectedApptDetails.patientEmail}>{selectedApptDetails.patientEmail || '-'}</div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="text-muted small text-uppercase fw-bold mb-1">Blood Group</div>
+                  <div className="fw-semibold text-dark"><span className="badge bg-danger px-2.5 py-1">{selectedApptDetails.bloodGroup || 'Not provided'}</span></div>
+                </div>
+
+                <div className="col-12 border-top pt-3">
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <div className="text-muted small text-uppercase fw-bold mb-1">Doctor Assigned</div>
+                      <div className="fw-semibold text-dark"><i className="bi bi-person-badge-fill me-1 text-primary"></i>{selectedApptDetails.doctor || '-'}</div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="text-muted small text-uppercase fw-bold mb-1">Appointment Date</div>
+                      <div className="fw-semibold text-dark"><i className="bi bi-calendar-event me-1 text-primary"></i>{selectedApptDetails.appointmentDate || '-'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedApptDetails.patientAddress && (
+                  <div className="col-12 border-top pt-3">
+                    <div className="text-muted small text-uppercase fw-bold mb-1">Patient Address</div>
+                    <div className="fw-semibold text-dark text-wrap small">{selectedApptDetails.patientAddress}</div>
+                  </div>
+                )}
+
+                {selectedApptDetails.symptoms && (
+                  <div className="col-12 border-top pt-3">
+                    <div className="text-muted small text-uppercase fw-bold mb-1">Symptoms Description</div>
+                    <div className="fw-semibold text-dark text-wrap small">{selectedApptDetails.symptoms}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          !loadingAppointments && (
+            <div className="text-center py-5 border rounded-3 mb-4 bg-light bg-opacity-50">
+              <i className="bi bi-globe fs-1 text-muted opacity-40 mb-3 d-block"></i>
+              <p className="text-muted small mb-0 px-4">Please select a Booking ID from the dropdown above to view patient details and register them in the system.</p>
+            </div>
+          )
+        )}
+
+        <div className="d-flex gap-2 mt-5">
+          <button type="button" className="btn btn-glass w-100 py-2" onClick={() => setIsOnlineRegModalOpen(false)}>Cancel</button>
+          <button 
+            type="button" 
+            className="btn btn-primary w-100 py-2" 
+            onClick={handleRegisterOnlinePatient}
+            disabled={!selectedApptDetails || isRegisteringOnline}
+          >
+            {isRegisteringOnline ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Registering...
+              </>
+            ) : (
+              'Register Patient'
+            )}
+          </button>
+        </div>
+      </Modal>
 
       {/* Register Modal */}
       <Modal 
@@ -705,6 +944,12 @@ const Patients = () => {
                     <span className="text-muted small">Email:</span>
                     <span className="fw-semibold small text-dark text-truncate ms-2" style={{ maxWidth: '160px' }} title={selectedPatient.email}>{selectedPatient.email || '-'}</span>
                   </div>
+                  {selectedPatient.address && (
+                    <div className="mt-2 border-top pt-2">
+                      <span className="text-muted small d-block">Address:</span>
+                      <span className="fw-semibold small text-dark d-block text-wrap mt-0.5">{selectedPatient.address}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -723,6 +968,27 @@ const Patients = () => {
                 </div>
               </div>
             </div>
+
+            {/* Online Booking Details */}
+            {selectedPatient.bookingId && (
+              <div className="p-3 border rounded mb-4" style={{ background: 'rgba(0,0,0,0.03)' }}>
+                <h6 className="fw-bold text-muted small text-uppercase mb-3"><i className="bi bi-globe me-2 text-primary"></i>Online Registration Link</h6>
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <div className="small text-muted mb-1">Booking ID:</div>
+                    <div className="fw-bold small text-primary">{selectedPatient.bookingId}</div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="small text-muted mb-1">Doctor Assigned:</div>
+                    <div className="fw-semibold small text-dark">{selectedPatient.doctorName || '-'}</div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="small text-muted mb-1">Appointment Date:</div>
+                    <div className="fw-semibold small text-dark">{selectedPatient.appointmentDate || '-'}</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Bed Assignment Details */}
             {(() => {

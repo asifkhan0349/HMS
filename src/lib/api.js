@@ -251,6 +251,16 @@ export const reportsApi = {
   }
 };
 
+export const aiInsightsApi = {
+  list: (params = {}) => {
+    const normalizedParams = Object.fromEntries(
+      Object.entries(params).map(([key, value]) => [key, String(value)])
+    );
+    const query = new URLSearchParams(normalizedParams).toString();
+    return request(`/ai-insights${query ? `?${query}` : ''}`, { isProtected: true });
+  },
+};
+
 /**
  * Trigger a CSV file download from an array of row objects.
  * @param {Record<string, unknown>[]} rows

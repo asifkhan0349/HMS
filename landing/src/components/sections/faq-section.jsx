@@ -8,12 +8,12 @@ import { ScrollReveal } from "../ui/effects/scroll-reveal"
 
 const faqItems = [
   {
-    question: "Is HMS HIPAA compliant?",
-    answer: "Yes, our platform is fully HIPAA compliant. We maintain BAAs with our cloud providers and offer full audit logs for all data access events."
+    question: "Is HMS compliance-ready?",
+    answer: "The platform is designed with compliance-ready controls such as role-based access, secure authentication, audit-log planning, and production backup procedures. Formal compliance claims should be validated for each deployment."
   },
   {
     question: "How secure is patient data?",
-    answer: "We use 256-bit AES encryption at rest and TLS 1.3 in transit. We follow SOC 2 Type II best practices for data handling and security."
+    answer: "The product uses secure authentication, restricted access patterns, environment-specific configuration, and a production hardening roadmap for backups, monitoring, and audit logs."
   },
   {
     question: "Can it integrate with lab machines?",
@@ -58,4 +58,3 @@ export function FaqSection() {
     </section>
   )
 }
-

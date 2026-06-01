@@ -1,13 +1,33 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
 import io
+import httpx
+import logging
 from sqlalchemy.orm import Session
 
 from ..auth_context import get_current_user_id, require_roles, exclude_roles, get_owner_id_for_filtering
 from .. import crud, models, schemas
 from ..core.database import get_db
+from ..core.config import settings
 from .common import PositiveId
 from ..services.invoice_delivery import InvoiceDeliveryError, send_invoice_email, download_invoice_pdf
+
+logger = logging.getLogger(__name__)
+
+async def send_invoice_webhook(invoice_data: dict):
+    url = settings.INVOICE_WEBHOOK_URL
+    if not url:
+        logger.warning("Invoice webhook URL not configured. Skipping.")
+        return
+
+    headers = {"Content-Type": "application/json"}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=invoice_data, headers=headers, timeout=10.0)
+            response.raise_for_status()
+            logger.info(f"Invoice webhook sent to {url} successfully: {response.status_code}")
+    except Exception as e:
+        logger.error(f"Failed to send invoice webhook to {url}: {e}")
 
 # Roles permitted to access Revenue Cycle — must stay in sync with
 # BILLING_ROLES in src/App.jsx and allowedRoles in Sidebar.jsx.
@@ -26,7 +46,12 @@ def list_invoices(db: Session = Depends(get_db), owner_id: int | None = Depends(
 
 
 @router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
-def create_invoice(payload: schemas.InvoiceCreate, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def create_invoice(
+    payload: schemas.InvoiceCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
     # 1. First validate stock for all pharmacy items in the invoice payload
     if payload.line_items:
         for item in payload.line_items:
@@ -92,6 +117,10 @@ def create_invoice(payload: schemas.InvoiceCreate, db: Session = Depends(get_db)
         from ..core.websockets import manager
         import json
         manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
+    
+    invoice_data = schemas.InvoiceRead.model_validate(entity).model_dump(mode='json')
+    background_tasks.add_task(send_invoice_webhook, invoice_data)
+    
     return entity
 
 
@@ -101,9 +130,16 @@ def get_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), owner_id:
 
 
 @router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(require_roles(["Admin"]))])
-def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
+def update_invoice(
+    invoice_id: PositiveId,
+    payload: schemas.InvoiceUpdate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    owner_id: int | None = Depends(get_owner_id_for_filtering)
+):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
     old_paid = invoice.amount_paid
+    old_status = invoice.status
     updated_invoice = crud.update_entity(db, invoice, payload)
     new_paid = updated_invoice.amount_paid
     if new_paid > old_paid:
@@ -120,6 +156,11 @@ def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: S
         from ..core.websockets import manager
         import json
         manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
+        
+    if (payload.status is not None and payload.status != old_status) or (new_paid != old_paid):
+        invoice_data = schemas.InvoiceRead.model_validate(updated_invoice).model_dump(mode='json')
+        background_tasks.add_task(send_invoice_webhook, invoice_data)
+        
     return updated_invoice
 
 
@@ -131,11 +172,13 @@ def update_invoice(invoice_id: PositiveId, payload: schemas.InvoiceUpdate, db: S
 def send_paid_invoice_email(
     invoice_id: PositiveId,
     payload: schemas.InvoicePaidEmailRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     owner_id: int | None = Depends(get_owner_id_for_filtering),
 ):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
     old_paid = invoice.amount_paid
+    old_status = invoice.status
     invoice_update_data = payload.model_dump(
         exclude={"recipient_email", "line_items"},
         exclude_none=True,
@@ -160,6 +203,10 @@ def send_paid_invoice_email(
         from ..core.websockets import manager
         import json
         manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
+
+    if (new_paid != old_paid) or (updated_invoice.status != old_status):
+        invoice_data = schemas.InvoiceRead.model_validate(updated_invoice).model_dump(mode='json')
+        background_tasks.add_task(send_invoice_webhook, invoice_data)
 
     if updated_invoice.status not in ("Paid", "Partially Paid"):
         return schemas.InvoicePaidEmailResponse(

@@ -133,6 +133,11 @@ export const mapPatientFromApi = (patient) => ({
   lastVisit: formatDate(patient.last_visit),
   rawLastVisit: patient.last_visit ? patient.last_visit.split('T')[0] : '',
   status: patient.status,
+  bookingId: patient.booking_id || '',
+  address: patient.address || '',
+  doctorName: patient.doctor_name || '',
+  appointmentDate: formatDate(patient.appointment_date),
+  rawAppointmentDate: patient.appointment_date ? patient.appointment_date.split('T')[0] : '',
 });
 
 export const mapAppointmentFromApi = (appointment) => ({

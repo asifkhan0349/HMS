@@ -33,6 +33,10 @@ class PatientCreate(PatientBase):
     email: Optional[str] = Field(None, max_length=120)
     emergency_contact_1: Optional[str] = Field(None, min_length=7, max_length=20)
     emergency_contact_2: Optional[str] = Field(None, min_length=7, max_length=20)
+    booking_id: Optional[str] = None
+    address: Optional[str] = Field(None, max_length=255)
+    doctor_name: Optional[str] = Field(None, max_length=120)
+    appointment_date: Optional[date] = None
 
 class PatientUpdate(AppBaseModel):
     patient_code: Optional[str] = None
@@ -46,6 +50,10 @@ class PatientUpdate(AppBaseModel):
     emergency_contact_2: Optional[str] = Field(None, min_length=7, max_length=20)
     last_visit: Optional[date] = None
     status: Optional[str] = Field(None, min_length=2, max_length=50)
+    booking_id: Optional[str] = None
+    address: Optional[str] = Field(None, max_length=255)
+    doctor_name: Optional[str] = Field(None, max_length=120)
+    appointment_date: Optional[date] = None
 
 class PatientRead(ORMBase):
     id: int
@@ -61,3 +69,7 @@ class PatientRead(ORMBase):
     last_visit: Optional[date] = None
     status: str
     created_at: datetime
+    booking_id: Optional[str] = None
+    address: Optional[str] = None
+    doctor_name: Optional[str] = None
+    appointment_date: Optional[date] = None

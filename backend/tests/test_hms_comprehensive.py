@@ -51,13 +51,15 @@ async def test_list_patients(client: AsyncClient, auth_headers: dict):
 
 @pytest.mark.asyncio
 async def test_create_patient_success(client: AsyncClient, auth_headers: dict):
+    import random
+    rand_num = random.randint(1000, 9999)
     payload = {
-        "name": "Integration Test Patient",
+        "name": f"Integration Test Patient {rand_num}",
         "age": 30,
         "gender": "Female",
         "blood_group": "B+",
         "status": "Inpatient",
-        "phone_number": "1234567890"
+        "phone_number": f"123456{rand_num}"
     }
     response = await client.post(f"{API_PREFIX}/patients", json=payload, headers=auth_headers)
     assert response.status_code == 201
@@ -75,6 +77,37 @@ async def test_create_patient_validation_error(client: AsyncClient, auth_headers
     payload = {"age": 30} # Missing name, gender, etc.
     response = await client.post(f"{API_PREFIX}/patients", json=payload, headers=auth_headers)
     assert response.status_code == 422
+
+@pytest.mark.asyncio
+async def test_create_patient_duplicate_booking_id(client: AsyncClient, auth_headers: dict):
+    import random
+    rand_num = random.randint(1000, 9999)
+    booking_id = f"BK-TEST-{rand_num}"
+    
+    payload1 = {
+        "name": f"Booking Test Patient A {rand_num}",
+        "age": 25,
+        "gender": "Male",
+        "blood_group": "A+",
+        "status": "Outpatient",
+        "phone_number": f"123457{rand_num}",
+        "booking_id": booking_id
+    }
+    response1 = await client.post(f"{API_PREFIX}/patients", json=payload1, headers=auth_headers)
+    assert response1.status_code == 201
+    
+    payload2 = {
+        "name": f"Booking Test Patient B {rand_num}",
+        "age": 28,
+        "gender": "Female",
+        "blood_group": "O-",
+        "status": "Inpatient",
+        "phone_number": f"987654{rand_num}",
+        "booking_id": booking_id
+    }
+    response2 = await client.post(f"{API_PREFIX}/patients", json=payload2, headers=auth_headers)
+    assert response2.status_code == 400
+    assert "already been registered" in response2.json()["detail"]
 
 # --- APPOINTMENT TESTS ---
 
