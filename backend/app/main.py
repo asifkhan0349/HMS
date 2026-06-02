@@ -50,8 +50,10 @@ from .routers import (
     cash_receipts,
     ai_insights,
     products,
+    discharge_summaries,
 )
 from .routers.appointments import public_router as appointments_public_router
+from .routers.discharge_summaries import public_router as discharge_summaries_public_router
 from .seed import seed_database
 
 
@@ -170,6 +172,8 @@ app.include_router(ambulances.router, prefix=API_PREFIX)
 app.include_router(cash_receipts.router, prefix=API_PREFIX)
 app.include_router(ai_insights.router, prefix=API_PREFIX)
 app.include_router(products.router, prefix=API_PREFIX)
+app.include_router(discharge_summaries_public_router, prefix=API_PREFIX)
+app.include_router(discharge_summaries.router, prefix=API_PREFIX)
 
 
 # Serve static files

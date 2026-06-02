@@ -208,7 +208,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Form Controls */
-input.form-control, select.form-select {
+input.form-control, textarea.form-control, select.form-select {
   background: var(--geist-background) !important;
   border: 1px solid var(--accents-2) !important;
   color: var(--geist-foreground) !important;
@@ -217,9 +217,22 @@ input.form-control, select.form-select {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-input.form-control:focus {
+input.form-control:focus, textarea.form-control:focus {
   border-color: var(--accents-4) !important;
   box-shadow: none !important;
+}
+
+/* Disabled & Read-only States */
+input.form-control:disabled,
+textarea.form-control:disabled,
+select.form-select:disabled,
+input.form-control[readonly],
+textarea.form-control[readonly] {
+  background-color: var(--accents-1) !important;
+  color: var(--geist-foreground) !important;
+  border-color: var(--accents-2) !important;
+  opacity: 0.85 !important;
+  cursor: not-allowed;
 }
 
 /* Specific Utilities */
@@ -231,4 +244,23 @@ input.form-control:focus {
   background: var(--accents-1);
   border: 1px solid var(--accents-2);
   border-radius: 8px;
+}
+
+/* ===== Modal Theme Compliance Overrides ===== */
+.modal-overlay .bg-white {
+  background-color: var(--geist-background) !important;
+}
+
+.modal-overlay .text-dark,
+.modal-overlay h4.text-dark,
+.modal-overlay h5.text-dark,
+.modal-overlay h6.text-dark,
+.modal-overlay div.text-dark,
+.modal-overlay span.text-dark,
+.modal-overlay button.text-dark {
+  color: var(--geist-foreground) !important;
+}
+
+.modal-overlay .border-bottom {
+  border-color: var(--accents-2) !important;
 }

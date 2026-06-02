@@ -249,4 +249,23 @@ class CashReceipt(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
+class DischargeSummary(Base):
+    __tablename__ = "discharge_summaries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    owner_user_id: Mapped[int] = mapped_column(Integer, index=True)
+    discharge_code: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    patient_name: Mapped[str] = mapped_column(String(120), index=True)
+    admission_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    discharge_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    attending_doctor: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    diagnosis: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    hospital_course: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    discharge_medications: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    discharge_condition: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    follow_up_instructions: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+
 

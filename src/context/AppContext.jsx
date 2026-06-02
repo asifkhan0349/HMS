@@ -179,6 +179,24 @@ export const mapRecordFromApi = (record) => ({
   description: record.description || '',
 });
 
+export const mapDischargeFromApi = (dsg) => ({
+  id: dsg.discharge_code,
+  apiId: dsg.id,
+  dischargeCode: dsg.discharge_code,
+  patient: dsg.patient_name,
+  rawAdmissionDate: dsg.admission_date ? dsg.admission_date.split('T')[0] : '',
+  admissionDate: formatDate(dsg.admission_date),
+  rawDischargeDate: dsg.discharge_date ? dsg.discharge_date.split('T')[0] : '',
+  dischargeDate: formatDate(dsg.discharge_date),
+  doctor: dsg.attending_doctor || '',
+  diagnosis: dsg.diagnosis || '',
+  hospitalCourse: dsg.hospital_course || '',
+  dischargeMedications: dsg.discharge_medications || '',
+  dischargeCondition: dsg.discharge_condition || '',
+  followUpInstructions: dsg.follow_up_instructions || '',
+});
+
+
 export const mapInvoiceFromApi = (invoice) => ({
   id: invoice.invoice_code,
   apiId: invoice.id,

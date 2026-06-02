@@ -29,3 +29,9 @@ from .ambulance import AmbulanceBase, AmbulanceCreate, AmbulanceUpdate, Ambulanc
 from .cash_receipt import CashReceiptBase, CashReceiptRead
 from .ai_insight import AIInsightRead, InsightSeverity, InsightStatus
 from .product import ProductModuleRead
+from .discharge_summary import (
+    DischargeSummaryBase,
+    DischargeSummaryCreate,
+    DischargeSummaryUpdate,
+    DischargeSummaryRead,
+)

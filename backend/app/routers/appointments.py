@@ -120,15 +120,13 @@ def update_appointment(
             detail="Access denied. Only Admin can edit appointments.",
         )
 
-    old_status = appointment.status
     updated_appointment = crud.update_entity(db, appointment, payload)
 
-    if payload.status is not None and payload.status != old_status:
-        appointment_data = schemas.AppointmentRead.model_validate(updated_appointment).model_dump(mode='json')
-        background_tasks.add_task(
-            send_appointment_webhook,
-            appointment_data
-        )
+    appointment_data = schemas.AppointmentRead.model_validate(updated_appointment).model_dump(mode='json')
+    background_tasks.add_task(
+        send_appointment_webhook,
+        appointment_data
+    )
 
     return updated_appointment
 

@@ -10,6 +10,7 @@ const menuItems = [
   { title: 'Scheduling', path: '/appointments', icon: 'bi bi-calendar-event', allowedRoles: ['Admin', 'Doctor', 'Reception', 'Patient'] },
   { title: 'Appointment Calendar', path: '/doctor-calendar', icon: 'bi bi-calendar3', allowedRoles: ['Admin', 'Doctor'] },
   { title: 'Medical Records', path: '/emr', icon: 'bi bi-file-medical', allowedRoles: ['Admin', 'Doctor', 'Nurse'] },
+  { title: 'Discharge Summaries', path: '/discharge-summaries', icon: 'bi bi-file-earmark-medical', allowedRoles: ['Admin', 'Doctor', 'Nurse'] },
   { title: 'Revenue Cycle', path: '/billing', icon: 'bi bi-receipt', allowedRoles: ['Admin', 'Reception', 'Accountant'] },
   { title: 'Invoice Generation', path: '/invoice-generation', icon: 'bi bi-receipt-cutoff', allowedRoles: ['Admin', 'Reception', 'Accountant'] },
   { title: 'Cash Receipts', path: '/cash-receipts', icon: 'bi bi-cash-coin', allowedRoles: ['Admin', 'Reception', 'Accountant'] },

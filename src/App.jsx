@@ -9,6 +9,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Patients = lazy(() => import('./pages/Patients'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const EMR = lazy(() => import('./pages/EMR'));
+const DischargeSummaries = lazy(() => import('./pages/DischargeSummaries'));
 const Billing = lazy(() => import('./pages/Billing'));
 const InvoiceGeneration = lazy(() => import('./pages/InvoiceGeneration'));
 const CashReceipts = lazy(() => import('./pages/CashReceipts'));
@@ -52,6 +53,9 @@ const PHARMACY_ROLES = ['Admin', 'Pharmacist'];
 
 // Roles that can access Medical Records (EMR)
 const EMR_ROLES = ['Admin', 'Doctor', 'Nurse'];
+
+// Roles that can access Discharge Summaries
+const DISCHARGE_ROLES = ['Admin', 'Doctor', 'Nurse'];
 
 // Roles that can access Diagnostics & Lab
 const LAB_ROLES = ['Admin', 'Doctor', 'Lab Technician'];
@@ -107,6 +111,7 @@ function App() {
               <Route path="/patients" element={<ProtectedRoute allowedRoles={PATIENT_DIR_ROLES}><Patients /></ProtectedRoute>} />
               <Route path="/appointments" element={<ProtectedRoute allowedRoles={SCHEDULING_ROLES}><Appointments /></ProtectedRoute>} />
               <Route path="/emr" element={<ProtectedRoute allowedRoles={EMR_ROLES}><EMR /></ProtectedRoute>} />
+              <Route path="/discharge-summaries" element={<ProtectedRoute allowedRoles={DISCHARGE_ROLES}><DischargeSummaries /></ProtectedRoute>} />
               <Route path="/billing" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><Billing /></ProtectedRoute>} />
               <Route path="/invoice-generation" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><InvoiceGeneration /></ProtectedRoute>} />
               <Route path="/cash-receipts" element={<ProtectedRoute allowedRoles={BILLING_ROLES}><CashReceipts /></ProtectedRoute>} />

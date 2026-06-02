@@ -42,6 +42,7 @@ _CODE_FIELDS: dict[str, tuple[str, str]] = {
     "Staff":         ("staff_code",     "STF"),
     "InventoryItem": ("item_code",      "ITM"),
     "Ambulance":     ("ambulance_code", "AMB"),
+    "DischargeSummary": ("discharge_code", "DSG"),
 }
 
 # Models that have TWO code fields (record_code + clinical_id)

@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
 
     # Webhooks
-    APPOINTMENT_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/form/510a1b1a-b126-4bc8-af63-01de1359b9c6"
+    APPOINTMENT_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/webhook/Hospital-appointment-confirmation"
     LAB_STATUS_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/webhook/hospital-lab-status"
     INVOICE_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/webhook/hospital-invoice"
 

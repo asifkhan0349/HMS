@@ -157,9 +157,8 @@ def update_invoice(
         import json
         manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
         
-    if (payload.status is not None and payload.status != old_status) or (new_paid != old_paid):
-        invoice_data = schemas.InvoiceRead.model_validate(updated_invoice).model_dump(mode='json')
-        background_tasks.add_task(send_invoice_webhook, invoice_data)
+    invoice_data = schemas.InvoiceRead.model_validate(updated_invoice).model_dump(mode='json')
+    background_tasks.add_task(send_invoice_webhook, invoice_data)
         
     return updated_invoice
 
@@ -204,9 +203,8 @@ def send_paid_invoice_email(
         import json
         manager.broadcast_sync(json.dumps({"event": "data_updated", "action": "create", "entity": "CashReceipt"}))
 
-    if (new_paid != old_paid) or (updated_invoice.status != old_status):
-        invoice_data = schemas.InvoiceRead.model_validate(updated_invoice).model_dump(mode='json')
-        background_tasks.add_task(send_invoice_webhook, invoice_data)
+    invoice_data = schemas.InvoiceRead.model_validate(updated_invoice).model_dump(mode='json')
+    background_tasks.add_task(send_invoice_webhook, invoice_data)
 
     if updated_invoice.status not in ("Paid", "Partially Paid"):
         return schemas.InvoicePaidEmailResponse(

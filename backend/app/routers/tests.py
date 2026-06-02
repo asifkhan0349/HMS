@@ -72,12 +72,10 @@ def update_test(
     owner_id: int | None = Depends(get_owner_id_for_filtering)
 ):
     test = crud.get_entity_or_404(db, models.LabTest, test_id, owner_id)
-    old_status = test.status
     updated_test = crud.update_entity(db, test, payload)
     
-    if payload.status is not None and payload.status != old_status:
-        test_data = schemas.LabTestRead.model_validate(updated_test).model_dump(mode='json')
-        background_tasks.add_task(send_lab_test_webhook, test_data)
+    test_data = schemas.LabTestRead.model_validate(updated_test).model_dump(mode='json')
+    background_tasks.add_task(send_lab_test_webhook, test_data)
         
     return updated_test
 
