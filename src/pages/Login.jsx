@@ -95,7 +95,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
 
   const content = (
     <div
-      className="p-6 p-md-6 position-relative"
+      className="p-4 p-sm-5 position-relative"
       style={{
         maxWidth: '420px',
         width: '100%',
@@ -115,7 +115,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
         </button>
       )}
 
-      <div className="text-center mb-6">
+      <div className="text-center mb-4">
         <div className="d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #16a34a, #10b981)' }}>
           <i className="bi bi-hospital text-white" style={{ fontSize: '1.25rem' }} />
         </div>
@@ -225,7 +225,7 @@ const Login = ({ isModal = false, onClose, initialMode = 'login' }) => {
           </div>
         )}
 
-        <button type="submit" className="btn btn-primary w-100 py-2.5" disabled={isSubmitting} style={{ height: 44 }}>
+        <button type="submit" className="btn btn-primary w-100 py-2" disabled={isSubmitting} style={{ height: 44 }}>
           {isSubmitting ? (
             <span className="d-inline-flex align-items-center gap-2">
               <span className="spinner-border spinner-border-sm" role="status" />

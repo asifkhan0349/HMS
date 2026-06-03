@@ -34,8 +34,8 @@ const ForgotPassword = () => {
   return (
     <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-canvas-soft)' }}>
       <div className="premium-card" style={{ maxWidth: '420px', width: '100%' }}>
-        <div className="p-6">
-          <div className="text-center mb-6">
+        <div className="p-4 p-sm-5">
+          <div className="text-center mb-4">
             <div className="d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #16a34a, #10b981)' }}>
               <i className="bi bi-envelope-at text-white" style={{ fontSize: '1.25rem' }} />
             </div>
