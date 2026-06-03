@@ -660,9 +660,9 @@ const InvoiceGeneration = () => {
         borderColor: 'rgba(245, 158, 11, 0.35)',
       },
       'Partially Paid': {
-        color: '#3b82f6',
-        background: 'rgba(59, 130, 246, 0.12)',
-        borderColor: 'rgba(59, 130, 246, 0.35)',
+        color: '#059669',
+        background: 'rgba(5, 150, 105, 0.12)',
+        borderColor: 'rgba(5, 150, 105, 0.35)',
       },
       Paid: {
         color: '#10b981',
@@ -975,7 +975,7 @@ const InvoiceGeneration = () => {
                 onBlur={() => setTimeout(() => setPatientSuggestionsVisible(false), 150)}
               />
               {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
-                <div className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
+                <div className="list-group position-absolute w-100 " style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
                   {filteredPatients.map((patient) => (
                     <button
                       key={patient.id}

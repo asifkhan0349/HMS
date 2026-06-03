@@ -1,0 +1,27 @@
+$kind: http-request
+name: Get Record
+method: GET
+url: '{{baseUrl}}/api/records/{{recordId}}'
+order: 3000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response;
+      const json = res.json();
+      const SLA_MS = 2000;
+      pm.test("[Get Record] Status code is 200", () => { res.to.have.status(200); });
+      pm.test("[Get Record] Content-Type is application/json", () => { pm.expect(res.headers.get("Content-Type")).to.include("application/json"); });
+      pm.test("[Get Record] Response time is within SLA (" + SLA_MS + "ms)", () => { pm.expect(res.responseTime).to.be.below(SLA_MS); });
+      pm.test("[Get Record] Response body is a JSON object", () => { pm.expect(json).to.be.an("object"); });
+      pm.test("[Get Record] Response has 'id' matching recordId variable", () => {
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+          const storedId = pm.collectionVariables.get("recordId");
+          if (storedId) { pm.expect(String(json.id)).to.equal(storedId); }
+      });
+      pm.test("[Get Record] Response has required medical record fields", () => {
+          pm.expect(json).to.have.property("patient_id");
+          pm.expect(json).to.have.property("diagnosis");
+          pm.expect(json).to.have.property("treatment");
+      });

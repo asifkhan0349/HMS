@@ -631,17 +631,17 @@ const AmbulanceService = () => {
                             fontSize: '0.65rem',
                             background: 
                               amb.status === 'Available' ? 'rgba(16, 185, 129, 0.12)' :
-                              amb.status === 'Dispatched' ? 'rgba(59, 130, 246, 0.12)' :
+                              amb.status === 'Dispatched' ? 'rgba(22, 163, 74, 0.12)' :
                               amb.status === 'Maintenance' ? 'rgba(245, 158, 11, 0.12)' :
                               'rgba(107, 114, 128, 0.12)',
                             color: 
                               amb.status === 'Available' ? '#10b981' :
-                              amb.status === 'Dispatched' ? '#3b82f6' :
+                              amb.status === 'Dispatched' ? '#16a34a' :
                               amb.status === 'Maintenance' ? '#f59e0b' :
                               '#6b7280',
                             border: `1px solid ${
                               amb.status === 'Available' ? 'rgba(16, 185, 129, 0.25)' :
-                              amb.status === 'Dispatched' ? 'rgba(59, 130, 246, 0.25)' :
+                              amb.status === 'Dispatched' ? 'rgba(22, 163, 74, 0.25)' :
                               amb.status === 'Maintenance' ? 'rgba(245, 158, 11, 0.25)' :
                               'rgba(107, 114, 128, 0.25)'
                             }`

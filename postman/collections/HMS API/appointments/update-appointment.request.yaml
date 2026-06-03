@@ -1,0 +1,56 @@
+$kind: http-request
+name: Update Appointment
+method: PUT
+url: '{{baseUrl}}/api/appointments/{{appointmentId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "completed",
+      "notes": "Checkup done"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      const res    = pm.response;
+      const json   = res.json();
+      const SLA_MS = 2000;
+      
+      // â”€â”€â”€ 1. Status & Protocol â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      pm.test("[Update Appointment] Status code is 200", () => {
+          res.to.have.status(200);
+      });
+      
+      pm.test("[Update Appointment] Content-Type is application/json", () => {
+          pm.expect(res.headers.get("Content-Type")).to.include("application/json");
+      });
+      
+      pm.test("[Update Appointment] Response time is within SLA (" + SLA_MS + "ms)", () => {
+          pm.expect(res.responseTime).to.be.below(SLA_MS);
+      });
+      
+      // â”€â”€â”€ 2. Schema Assertions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      pm.test("[Update Appointment] Response body is a JSON object", () => {
+          pm.expect(json).to.be.an("object");
+      });
+      
+      pm.test("[Update Appointment] Response has 'id' as a number", () => {
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+      
+      pm.test("[Update Appointment] Updated status is reflected in response", () => {
+          pm.expect(json).to.have.property("status");
+          pm.expect(json.status).to.equal("completed");
+      });
+      
+      pm.test("[Update Appointment] Response has updated_at or created_at timestamp", () => {
+          const hasTimestamp = json.hasOwnProperty("updated_at") || json.hasOwnProperty("updatedAt") || json.hasOwnProperty("created_at");
+          pm.expect(hasTimestamp, "Expected a timestamp field").to.be.true;
+      });

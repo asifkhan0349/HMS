@@ -1,12 +1,12 @@
 import React from 'react';
 
-const Pagination = ({ 
-  currentPage, 
-  totalPages, 
-  onPageChange, 
-  rowsPerPage, 
-  onRowsPerPageChange, 
-  totalItems 
+const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  rowsPerPage,
+  onRowsPerPageChange,
+  totalItems
 }) => {
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalItems);
@@ -27,16 +27,16 @@ const Pagination = ({
   const pages = getVisiblePages();
 
   return (
-    <div className="p-4 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div className="px-4 py-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" style={{ borderColor: 'var(--accents-2)' }}>
       <div className="d-flex align-items-center flex-wrap gap-3">
-        <small className="text-muted">
+        <small className="text-muted" style={{ fontSize: '0.8rem' }}>
           Showing {startItem} to {endItem} of {totalItems} entries
         </small>
         <div className="d-flex align-items-center gap-2">
-          <small className="text-muted">Rows per page:</small>
-          <select 
-            className="form-select form-select-sm" 
-            style={{ width: 'auto' }}
+          <small className="text-muted" style={{ fontSize: '0.8rem' }}>Rows per page:</small>
+          <select
+            className="form-select form-select-sm"
+            style={{ width: 'auto', fontSize: '0.8rem' }}
             value={rowsPerPage}
             onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
           >
@@ -46,23 +46,23 @@ const Pagination = ({
           </select>
         </div>
       </div>
-      
+
       <nav aria-label="Pagination">
-        <ul className="pagination pagination-sm mb-0 flex-wrap justify-content-center mt-2 mt-md-0">
+        <ul className="pagination pagination-sm mb-0 flex-wrap justify-content-center">
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button 
-              className="page-link border" 
+            <button
+              className="page-link"
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
               Previous
             </button>
           </li>
-          
+
           {pages.map(page => (
             <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
-              <button 
-                className="page-link border" 
+              <button
+                className="page-link"
                 onClick={() => onPageChange(page)}
               >
                 {page}
@@ -71,8 +71,8 @@ const Pagination = ({
           ))}
 
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button 
-              className="page-link border" 
+            <button
+              className="page-link"
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >

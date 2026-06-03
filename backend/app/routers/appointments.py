@@ -30,10 +30,11 @@ public_router = APIRouter(
 )
 
 
-async def send_appointment_webhook(appointment_data: dict):
-    url = settings.APPOINTMENT_WEBHOOK_URL
+async def send_appointment_webhook(appointment_data: dict, is_booking: bool = False):
+    url = settings.APPOINTMENT_BOOKING_WEBHOOK_URL if is_booking else settings.APPOINTMENT_WEBHOOK_URL
+    webhook_name = "Booking" if is_booking else "Confirmation"
     if not url:
-        logger.warning("Appointment webhook URL not configured. Skipping.")
+        logger.warning(f"Appointment {webhook_name.lower()} webhook URL not configured. Skipping.")
         return
 
     headers = {"Content-Type": "application/json"}
@@ -41,9 +42,9 @@ async def send_appointment_webhook(appointment_data: dict):
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=appointment_data, headers=headers, timeout=10.0)
             response.raise_for_status()
-            logger.info(f"Webhook sent to {url} successfully: {response.status_code}")
+            logger.info(f"{webhook_name} webhook sent to {url} successfully: {response.status_code}")
     except Exception as e:
-        logger.error(f"Failed to send webhook to {url}: {e}")
+        logger.error(f"Failed to send {webhook_name.lower()} webhook to {url}: {e}")
 
 
 @router.get("", response_model=list[schemas.AppointmentRead])
@@ -88,7 +89,8 @@ def create_appointment(
     appointment_data = schemas.AppointmentRead.model_validate(appointment).model_dump(mode='json')
     background_tasks.add_task(
         send_appointment_webhook,
-        appointment_data
+        appointment_data,
+        is_booking=True
     )
     return appointment
 
@@ -125,7 +127,8 @@ def update_appointment(
     appointment_data = schemas.AppointmentRead.model_validate(updated_appointment).model_dump(mode='json')
     background_tasks.add_task(
         send_appointment_webhook,
-        appointment_data
+        appointment_data,
+        is_booking=False
     )
 
     return updated_appointment
@@ -186,6 +189,7 @@ def create_public_appointment(
     appointment_data = schemas.AppointmentRead.model_validate(appointment).model_dump(mode='json')
     background_tasks.add_task(
         send_appointment_webhook,
-        appointment_data
+        appointment_data,
+        is_booking=True
     )
     return appointment

@@ -36,16 +36,10 @@ _ALLOWED_ROLES = ["Admin", "Reception"]
 router = APIRouter(
     prefix="/invoices",
     tags=["invoices"],
-    dependencies=[Depends(require_roles(_ALLOWED_ROLES))]
 )
 
 
-@router.get("", response_model=list[schemas.InvoiceRead])
-def list_invoices(db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
-    return crud.list_entities(db, models.Invoice, owner_id)
-
-
-@router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(exclude_roles(["Patient"]))])
+@router.post("", response_model=schemas.InvoiceRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(_ALLOWED_ROLES)), Depends(exclude_roles(["Patient"]))])
 def create_invoice(
     payload: schemas.InvoiceCreate,
     background_tasks: BackgroundTasks,
@@ -124,11 +118,6 @@ def create_invoice(
     return entity
 
 
-@router.get("/{invoice_id}", response_model=schemas.InvoiceRead)
-def get_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), owner_id: int | None = Depends(get_owner_id_for_filtering)):
-    return crud.get_entity_or_404(db, models.Invoice, invoice_id, owner_id)
-
-
 @router.put("/{invoice_id}", response_model=schemas.InvoiceRead, dependencies=[Depends(require_roles(["Admin"]))])
 def update_invoice(
     invoice_id: PositiveId,
@@ -166,7 +155,7 @@ def update_invoice(
 @router.post(
     "/{invoice_id}/send-paid-email",
     response_model=schemas.InvoicePaidEmailResponse,
-    dependencies=[Depends(exclude_roles(["Patient"]))],
+    dependencies=[Depends(require_roles(_ALLOWED_ROLES)), Depends(exclude_roles(["Patient"]))],
 )
 def send_paid_invoice_email(
     invoice_id: PositiveId,
@@ -236,7 +225,7 @@ def delete_invoice(invoice_id: PositiveId, db: Session = Depends(get_db), owner_
 
 @router.get(
     "/{invoice_id}/download-pdf",
-    dependencies=[Depends(exclude_roles(["Patient", "Doctor", "Nurse"]))],
+    dependencies=[Depends(require_roles(_ALLOWED_ROLES)), Depends(exclude_roles(["Patient", "Doctor", "Nurse"]))],
 )
 def download_invoice_pdf_endpoint(
     invoice_id: PositiveId,
@@ -260,21 +249,17 @@ def download_invoice_pdf_endpoint(
     )
 
 
-# ── Public Router ─────────────────────────────────────────────────────────────
-public_router = APIRouter(
-    prefix="/invoices",
-    tags=["invoices – public"],
-)
+# ── Public/Unauthenticated Endpoints ──────────────────────────────────────────
 
-@public_router.get("/public", response_model=list[schemas.InvoiceRead])
+@router.get("", response_model=list[schemas.InvoiceRead])
 def list_public_invoices(db: Session = Depends(get_db)):
     return crud.list_entities(db, models.Invoice)
 
-@public_router.get("/public/{invoice_id}", response_model=schemas.InvoiceRead)
+@router.get("/{invoice_id}", response_model=schemas.InvoiceRead)
 def get_public_invoice(invoice_id: PositiveId, db: Session = Depends(get_db)):
     return crud.get_entity_or_404(db, models.Invoice, invoice_id)
 
-@public_router.get("/public/{invoice_id}/download-pdf")
+@router.get("/public/{invoice_id}/download-pdf")
 def download_public_invoice_pdf(invoice_id: PositiveId, db: Session = Depends(get_db)):
     invoice = crud.get_entity_or_404(db, models.Invoice, invoice_id)
     try:

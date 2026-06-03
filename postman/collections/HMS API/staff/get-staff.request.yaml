@@ -1,0 +1,27 @@
+$kind: http-request
+name: Get Staff
+method: GET
+url: '{{baseUrl}}/api/staff/{{staffId}}'
+order: 3000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response;
+      const json = res.json();
+      const SLA_MS = 2000;
+      pm.test("[Get Staff] Status code is 200", () => { res.to.have.status(200); });
+      pm.test("[Get Staff] Content-Type is application/json", () => { pm.expect(res.headers.get("Content-Type")).to.include("application/json"); });
+      pm.test("[Get Staff] Response time is within SLA (" + SLA_MS + "ms)", () => { pm.expect(res.responseTime).to.be.below(SLA_MS); });
+      pm.test("[Get Staff] Response body is a JSON object", () => { pm.expect(json).to.be.an("object"); });
+      pm.test("[Get Staff] Response has 'id' matching staffId variable", () => {
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+          const storedId = pm.collectionVariables.get("staffId");
+          if (storedId) { pm.expect(String(json.id)).to.equal(storedId); }
+      });
+      pm.test("[Get Staff] Response has required staff fields", () => {
+          pm.expect(json).to.have.property("name");
+          pm.expect(json).to.have.property("role");
+          pm.expect(json).to.have.property("email");
+      });

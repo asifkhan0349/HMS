@@ -1,0 +1,29 @@
+$kind: http-request
+name: List Records
+method: GET
+url: '{{baseUrl}}/api/records'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response;
+      const json = res.json();
+      const SLA_MS = 2000;
+      pm.test("[List Records] Status code is 200", () => { res.to.have.status(200); });
+      pm.test("[List Records] Content-Type is application/json", () => { pm.expect(res.headers.get("Content-Type")).to.include("application/json"); });
+      pm.test("[List Records] Response time is within SLA (" + SLA_MS + "ms)", () => { pm.expect(res.responseTime).to.be.below(SLA_MS); });
+      pm.test("[List Records] Response is an array", () => { pm.expect(json).to.be.an("array"); });
+      pm.test("[List Records] Each record has required fields", () => {
+          if (json.length > 0) {
+              const rec = json[0];
+              pm.expect(rec).to.have.property("id");
+              pm.expect(rec).to.have.property("patient_id");
+              pm.expect(rec).to.have.property("diagnosis");
+              pm.expect(rec.id).to.be.a("number");
+          }
+      });
+      pm.test("[List Records] Array items have numeric ids", () => {
+          json.forEach((item, idx) => { pm.expect(item.id, "item[" + idx + "].id").to.be.a("number"); });
+      });
+      if (json.length > 0) { pm.collectionVariables.set("lastResourceId", String(json[0].id)); }

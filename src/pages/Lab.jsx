@@ -215,13 +215,13 @@ const Lab = () => {
           <p className="text-white opacity-75 mb-0">Monitor clinical pathology and bio-telemetry results.</p>
         </div>
         {!isPatient && (
-          <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
+          <button className="btn btn-primary px-4 py-2 rounded-3 " onClick={() => setIsModalOpen(true)}>
             <i className="bi bi-plus-square me-2"></i>Order New Test
           </button>
         )}
       </div>
 
-      <div className="glass-card p-0 overflow-hidden shadow-lg border-0">
+      <div className="glass-card p-0 overflow-hidden  border-0">
         <div className="p-4 border-bottom d-flex justify-content-between align-items-center">
           <h5 className="fw-bold mb-0">Active Diagnostic Queue</h5>
           <div className="text-white opacity-75 small">Processing now: {labStats.processing}</div>
@@ -355,7 +355,7 @@ const Lab = () => {
               onBlur={() => setTimeout(() => setPatientSuggestionsVisible(false), 150)}
             />
             {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
-              <div className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
+              <div className="list-group position-absolute w-100 " style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
                 {filteredPatients.map((patient) => (
                   <button
                     key={patient.id}

@@ -167,12 +167,12 @@ const Staff = () => {
           <h2 className="fw-bold mb-0">Human Resources & Staffing</h2>
           <p className="text-muted mb-0">Monitor clinical personnel deployment and shifts.</p>
         </div>
-        <button className="btn btn-primary px-4 py-2 rounded-3 shadow-sm" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary px-4 py-2 rounded-3 " onClick={() => setIsModalOpen(true)}>
           <i className="bi bi-person-plus-fill me-2"></i>Add Staff Member
         </button>
       </div>
 
-      <div className="glass-card p-0 overflow-hidden shadow-lg border-0">
+      <div className="glass-card p-0 overflow-hidden  border-0">
         <div className="p-4 border-bottom d-flex justify-content-between align-items-center">
           <h5 className="fw-bold mb-0">Active Personnel Directory</h5>
           <div className="btn-group">

@@ -1,0 +1,36 @@
+$kind: http-request
+name: Signup
+method: POST
+url: '{{baseUrl}}/api/auth/signup'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "testuser",
+      "email": "test@hospital.com",
+      "password": "Test@1234",
+      "role": "admin"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // --- Helpers ---
+      const res    = pm.response;
+      const json   = res.json();
+      const SLA_MS = 2000;
+      // --- 1. Status & Protocol ---
+      pm.test("[Signup] Status code is 201", () => { res.to.have.status(201); });
+      pm.test("[Signup] Content-Type is application/json", () => { pm.expect(res.headers.get("Content-Type")).to.include("application/json"); });
+      pm.test("[Signup] Response time is within SLA (" + SLA_MS + "ms)", () => { pm.expect(res.responseTime).to.be.below(SLA_MS); });
+      // --- 2. Schema Assertions ---
+      pm.test("[Signup] Response body is a JSON object", () => { pm.expect(json).to.be.an("object"); });
+      pm.test("[Signup] Response contains 'access_token' field", () => { pm.expect(json).to.have.property("access_token"); pm.expect(json.access_token).to.be.a("string").and.not.empty; });
+      pm.test("[Signup] Response contains 'user' object", () => { pm.expect(json).to.have.property("user"); pm.expect(json.user).to.be.an("object"); });
+      pm.test("[Signup] User object has required fields (id, username, email)", () => { pm.expect(json.user).to.have.property("id"); pm.expect(json.user).to.have.property("username"); pm.expect(json.user).to.have.property("email"); pm.expect(json.user.username).to.be.a("string").and.not.empty; pm.expect(json.user.email).to.be.a("string").and.not.empty; });
+      // --- 3. Variable Chaining ---
+      pm.test("[Signup] authToken is set in collection variables", () => { pm.expect(json.access_token).to.be.a("string").and.not.empty; pm.collectionVariables.set("authToken", json.access_token); pm.expect(pm.collectionVariables.get("authToken")).to.equal(json.access_token); });

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ArrowRight, CheckCircle2 } from "lucide-react"
+import { ArrowRight, ShieldCheck, Zap, TrendingUp } from "lucide-react"
 import { Button } from "../ui/button"
 import { ScrollReveal } from "../ui/effects/scroll-reveal"
 
@@ -8,140 +8,122 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.12,
       delayChildren: 0.2,
     },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
   },
 }
 
 export function HeroSection({ onAuthRedirect }) {
   return (
-    <section id="home" className="relative w-full pt-40 pb-20 md:pt-56 md:pb-32 overflow-hidden bg-white">
-      {/* Subtle Background elements */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[120px]" />
-      </div>
+    <section id="home" className="relative w-full pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden bg-background">
+      <div className="mesh-gradient-hero absolute inset-0" />
 
       <div className="section-container relative z-10">
-        <div className="grid gap-16 lg:grid-cols-2 items-center">
+        <div className="mx-auto max-w-5xl text-center">
           <motion.div
-            className="flex flex-col space-y-10"
+            className="flex flex-col items-center space-y-8"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            <motion.div className="space-y-6" variants={itemVariants}>
-              <div className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold bg-black text-white">
-                <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse" />
-                Built for multi-site healthcare teams
+            <motion.div variants={itemVariants}>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                Now Live — AI-driven clinical logistics & pharmacy platform
               </div>
-              
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9] text-black">
-                Unified <span className="gradient-text">Hospital</span> <br />
-                Operations.
+            </motion.div>
+
+            <motion.div className="space-y-6 max-w-4xl" variants={itemVariants}>
+              <h1 className="text-4xl font-bold leading-tight tracking-tight text-text-secondary">
+                GoMeds AI — Smart clinical logistics,{" "}
+                <span className="text-gradient-premium">reimagined.</span>
               </h1>
-              
-              <p className="max-w-[540px] text-lg md:text-xl text-muted-foreground leading-relaxed font-medium">
-                The modern operating system for healthcare providers. 
-                Manage patients, billing, and pharmacy in one seamless, high-performance workspace.
+
+              <p className="mx-auto max-w-[640px] text-base text-text-tertiary leading-relaxed">
+                A unified operating system for healthcare providers and teams — connecting medication planning, automated pharmacy logistics, drug safety analysis, and clinical workflows in one secure platform.
               </p>
             </motion.div>
 
-            <motion.div className="flex flex-col gap-4 sm:flex-row" variants={itemVariants}>
-              <Button 
-                size="lg" 
-                className="pill-button bg-primary text-white hover:bg-primary/90 text-lg h-14"
+            <motion.div className="flex flex-col gap-4 sm:flex-row w-full max-w-md mx-auto" variants={itemVariants}>
+              <Button
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/95 active:scale-[0.98] disabled:opacity-50 transition-all h-12 text-sm rounded-xl px-8 shadow-md flex-1 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => onAuthRedirect('signup')}
               >
-                Get Started for Free
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Request a Demo
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="pill-button text-lg h-14 border-2 border-black/10 hover:bg-black/5 font-bold"
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 text-sm rounded-xl px-8 border-border bg-white/5 text-text-secondary hover:bg-white/10 active:scale-[0.98] disabled:opacity-50 transition-all flex-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => {
                   document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" })
                 }}
               >
-                Watch Demo
+                <svg className="mr-2 h-4 w-4 fill-current text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                Watch Overview
               </Button>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="pt-4 flex flex-wrap gap-8">
-              {["ABDM-ready workflows", "Security-first architecture", "Operational support model"].map((text) => (
-                <div key={text} className="flex items-center text-sm font-bold text-black/60">
-                  <CheckCircle2 className="h-4 w-4 text-primary mr-2" />
+            <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-x-8 gap-y-3 pt-4">
+              {[
+                { icon: ShieldCheck, text: "HIPAA & GxP compliant" },
+                { icon: Zap, text: "99.9% uptime logistics" },
+                { icon: TrendingUp, text: "45% reduction in prescription errors" },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-2 text-xs font-semibold text-text-tertiary">
+                  <Icon className="h-4 w-4 text-primary" />
                   {text}
                 </div>
               ))}
             </motion.div>
           </motion.div>
 
-          <ScrollReveal delay={0.4} className="relative">
-            <div className="relative z-20 group">
-              {/* Device Frame Simulation */}
-              <div className="relative overflow-hidden rounded-[2rem] border-[8px] border-black shadow-[0_40px_100px_rgba(0,0,0,0.2)] bg-card aspect-[16/10]">
-                <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 flex items-center justify-center">
-                  <div className="w-full h-full p-8 space-y-6">
-                    {/* Skeleton UI for Dashboard */}
-                    <div className="flex items-center justify-between border-b pb-4">
-                      <div className="h-4 w-32 bg-gray-200 rounded-full" />
-                      <div className="flex gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gray-100" />
-                        <div className="h-8 w-8 rounded-full bg-gray-100" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-6">
-                      <div className="h-32 rounded-2xl bg-primary/5 border border-primary/10 flex flex-col p-4 justify-between">
-                        <div className="h-2 w-12 bg-primary/20 rounded-full" />
-                        <div className="h-6 w-16 bg-primary/40 rounded-full" />
-                      </div>
-                      <div className="h-32 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col p-4 justify-between">
-                        <div className="h-2 w-12 bg-gray-200 rounded-full" />
-                        <div className="h-6 w-16 bg-gray-300 rounded-full" />
-                      </div>
-                      <div className="h-32 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col p-4 justify-between">
-                        <div className="h-2 w-12 bg-gray-200 rounded-full" />
-                        <div className="h-6 w-16 bg-gray-300 rounded-full" />
-                      </div>
-                    </div>
-                    <div className="h-40 rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
-                      <div className="space-y-3">
-                        <div className="h-3 w-1/2 bg-gray-100 rounded-full" />
-                        <div className="h-3 w-full bg-gray-50 rounded-full" />
-                        <div className="h-3 w-4/5 bg-gray-50 rounded-full" />
-                        <div className="h-3 w-3/4 bg-gray-50 rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <ScrollReveal delay={0.5} className="relative mt-16">
+            <div className="relative">
+              <div className="premium-card-lg overflow-hidden border border-border/20 rounded-2xl bg-card">
+                <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent z-10" />
+                <img
+                  src="/previews/dashboard_desktop.png"
+                  alt="GoMeds AI dashboard showing clinical operations, patient flow, and pharmacy logs"
+                  className="w-full h-auto object-cover"
+                  fetchPriority="high"
+                />
               </div>
-              
-              {/* Floating Badge */}
-              <motion.div 
-                className="absolute -bottom-6 -right-6 bg-white border-2 border-black rounded-2xl p-6 shadow-2xl z-30"
+
+              <motion.div
+                className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 premium-card p-4 md:p-5 bg-card/90 backdrop-blur-md shadow-lg hidden md:block"
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 1, duration: 0.5 }}
+                transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="text-3xl font-black text-black">24/7</div>
-                <div className="text-xs font-bold text-muted-foreground uppercase">Operational Visibility</div>
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="w-8 h-8 rounded-lg bg-gradient-premium border-2 border-card flex items-center justify-center text-[10px] font-bold text-white">
+                        {['JD', 'SK', 'MR'][i-1]}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-text-secondary">Trusted by 500+ clinics</div>
+                    <div className="text-[10px] text-text-tertiary">Across 12 countries</div>
+                  </div>
+                </div>
               </motion.div>
-
-              {/* Decorative elements */}
-              <div className="absolute -z-10 -inset-4 bg-primary/20 rounded-[2.5rem] blur-2xl group-hover:bg-primary/30 transition-colors" />
             </div>
           </ScrollReveal>
         </div>

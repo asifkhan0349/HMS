@@ -1,54 +1,53 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, X } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { ScrollReveal } from '../ui/effects/scroll-reveal';
 
 const plans = [
   {
-    name: "Clinic",
-    price: "49",
-    description: "Perfect for single-doctor clinics and small practices.",
+    name: "Smart Clinic",
+    price: "Demo",
+    description: "For independent practices needing EMR, prescription audits, basic inventory, and billing workflows.",
     features: [
-      "Patient Registration",
-      "OPD Management",
-      "Digital Prescriptions",
-      "Basic Billing",
-      "Email Support",
-      { name: "Inventory Management", included: false },
-      { name: "IPD / Ward Management", included: false },
+      "Clinical Patient Directory",
+      "AI Prescription Audits",
+      "Standard Invoicing & Cash Receipts",
+      "Email & Slack Support",
+      "Basic Stock Control Logs",
     ],
-    cta: "Start Free Trial",
+    cta: "Request Demo",
     highlighted: false,
   },
   {
-    name: "Hospital",
-    price: "199",
-    description: "Advanced features for medium to large hospitals.",
+    name: "Network Hospital",
+    price: "Quote",
+    description: "For multi-department networks that need clinical assistance, pharmacy ERP, diagnostics AI, and insurance audits.",
+    popular: true,
     features: [
-      "Everything in Clinic",
-      "IPD & Ward Control",
-      "Pharmacy & Inventory",
-      "Lab Integration",
-      "Insurance Claims",
-      "Priority Support",
-      "ABDM Certification",
+      "Everything in Clinic, plus:",
+      "IPD Ward Allocation Logs",
+      "Pharmacy ERP & Expiry Monitor",
+      "Lab Integration & Pathology AI",
+      "Automated Claims Auditing",
+      "Priority SLA & Support",
+      "GxP Regulatory Checklists",
     ],
     cta: "Book a Demo",
     highlighted: true,
   },
   {
-    name: "Enterprise",
+    name: "Global Enterprise",
     price: "Custom",
-    description: "Tailored solutions for medical chains and networks.",
+    description: "For pharmacy chains, distributors, wholesale logistics suppliers, and multi-site groups.",
     features: [
-      "Multiple Locations",
-      "Centralized Dashboard",
-      "Data Migration",
-      "Dedicated AM",
-      "Custom SLA",
-      "On-Premise Option",
-      "White-labeling",
+      "Everything in Hospital, plus:",
+      "Wholesale Supplier Pipelines",
+      "Route Optimizer Telemetry Logs",
+      "Dedicated Technical Account Manager",
+      "Custom GxP Compliance Profiles",
+      "White-labeled Patient Interface",
+      "Dedicated API Infrastructure",
     ],
     cta: "Contact Sales",
     highlighted: false,
@@ -57,70 +56,72 @@ const plans = [
 
 export function PricingSection({ onAuthRedirect }) {
   return (
-    <section id="pricing" className="py-32 bg-gray-50 relative overflow-hidden">
+    <section id="pricing" className="py-24 md:py-32 relative overflow-hidden bg-background">
       <div className="section-container">
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-16">
           <ScrollReveal>
-            <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-8 text-black">
-              Simple, <span className="text-black/40">transparent pricing.</span>
+            <div className="mono-label mb-4 flex items-center justify-center gap-2">
+              <span className="w-1.5 h-4 rounded-full bg-gradient-premium" />
+              PRICING
+            </div>
+            <h2 className="text-4xl font-bold mb-4 leading-tight tracking-tight text-text-secondary">
+              Pricing built around{" "}
+              <span className="text-gradient-premium">facility scope.</span>
             </h2>
-            <p className="text-xl text-muted-foreground font-medium">
-              Choose the plan that fits your facility. No hidden fees, cancel anytime.
+            <p className="text-base text-text-tertiary leading-relaxed">
+              Transparent pricing based on facility size, modules, deployment model, and support needs.
             </p>
           </ScrollReveal>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <ScrollReveal key={index} delay={index * 0.1}>
-              <div 
-                className={`flex flex-col h-full p-10 rounded-[2.5rem] border-2 transition-all duration-300 ${
-                  plan.highlighted 
-                  ? "bg-black text-white border-black shadow-2xl scale-105" 
-                  : "bg-white text-black border-black/5 hover:border-black/10"
+              <div
+                className={`relative flex flex-col h-full p-8 rounded-sm border-2 transition-all duration-300 ${
+                  plan.highlighted
+                    ? "bg-text-secondary text-background border-text-secondary shadow-xl scale-[1.02] lg:scale-105"
+                    : "bg-card text-text-secondary border-border/10 hover:border-primary/30 shadow-sm"
                 }`}
               >
-                <div className="mb-10">
-                  <h3 className="text-2xl font-black mb-4">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black tracking-tight">
-                      {plan.price !== "Custom" && "Rs. "}
-                      {plan.price}
-                    </span>
-                    {plan.price !== "Custom" && <span className="text-muted-foreground font-bold">/mo</span>}
+                {plan.popular && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-premium text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                    Most Popular
                   </div>
-                  <p className={`mt-6 font-medium ${plan.highlighted ? "text-white/60" : "text-muted-foreground"}`}>
+                )}
+
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold mb-2">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1.5 mb-4">
+                    <span className="text-3xl font-bold tracking-tight">{plan.price}</span>
+                    {plan.price === "Quote" && <span className={plan.highlighted ? "text-background/60" : "text-text-tertiary"}>-based</span>}
+                  </div>
+                  <p className={`text-sm leading-relaxed ${plan.highlighted ? "text-background/65" : "text-text-tertiary"}`}>
                     {plan.description}
                   </p>
                 </div>
 
-                <ul className="space-y-4 mb-10 flex-grow p-0 list-none">
-                  {plan.features.map((feature, fIndex) => {
-                    const isIncluded = typeof feature === 'string' || feature.included !== false;
-                    const name = typeof feature === 'string' ? feature : feature.name;
-                    
-                    return (
-                      <li key={fIndex} className={`flex items-start gap-3 text-sm font-bold ${!isIncluded && "opacity-40"}`}>
-                        {isIncluded ? (
-                          <Check className={`h-5 w-5 ${plan.highlighted ? "text-primary" : "text-primary"}`} />
-                        ) : (
-                          <X className="h-5 w-5" />
-                        )}
-                        <span>{name}</span>
-                      </li>
-                    )
-                  })}
+                <ul className="space-y-3 mb-8 flex-grow p-0 list-none">
+                  {plan.features.map((feature, fIndex) => (
+                    <li key={fIndex} className="flex items-start gap-3 text-sm">
+                      <Check className={`h-4 w-4 mt-0.5 shrink-0 ${
+                        plan.highlighted ? "text-background" : "text-primary"
+                      }`} />
+                      <span className={plan.highlighted ? "text-background/85" : "text-text-secondary"}>{feature}</span>
+                    </li>
+                  ))}
                 </ul>
 
-                <Button 
-                  className={`pill-button h-14 text-lg w-full ${
-                    plan.highlighted 
-                    ? "bg-primary text-white hover:bg-primary/90" 
-                    : "bg-black text-white hover:bg-black/90"
+                <Button
+                  className={`h-11 text-xs font-bold rounded-xl w-full flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    plan.highlighted
+                      ? "bg-background text-text-secondary hover:bg-background/90"
+                      : "bg-text-secondary text-background hover:bg-text-secondary/85"
                   }`}
                   onClick={() => onAuthRedirect('signup')}
                 >
                   {plan.cta}
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </ScrollReveal>

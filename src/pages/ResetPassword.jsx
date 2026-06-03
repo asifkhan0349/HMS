@@ -53,63 +53,72 @@ const ResetPassword = () => {
 
   if (!token) {
     return (
-      <div className="login-page d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-background)' }}>
-        <div className="p-5 glass-card text-center" style={{ maxWidth: '460px', width: '100%', borderRadius: '12px' }}>
-          <i className="bi bi-exclamation-triangle text-danger display-1 mb-4"></i>
-          <h3 className="fw-bold">Invalid Link</h3>
-          <p className="text-muted">The password reset link is invalid or has expired.</p>
-          <button className="btn btn-primary w-100 mt-3" onClick={() => navigate('/forgot-password')}>Request New Link</button>
+      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-canvas-soft)' }}>
+        <div className="premium-card" style={{ maxWidth: '420px', width: '100%' }}>
+          <div className="p-6 text-center">
+            <div className="d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--danger-alpha)' }}>
+              <i className="bi bi-exclamation-triangle text-danger" style={{ fontSize: '1.5rem' }} />
+            </div>
+            <h4 className="fw-bold mb-2" style={{ color: 'var(--geist-foreground)' }}>Invalid Link</h4>
+            <p className="text-muted small mb-4">The password reset link is invalid or has expired.</p>
+            <button className="btn btn-primary w-100" style={{ height: 44 }} onClick={() => navigate('/forgot-password')}>Request New Link</button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="login-page d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-background)' }}>
-      <div className="p-4 p-md-5 glass-card shadow-lg" style={{ maxWidth: '460px', width: '100%', borderRadius: '12px' }}>
-        <div className="text-center mb-5">
-          <div className="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px' }}>
-            <i className="bi bi-shield-lock-fill fs-2"></i>
+    <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-canvas-soft)' }}>
+      <div className="premium-card" style={{ maxWidth: '420px', width: '100%' }}>
+        <div className="p-6">
+          <div className="text-center mb-6">
+            <div className="d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #16a34a, #10b981)' }}>
+              <i className="bi bi-shield-lock-fill text-white" style={{ fontSize: '1.25rem' }} />
+            </div>
+            <h4 className="fw-bold mb-1" style={{ color: 'var(--geist-foreground)' }}>Reset Password</h4>
+            <p className="text-muted small">Choose a new secure password for your account.</p>
           </div>
-          <h3 className="fw-bold mb-2">Reset Password</h3>
-          <p className="text-muted small">Choose a new secure password for your account.</p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="new-password" className="form-label required-label">New Password</label>
+              <input
+                id="new-password"
+                type="password"
+                className={`form-control ${validationErrors.password ? 'is-invalid' : ''}`}
+                placeholder="Min. 8 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="confirm-new-password" className="form-label required-label">Confirm New Password</label>
+              <input
+                id="confirm-new-password"
+                type="password"
+                className={`form-control ${validationErrors.confirmPassword ? 'is-invalid' : ''}`}
+                placeholder="Repeat new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary w-100 py-2" disabled={isSubmitting} style={{ height: 44 }}>
+              {isSubmitting ? (
+                <span className="d-inline-flex align-items-center gap-2">
+                  <span className="spinner-border spinner-border-sm" role="status" />
+                  Updating...
+                </span>
+              ) : 'Reset Password'}
+            </button>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="new-password" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">New Password</label>
-            <input
-              id="new-password"
-              type="password"
-              className={`form-control py-2 ${validationErrors.password ? 'is-invalid' : ''}`}
-              placeholder="Min. 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="confirm-new-password" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">Confirm New Password</label>
-            <input
-              id="confirm-new-password"
-              type="password"
-              className={`form-control py-2 ${validationErrors.confirmPassword ? 'is-invalid' : ''}`}
-              placeholder="Repeat new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn btn-success w-100 py-2 mt-2 text-white fw-bold" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <><span className="spinner-border spinner-border-sm me-2"></span>Updating...</>
-            ) : (
-              'Reset Password'
-            )}
-          </button>
-        </form>
       </div>
     </div>
   );

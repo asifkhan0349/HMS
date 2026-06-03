@@ -1,72 +1,89 @@
-import { Hospital, Globe, Mail, ExternalLink } from "lucide-react"
+import { Pill } from "lucide-react"
+
+const footerLinks = {
+  Product: [
+    { name: "Features", href: "#features" },
+    { name: "Products", href: "#products" },
+    { name: "Solutions", href: "#solutions" },
+    { name: "Pricing", href: "#pricing" },
+    { name: "ROI Guide", href: "#roi-guide" },
+  ],
+  Company: [
+    { name: "About", href: "#about" },
+    { name: "Careers", href: "#careers" },
+    { name: "Blog", href: "#blog" },
+    { name: "Contact", href: "#contact" },
+  ],
+  Legal: [
+    { name: "Privacy", href: "#privacy" },
+    { name: "Terms", href: "#terms" },
+    { name: "Compliance", href: "#compliance" },
+    { name: "Security", href: "#security" },
+  ],
+}
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-black text-white py-12 md:py-16">
+    <footer className="bg-surface-muted border-t border-border/10 text-text-secondary pt-20 pb-10">
       <div className="section-container">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-16 mb-24">
-          <div className="col-span-2 space-y-8">
-            <div className="flex items-center space-x-2 no-underline text-white">
-              <Hospital className="h-8 w-8 text-primary" />
-              <span className="font-black text-2xl tracking-tight">HMS</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10 mb-16">
+          <div className="col-span-2 space-y-6">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-premium text-white">
+                <Pill className="h-5 w-5" />
+              </div>
+              <span className="font-bold text-xl tracking-tight text-text-secondary">GoMeds AI</span>
             </div>
-            <p className="text-xl text-white/60 font-medium leading-relaxed max-w-sm">
-              The modern operating system for healthcare providers. Unified, secure, and built for humans.
+            <p className="text-text-tertiary text-sm leading-relaxed max-w-xs">
+              A unified AI-powered healthcare logistics, smart medication planning, and clinical assistant platform for teams and decision-makers.
             </p>
-            <div className="flex gap-6 items-center">
-              <a href="#" className="text-white/40 hover:text-white transition-colors"><Globe className="h-6 w-6" /></a>
-              <a href="#" className="text-white/40 hover:text-white transition-colors"><Mail className="h-6 w-6" /></a>
+            <div className="flex gap-4">
+              {["TW", "LI", "GH", "YT"].map((s) => (
+                <a
+                  key={s}
+                  href="#"
+                  className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-text-tertiary hover:text-text-secondary hover:bg-white/10 transition-all text-xs font-semibold no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  aria-label={`GoMeds AI on ${s}`}
+                >
+                  {s}
+                </a>
+              ))}
             </div>
           </div>
-          
-          <div className="col-span-1">
-            <h4 className="font-black mb-8 text-white uppercase tracking-widest text-sm">Product</h4>
-            <ul className="space-y-4 font-bold text-white/40 list-none p-0">
-              <li><a href="#features" className="hover:text-white transition-colors no-underline">Features</a></li>
-              <li><a href="#solutions" className="hover:text-white transition-colors no-underline">Solutions</a></li>
-              <li><a href="#pricing" className="hover:text-white transition-colors no-underline">Pricing</a></li>
-              <li><a href="#roi-guide" className="hover:text-white transition-colors no-underline">ROI Guide</a></li>
-            </ul>
-          </div>
-          
-          <div className="col-span-1">
-            <h4 className="font-black mb-8 text-white uppercase tracking-widest text-sm">Company</h4>
-            <ul className="space-y-4 font-bold text-white/40 list-none p-0">
-              <li><a href="#about" className="hover:text-white transition-colors no-underline">About</a></li>
-              <li><a href="#careers" className="hover:text-white transition-colors no-underline">Careers</a></li>
-              <li><a href="#blog" className="hover:text-white transition-colors no-underline">Blog</a></li>
-              <li><a href="#contact" className="hover:text-white transition-colors no-underline">Contact</a></li>
-            </ul>
-          </div>
-          
-          <div className="col-span-1">
-            <h4 className="font-black mb-8 text-white uppercase tracking-widest text-sm">Legal</h4>
-            <ul className="space-y-4 font-bold text-white/40 list-none p-0">
-              <li><a href="#privacy" className="hover:text-white transition-colors no-underline">Privacy</a></li>
-              <li><a href="#terms" className="hover:text-white transition-colors no-underline">Terms</a></li>
-              <li><a href="#hipaa" className="hover:text-white transition-colors no-underline">HIPAA</a></li>
-              <li><a href="#security" className="hover:text-white transition-colors no-underline">Security</a></li>
-            </ul>
-          </div>
+
+          {Object.entries(footerLinks).map(([title, links]) => (
+            <div key={title} className="col-span-1">
+              <h4 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-5">{title}</h4>
+              <ul className="space-y-3 p-0 list-none">
+                {links.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-text-tertiary hover:text-text-secondary transition-colors no-underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="text-lg font-bold text-white/20">
-            &copy; {currentYear} HMS OS. All rights reserved.
+
+        <div className="pt-8 border-t border-border/10 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-sm text-text-tertiary">
+            &copy; {currentYear} GoMeds AI. All rights reserved.
           </div>
-          <div className="flex gap-8 items-center font-bold text-white/20">
-            <a href="#" className="hover:text-white transition-colors no-underline">Status</a>
-            <a href="#" className="hover:text-white transition-colors no-underline">Security</a>
-            <a href="#" className="hover:text-white transition-colors no-underline">Compliance</a>
+          <div className="flex gap-6 text-sm text-text-tertiary">
+            <a href="#" className="hover:text-text-secondary transition-colors no-underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Status</a>
+            <a href="#" className="hover:text-text-secondary transition-colors no-underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Security</a>
+            <a href="#" className="hover:text-text-secondary transition-colors no-underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Compliance</a>
+            <a href="#" className="hover:text-text-secondary transition-colors no-underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Sitemap</a>
           </div>
         </div>
       </div>
     </footer>
   )
 }
-
-
-
-

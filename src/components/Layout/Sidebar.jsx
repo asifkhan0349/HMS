@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 
 const menuItems = [
-  { title: 'HMS Product', path: '/products', icon: 'bi bi-grid-1x2', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'] },
+  { title: 'HMS Workspaces', path: '/products', icon: 'bi bi-grid-1x2', allowedRoles: ['Admin', 'Doctor', 'Nurse', 'Patient', 'Reception', 'Pharmacist', 'Lab Technician', 'Accountant'] },
   { title: 'Command Center', path: '/dashboard', icon: 'bi bi-activity', adminOnly: true },
   { title: 'User Management', path: '/user-management', icon: 'bi bi-shield-check', adminOnly: true },
   { title: 'Patient Directory', path: '/patients', icon: 'bi bi-people', allowedRoles: ['Admin', 'Doctor', 'Reception'] },
@@ -35,24 +35,28 @@ const Sidebar = ({ isOpen, onClose }) => {
   const filteredMenuItems = menuItems.filter(item => {
     if (item.adminOnly) return user?.role === 'Admin';
     if (item.allowedRoles) return item.allowedRoles.includes(user?.role);
-    return true; // no restriction — show to all authenticated users
+    return true;
   });
 
   return (
-    <aside className={`sidebar d-flex flex-column border-end ${isOpen ? 'sidebar-open' : ''}`}>
+    <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <button className="sidebar-close-btn" onClick={onClose} aria-label="Close menu">
-        <i className="bi bi-x-lg" style={{ fontSize: '0.85rem' }} aria-hidden="true"></i>
+        <i className="bi bi-x-lg" style={{ fontSize: '0.85rem' }} />
       </button>
 
-      <div className="p-4 mb-2">
-        <h4 className="fw-bold mb-0">
-          <i className="bi bi-hospital me-2" aria-hidden="true"></i>
-          <span>HMS Core</span>
-        </h4>
-        <small className="text-muted">v1.0.0 Premium</small>
+      <div className="sidebar-brand">
+        <div className="sidebar-brand-inner">
+          <div className="sidebar-brand-icon">
+            <i className="bi bi-hospital" />
+          </div>
+          <div>
+            <div className="sidebar-brand-text">HMS Core</div>
+            <div className="sidebar-brand-sub">v1.0.0 Premium</div>
+          </div>
+        </div>
       </div>
 
-      <nav className="flex-grow-1 overflow-y-auto custom-scrollbar px-2" aria-label="Main Navigation">
+      <nav className="sidebar-nav" aria-label="Main Navigation">
         {filteredMenuItems.map((item) => (
           <NavLink
             key={item.path}
@@ -60,16 +64,16 @@ const Sidebar = ({ isOpen, onClose }) => {
             className={({ isActive }) => `nav-link-custom ${isActive ? 'active' : ''}`}
             onClick={handleNavClick}
           >
-            <i className={item.icon} aria-hidden="true"></i>
+            <i className={item.icon} />
             <span>{item.title}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-4 mt-auto">
-        <div className="sidebar-footer-card p-3">
-          <div className="d-flex align-items-center mb-3 pb-3 border-bottom border-white border-opacity-10">
-            <div className="overflow-hidden">
+      <div className="sidebar-footer-section">
+        <div className="sidebar-user-card">
+          <div className="d-flex align-items-center mb-3 pb-3 border-bottom" style={{ borderColor: 'var(--accents-2)' }}>
+            <div style={{ minWidth: 0 }}>
               <h6 className="mb-0 text-truncate small fw-bold">{user?.name || 'Signed-out user'}</h6>
               <small className="text-muted" style={{ fontSize: '0.65rem' }}>
                 {user?.role || 'No role'}
@@ -78,47 +82,36 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="ms-auto d-flex align-items-center gap-2">
               <Link
                 to="/settings"
-                className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
+                className="btn btn-sm btn-link text-muted p-1"
                 title="Account Settings"
                 aria-label="Account Settings"
                 onClick={handleNavClick}
               >
-                <i className="bi bi-gear fs-5" aria-hidden="true"></i>
+                <i className="bi bi-gear fs-5" />
               </Link>
               <button
-                className="btn btn-sm btn-link text-muted p-0 hover-opacity-100"
+                className="btn btn-sm btn-link text-muted p-1"
                 onClick={logout}
                 title="Sign Out"
                 aria-label="Sign Out"
               >
-                <i className="bi bi-box-arrow-right fs-5" aria-hidden="true"></i>
+                <i className="bi bi-box-arrow-right fs-5" />
               </button>
             </div>
           </div>
 
           <div className="d-flex align-items-center mb-2">
-            <span className="pulsing-dot me-2" aria-hidden="true"></span>
-            <small className="fw-bold text-muted" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>
-              CORE OPERATIONAL
+            <span className="pulsing-dot me-2" />
+            <small className="fw-bold text-muted" style={{ fontSize: '0.65rem', letterSpacing: '0.5px' }}>
+              SYSTEM HEALTH
             </small>
           </div>
-          <div className="progress mb-2" style={{ height: '4px' }}>
-            <div
-              className="progress-bar"
-              role="progressbar"
-              style={{ width: '92%' }}
-              aria-valuenow="92"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            ></div>
+          <div className="progress mb-1" style={{ height: '3px' }}>
+            <div className="progress-bar" role="progressbar" style={{ width: '92%' }} />
           </div>
           <div className="d-flex justify-content-between">
-            <small className="text-muted" style={{ fontSize: '0.65rem' }}>
-              System Health
-            </small>
-            <small className="fw-bold" style={{ fontSize: '0.65rem' }}>
-              OPTIMAL
-            </small>
+            <small className="text-muted" style={{ fontSize: '0.6rem' }}>Performance</small>
+            <small className="fw-bold" style={{ fontSize: '0.6rem', color: 'var(--success)' }}>OPTIMAL</small>
           </div>
         </div>
       </div>

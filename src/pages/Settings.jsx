@@ -152,13 +152,13 @@ const Settings = () => {
       <div className="row g-5">
         {/* Profile Section */}
         <div className="col-xl-7">
-          <div className="glass-card p-5 border-0 shadow-sm position-relative overflow-hidden h-100" style={{ background: 'var(--geist-background)', borderRadius: '24px' }}>
+          <div className="glass-card p-5 border-0  position-relative overflow-hidden h-100" style={{ background: 'var(--geist-background)', borderRadius: '24px' }}>
             <div className="position-absolute top-0 end-0 p-4 opacity-10">
               <i className="bi bi-person-gear display-1"></i>
             </div>
             
             <div className="d-flex align-items-center mb-5">
-              <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4 shadow-lg" style={{ width: '64px', height: '64px' }}>
+              <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4 " style={{ width: '64px', height: '64px' }}>
                 <i className="bi bi-person-vcard fs-2"></i>
               </div>
               <div>
@@ -221,7 +221,7 @@ const Settings = () => {
               <div className="mt-5">
                 <button 
                   type="submit" 
-                  className="btn btn-primary d-flex align-items-center justify-content-center px-5 py-3 shadow-lg"
+                  className="btn btn-primary d-flex align-items-center justify-content-center px-5 py-3 "
                   disabled={isProfileUpdating}
                   style={{ borderRadius: '16px', minWidth: '220px' }}
                 >
@@ -239,9 +239,9 @@ const Settings = () => {
 
         {/* Security Section */}
         <div className="col-xl-5">
-          <div className="glass-card p-5 border-0 shadow-sm h-100" style={{ background: 'var(--geist-background)', borderRadius: '24px' }}>
+          <div className="glass-card p-5 border-0  h-100" style={{ background: 'var(--geist-background)', borderRadius: '24px' }}>
             <div className="d-flex align-items-center mb-5">
-              <div className="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-4 shadow-lg" style={{ width: '64px', height: '64px' }}>
+              <div className="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-4 " style={{ width: '64px', height: '64px' }}>
                 <i className="bi bi-shield-lock-fill fs-2"></i>
               </div>
               <div>
@@ -294,7 +294,7 @@ const Settings = () => {
                       <div 
                         className={`progress-bar ${passwordStrength < 50 ? 'bg-danger' : passwordStrength < 100 ? 'bg-warning' : 'bg-success'}`} 
                         role="progressbar" 
-                        style={{ width: `${passwordStrength}%`, transition: 'width 0.3s ease' }}
+                        style={{ width: `${passwordStrength}%`, transition: 'width 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
                       ></div>
                     </div>
                     <div className="d-flex justify-content-between mt-2">
@@ -328,7 +328,7 @@ const Settings = () => {
 
               <button 
                 type="submit" 
-                className="btn btn-warning w-100 py-3 d-flex align-items-center justify-content-center shadow-lg text-white"
+                className="btn btn-warning w-100 py-3 d-flex align-items-center justify-content-center  text-white"
                 disabled={isPasswordUpdating}
                 style={{ borderRadius: '16px', fontWeight: '700' }}
               >

@@ -1,0 +1,41 @@
+name: HMS Local
+values:
+  - key: baseUrl
+    value: 'http://localhost:8000'
+    enabled: true
+  - key: authToken
+    value: ''
+    enabled: true
+  - key: patientId
+    value: ''
+    enabled: true
+  - key: appointmentId
+    value: ''
+    enabled: true
+  - key: invoiceId
+    value: ''
+    enabled: true
+  - key: labTestId
+    value: ''
+    enabled: true
+  - key: prescriptionId
+    value: ''
+    enabled: true
+  - key: recordId
+    value: ''
+    enabled: true
+  - key: staffId
+    value: ''
+    enabled: true
+  - key: nurseId
+    value: ''
+    enabled: true
+  - key: departmentId
+    value: ''
+    enabled: true
+  - key: roomId
+    value: ''
+    enabled: true
+  - key: lastResourceId
+    value: ''
+    enabled: true

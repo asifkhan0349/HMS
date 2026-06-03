@@ -371,7 +371,7 @@ const DischargeSummaries = () => {
         </div>
         {canCreate && (
           <button 
-            className="btn btn-primary px-4 py-2.5 rounded-3 shadow-sm d-flex align-items-center gap-2 hover-scale-sm" 
+            className="btn btn-primary px-4 py-2.5 rounded-3 d-flex align-items-center gap-2 hover-scale-sm" 
             onClick={() => setIsModalOpen(true)}
           >
             <i className="bi bi-file-earmark-plus fs-5"></i>
@@ -383,7 +383,7 @@ const DischargeSummaries = () => {
       {/* Telemetry Metrics cards */}
       <div className="row g-4 mb-5">
         <div className="col-md-3">
-          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10 shadow-lg position-relative overflow-hidden">
+          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10  position-relative overflow-hidden">
             <div className="d-flex align-items-center justify-content-between mb-3">
               <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Total Releases</span>
               <div className="rounded bg-primary bg-opacity-10 p-2 text-primary">
@@ -396,7 +396,7 @@ const DischargeSummaries = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10 shadow-lg position-relative overflow-hidden">
+          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10  position-relative overflow-hidden">
             <div className="d-flex align-items-center justify-content-between mb-3">
               <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Recovered Rate</span>
               <div className="rounded bg-success bg-opacity-10 p-2 text-success">
@@ -409,7 +409,7 @@ const DischargeSummaries = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10 shadow-lg position-relative overflow-hidden">
+          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10  position-relative overflow-hidden">
             <div className="d-flex align-items-center justify-content-between mb-3">
               <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Avg Stay Length</span>
               <div className="rounded bg-info bg-opacity-10 p-2 text-info">
@@ -422,7 +422,7 @@ const DischargeSummaries = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10 shadow-lg position-relative overflow-hidden">
+          <div className="glass-card p-4 transition-all hover-translate-y h-100 border border-white border-opacity-10  position-relative overflow-hidden">
             <div className="d-flex align-items-center justify-content-between mb-3">
               <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Awaiting Sign-off</span>
               <div className="rounded bg-warning bg-opacity-10 p-2 text-warning">
@@ -436,7 +436,7 @@ const DischargeSummaries = () => {
       </div>
 
       {/* Control panel & filters */}
-      <div className="glass-card mb-4 p-4 border border-white border-opacity-10 shadow-md">
+      <div className="glass-card mb-4 p-4 border border-white border-opacity-10 ">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
           <div className="search-box position-relative" style={{ maxWidth: '400px', flexGrow: 1 }}>
             <i className="bi bi-search position-absolute text-muted" style={{ left: '16px', top: '12px' }}></i>
@@ -457,7 +457,7 @@ const DischargeSummaries = () => {
       {/* Modern Card Grid Listing */}
       <Skeleton name="discharge-summaries-list" loading={loading}>
         {paginatedSummaries.length === 0 ? (
-          <div className="glass-card p-5 border border-white border-opacity-10 text-center shadow-lg">
+          <div className="glass-card p-5 border border-white border-opacity-10 text-center ">
             <EmptyState
               icon="bi-file-earmark-check"
               title="No Summaries Found"
@@ -470,7 +470,7 @@ const DischargeSummaries = () => {
           <div className="row g-4">
             {paginatedSummaries.map((summary) => (
               <div key={summary.id} className="col-12 col-md-6 col-xl-4">
-                <div className="glass-card p-4 transition-all hover-translate-y border border-white border-opacity-10 shadow-lg d-flex flex-column h-100 position-relative">
+                <div className="glass-card p-4 transition-all hover-translate-y border border-white border-opacity-10  d-flex flex-column h-100 position-relative">
                   <div className="d-flex justify-content-between align-items-start mb-4">
                     <div>
                       <span className="badge bg-white bg-opacity-10 text-accent font-monospace small px-2 py-1 rounded mb-2 d-inline-block">
@@ -572,7 +572,7 @@ const DischargeSummaries = () => {
             <div className="d-flex flex-column align-items-center position-relative" style={{ zIndex: 2 }}>
               <div 
                 className={`rounded-circle d-flex align-items-center justify-content-center fw-bold transition-all ${
-                  creationStep >= 1 ? 'bg-primary text-white scale-up shadow-glow-primary' : 'bg-white bg-opacity-10 text-muted'
+                  creationStep >= 1 ? 'bg-primary text-white scale-up ' : 'bg-white bg-opacity-10 text-muted'
                 }`}
                 style={{ width: '40px', height: '40px' }}
               >
@@ -586,7 +586,7 @@ const DischargeSummaries = () => {
             <div className="d-flex flex-column align-items-center position-relative" style={{ zIndex: 2 }}>
               <div 
                 className={`rounded-circle d-flex align-items-center justify-content-center fw-bold transition-all ${
-                  creationStep >= 2 ? 'bg-primary text-white scale-up shadow-glow-primary' : 'bg-white bg-opacity-10 text-muted'
+                  creationStep >= 2 ? 'bg-primary text-white scale-up ' : 'bg-white bg-opacity-10 text-muted'
                 }`}
                 style={{ width: '40px', height: '40px' }}
               >
@@ -600,7 +600,7 @@ const DischargeSummaries = () => {
             <div className="d-flex flex-column align-items-center position-relative" style={{ zIndex: 2 }}>
               <div 
                 className={`rounded-circle d-flex align-items-center justify-content-center fw-bold transition-all ${
-                  creationStep >= 3 ? 'bg-primary text-white scale-up shadow-glow-primary' : 'bg-white bg-opacity-10 text-muted'
+                  creationStep >= 3 ? 'bg-primary text-white scale-up ' : 'bg-white bg-opacity-10 text-muted'
                 }`}
                 style={{ width: '40px', height: '40px' }}
               >
@@ -632,7 +632,7 @@ const DischargeSummaries = () => {
                   onBlur={() => setTimeout(() => setPatientSuggestionsVisible(false), 150)}
                 />
                 {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
-                  <div className="list-group position-absolute w-100 shadow-lg" style={{ zIndex: 1050, maxHeight: '200px', overflowY: 'auto' }}>
+                  <div className="list-group position-absolute w-100 " style={{ zIndex: 1050, maxHeight: '200px', overflowY: 'auto' }}>
                     {filteredPatients.map((p) => (
                       <button
                         key={p.id}
@@ -670,7 +670,7 @@ const DischargeSummaries = () => {
               </div>
 
               <div className="d-flex justify-content-end mt-5 pt-3 border-top border-white border-opacity-10">
-                <button type="button" className="btn btn-primary px-5 py-3 rounded-3 shadow-md hover-scale-sm" onClick={handleNextStep}>
+                <button type="button" className="btn btn-primary px-5 py-3 rounded-3  hover-scale-sm" onClick={handleNextStep}>
                   Next: Clinical Info <i className="bi bi-arrow-right ms-2"></i>
                 </button>
               </div>
@@ -772,7 +772,7 @@ const DischargeSummaries = () => {
                 <button type="button" className="btn btn-glass px-4 py-3 rounded-3" onClick={handlePrevStep}>
                   <i className="bi bi-arrow-left me-2"></i> Previous
                 </button>
-                <button type="submit" className="btn btn-success px-5 py-3 rounded-3 shadow-glow-success hover-scale-sm">
+                <button type="submit" className="btn btn-success px-5 py-3 rounded-3  hover-scale-sm">
                   Finalize Summary Protocol
                 </button>
               </div>

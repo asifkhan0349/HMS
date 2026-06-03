@@ -147,7 +147,7 @@ const Reports = () => {
                 </div>
               </div>
               <button
-                className="btn btn-primary btn-sm px-3 rounded-3 shadow-none py-2"
+                className="btn btn-primary btn-sm px-3 rounded-3  py-2"
                 onClick={() => showToast(`Synchronizing backend analytics for ${report.title}...`)}
               >
                 RUN SYNC <i className="bi bi-arrow-right ms-1"></i>
@@ -160,7 +160,7 @@ const Reports = () => {
 
       <Skeleton name="reports-advisory" loading={!stats}>
       <div
-        className="glass-card p-4 border-start border-4 border-accent shadow-lg"
+        className="glass-card p-4 border-start border-4 border-accent "
         style={{ borderLeftColor: 'var(--accent-color) !important' }}
       >
         <div className="row align-items-center">

@@ -18,38 +18,33 @@ const Layout = ({ children }) => {
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   return (
-    <div className="hms-layout position-relative">
-      <div className="hms-bg-overlay"></div>
-      <div className="hms-bg-blur"></div>
-      
+    <div className="hms-layout">
       {showNav && <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />}
       {showNav && <Navbar onToggleSidebar={toggleSidebar} />}
 
-      {/* Mobile sidebar backdrop */}
       {showNav && (
-        <div 
-          className={`sidebar-backdrop ${sidebarOpen ? 'show' : ''}`} 
+        <div
+          className={`sidebar-backdrop ${sidebarOpen ? 'show' : ''}`}
           onClick={closeSidebar}
         />
       )}
 
-      {/* Global Toast Notification System */}
       {toast && (
         <div className="position-fixed bottom-0 start-50 translate-middle-x mb-5" style={{ zIndex: 2000 }}>
-          <div className="glass-card border-primary border-opacity-50 px-4 py-3 shadow-lg animate-fade-up d-flex align-items-center" style={{ minWidth: '300px' }}>
-            <div className="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-              <i className="bi bi-info-circle text-primary"></i>
+          <div className="premium-card px-4 py-3 d-flex align-items-center gap-3 animate-slide-up " style={{ minWidth: '320px', borderLeft: `3px solid var(--primary)` }}>
+            <div className="d-flex align-items-center justify-content-center" style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-bg)', flexShrink: 0 }}>
+              <i className="bi bi-info-circle text-primary" style={{ fontSize: '0.9rem' }} />
             </div>
             <div>
-              <small className="text-uppercase text-primary fw-bold d-block mb-1" style={{ fontSize: '0.65rem', letterSpacing: '1.5px' }}>System Response</small>
-              <p className="mb-0 fw-medium" style={{ color: 'var(--geist-foreground)' }}>{toast.message}</p>
+              <small className="text-uppercase fw-bold d-block mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px', color: 'var(--primary)' }}>System Response</small>
+              <p className="mb-0 fw-medium" style={{ fontSize: '0.85rem', color: 'var(--geist-foreground)' }}>{toast.message}</p>
             </div>
           </div>
         </div>
       )}
-      
+
       <main className={`main-content ${!showNav ? 'ms-0 pt-0' : ''}`}>
-        <div className={isPublicPage ? "" : "container-fluid p-4"}>
+        <div className={isPublicPage ? '' : 'container-fluid p-4'}>
           {children}
         </div>
       </main>

@@ -1,5 +1,5 @@
-/* 
-  HMS Landing Page Styles
-  All styles are now handled via Tailwind CSS 4.0.
-  This file is kept for any global overrides if needed in the future.
+/*
+  HMS Landing Page — Premium SaaS Redesign
+  All styles are handled via Tailwind CSS 4.0 with custom theme in index.css.
+  This file is intentionally left empty for runtime CSS variable overrides if needed.
 */

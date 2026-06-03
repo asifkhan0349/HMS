@@ -1,13 +1,13 @@
-# GoMeds Production Readiness Checklist
+# HMS Production Readiness Checklist
 
 Use this checklist before any real customer launch or storage of production patient data.
 
 ## Hosting and Domains
 
 - Move API, app, landing, and database services to paid production plans.
-- Configure `gomeds.com` for the public site.
-- Configure `app.gomeds.com` or `app.gomeds.in` for the authenticated app.
-- Configure `api.gomeds.com` for backend APIs.
+- Configure `hms.com` for the public site.
+- Configure `app.hms.com` or `app.hms.in` for the authenticated app.
+- Configure `api.hms.com` for backend APIs.
 - Confirm TLS certificates renew automatically.
 
 ## Environment

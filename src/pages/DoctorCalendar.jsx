@@ -139,7 +139,7 @@ const DoctorCalendar = () => {
           >
             Today
           </button>
-          <div className="d-flex align-items-center bg-white border rounded-3 p-1 shadow-sm">
+          <div className="d-flex align-items-center bg-white border rounded-3 p-1 ">
             <button className="btn btn-sm btn-link text-dark p-2 hover-bg-light rounded-2" onClick={handlePrevMonth}>
               <i className="bi bi-chevron-left"></i>
             </button>
@@ -153,7 +153,7 @@ const DoctorCalendar = () => {
         </div>
       </div>
 
-      <div className="calendar-container glass-card p-0 border shadow-sm" style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: '#fff' }}>
+      <div className="calendar-container glass-card p-0 border " style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: '#fff' }}>
         {/* Unified Grid Container */}
         <div className="calendar-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
           {/* Calendar Header / Days of Week */}
@@ -200,7 +200,7 @@ const DoctorCalendar = () => {
                   
                   <div className="appt-mini-cards-container custom-scrollbar">
                     {dateAppointments.map((app, appIdx) => (
-                      <div key={appIdx} className="appt-mini-card shadow-sm border">
+                      <div key={appIdx} className="appt-mini-card  border">
                         <div className="d-flex align-items-center gap-1 mb-1">
                           <i className="bi bi-person-fill text-primary" style={{ fontSize: '10px' }}></i>
                           <span className="doctor-name text-truncate">{app.doctor || 'Unassigned'}</span>
@@ -227,8 +227,8 @@ const DoctorCalendar = () => {
       >
         <div className="modal-content-scroll custom-scrollbar pe-2" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
           {selectedDateAppointments?.map((app, idx) => (
-            <div key={idx} className="appointment-detail-card border rounded-4 p-4 mb-3 shadow-sm bg-white position-relative overflow-hidden">
-              <div className="status-stripe" style={{ backgroundColor: app.status === 'Scheduled' ? '#00bf83' : '#007aff' }}></div>
+            <div key={idx} className="appointment-detail-card border rounded-4 p-4 mb-3  bg-white position-relative overflow-hidden">
+              <div className="status-stripe" style={{ backgroundColor: app.status === 'Scheduled' ? '#00bf83' : '#059669' }}></div>
               
               <div className="d-flex justify-content-between align-items-start mb-4">
                 <div className="d-flex align-items-center gap-3">
@@ -502,13 +502,13 @@ const DoctorCalendar = () => {
         .calendar-cell:hover {
           background-color: var(--accents-1) !important;
           z-index: 2;
-          box-shadow: inset 0 0 0 2px var(--bs-primary);
+          outline: 2px solid var(--bs-primary);
+          outline-offset: -2px;
         }
         .empty-cell {
           cursor: default;
         }
         .empty-cell:hover {
-          box-shadow: none !important;
           background-color: rgba(0,0,0,0.02) !important;
         }
         .weekend-cell {
@@ -533,7 +533,6 @@ const DoctorCalendar = () => {
         .date-number.active {
           background-color: var(--bs-primary);
           color: #fff;
-          box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
         }
         
         .appt-count-indicator {
@@ -558,7 +557,7 @@ const DoctorCalendar = () => {
           margin-bottom: 6px;
           font-size: 0.7rem;
           line-height: 1.3;
-          border-left: 3px solid var(--bs-primary) !important;
+          border: 1px solid var(--bs-primary) !important;
           transition: transform 0.1s;
         }
         .appt-mini-card:hover {

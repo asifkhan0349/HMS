@@ -4,6 +4,7 @@ import { SiteHeader } from './components/sections/site-header';
 import { HeroSection } from './components/sections/hero-section';
 import { FeaturesSection } from './components/sections/features-section';
 import { SolutionsSection } from './components/sections/solutions-section';
+import { ProductSuiteSection } from './components/sections/product-suite-section';
 import { SiteFooter } from './components/sections/site-footer';
 
 const TestimonialsSection = lazy(() => import('./components/sections/testimonials-section').then((m) => ({ default: m.TestimonialsSection })));
@@ -35,7 +36,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 selection:text-primary">
       {/* Enhanced global cursor effect */}
       <MouseGlow
-        color="rgba(220, 38, 38, 0.12)"
+        color="rgba(16, 185, 129, 0.12)"
         size={600}
         blur={150}
         opacity={0.6}
@@ -50,6 +51,7 @@ const Landing = () => {
       <main className="flex flex-col items-center relative">
         <HeroSection onAuthRedirect={handleAuthRedirect} />
         <FeaturesSection />
+        <ProductSuiteSection appUrl={appUrl} />
         <Suspense fallback={<div className="py-16 text-center text-muted-foreground">Loading sections...</div>}>
           <AppPreviewSection />
           <SolutionsSection />

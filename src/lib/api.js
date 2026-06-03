@@ -124,6 +124,7 @@ export const authApi = {
    * Revoke the current JWT server-side so it cannot be replayed after logout.
    */
   logout: () => request('/auth/logout', { method: 'POST', isProtected: true }),
+  signup: (userData) => request('/auth/signup', { method: 'POST', body: userData }),
   createUser: (userData) => request('/auth/create-user', { method: 'POST', body: userData, isProtected: true }),
   updateProfile: (profileData) => 
     request('/auth/profile', { method: 'PATCH', body: profileData, isProtected: true }),

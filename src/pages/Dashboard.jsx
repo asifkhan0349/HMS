@@ -20,7 +20,7 @@ const StatCard = memo(({ stat }) => {
       <div className="glass-card p-4 stat-card h-100">
         <div className="d-flex justify-content-between mb-3 align-items-start">
           <div
-            className="stat-icon-wrapper rounded-3 d-flex align-items-center justify-content-center shadow-sm"
+            className="stat-icon-wrapper rounded-3 d-flex align-items-center justify-content-center "
             style={{ 
               background: 'var(--accents-1)', 
               border: '1px solid var(--accents-2)',

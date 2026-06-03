@@ -60,7 +60,7 @@ _PRODUCTS = [
     },
     {
         "id": "distribution",
-        "title": "Medical Distribution ERP",
+        "title": "Distribution Planning",
         "status": "Planned module",
         "summary": "Purchase orders, dispatch planning, supplier stock, and receivables.",
         "allowed_roles": ["Admin", "Accountant"],
@@ -69,7 +69,7 @@ _PRODUCTS = [
     },
     {
         "id": "equipment",
-        "title": "Medical Equipment ERP",
+        "title": "Equipment Management",
         "status": "Planned module",
         "summary": "Equipment assets, serial numbers, warranties, service, rentals, and maintenance.",
         "allowed_roles": ["Admin"],
@@ -78,7 +78,7 @@ _PRODUCTS = [
     },
     {
         "id": "supplier",
-        "title": "Supplier ERP",
+        "title": "Supplier Coordination",
         "status": "Planned module",
         "summary": "Supplier catalog, stock commitment, fulfillment status, and payments.",
         "allowed_roles": ["Admin", "Accountant"],
@@ -87,7 +87,7 @@ _PRODUCTS = [
     },
     {
         "id": "online-pharmacy",
-        "title": "Online Pharmacy",
+        "title": "Pharmacy Orders",
         "status": "Planned module",
         "summary": "Medicine catalog, prescriptions, carts, orders, delivery status, and notifications.",
         "allowed_roles": ["Admin", "Pharmacist"],
@@ -98,7 +98,7 @@ _PRODUCTS = [
         "id": "analytics",
         "title": "Advanced Analytics",
         "status": "Operational shell",
-        "summary": "Cross-product reporting, AI insights, revenue, operations, patient flow, and inventory risk.",
+        "summary": "Cross-module reporting, AI insights, revenue, operations, patient flow, and inventory risk.",
         "allowed_roles": ["Admin", "Accountant"],
         "connected_routes": ["/reports", "/ai-insights"],
         "metrics": ["AI alerts", "Revenue trend", "Patient flow", "Inventory risk"],

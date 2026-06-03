@@ -47,7 +47,7 @@ const ProductDetail = ({ product }) => (
       </div>
       <Link to="/products" className="btn btn-glass align-self-start">
         <i className="bi bi-grid me-2" aria-hidden="true"></i>
-        All Products
+        All Workspaces
       </Link>
     </div>
 
@@ -89,9 +89,9 @@ const ProductModules = () => {
       {!selectedProduct ? (
         <>
           <div className="mb-5">
-            <h2 className="fw-bold mb-1">HMS Product Modules</h2>
+            <h2 className="fw-bold mb-1">HMS Workspaces</h2>
             <p className="text-muted mb-0">
-              Product-specific workspaces aligned with the public HMS suite claim.
+              Connected hospital workspaces for clinical, facility, pharmacy, lab, billing, logistics, and analytics teams.
             </p>
           </div>
           <div className="row g-4">

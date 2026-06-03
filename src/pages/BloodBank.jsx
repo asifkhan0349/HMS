@@ -297,7 +297,7 @@ const BloodBank = () => {
               <div className="glass-card p-4 transition-all hover-translate-y position-relative h-100 d-flex flex-column">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div 
-                    className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                    className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white " 
                     style={{ 
                       width: '48px', 
                       height: '48px', 
@@ -325,7 +325,7 @@ const BloodBank = () => {
                         <button className="btn btn-sm btn-glass p-0 border-0" data-bs-toggle="dropdown" style={{ width: '20px' }}>
                           <i className="bi bi-three-dots-vertical small"></i>
                         </button>
-                        <ul className="dropdown-menu dropdown-menu-end glass-card border shadow-sm">
+                        <ul className="dropdown-menu dropdown-menu-end glass-card border ">
                           <li><button className="dropdown-item small" onClick={() => openInventoryEditModal(group)}><i className="bi bi-pencil me-2"></i>Edit Stock</button></li>
                           <li><button className="dropdown-item small text-danger" onClick={() => {
                             setDeletingItem(group);

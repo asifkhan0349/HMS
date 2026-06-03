@@ -1,0 +1,29 @@
+$kind: http-request
+name: List Departments
+method: GET
+url: '{{baseUrl}}/api/departments'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response;
+      const json = res.json();
+      const SLA_MS = 2000;
+      pm.test("[List Departments] Status code is 200", () => { res.to.have.status(200); });
+      pm.test("[List Departments] Content-Type is application/json", () => { pm.expect(res.headers.get("Content-Type")).to.include("application/json"); });
+      pm.test("[List Departments] Response time is within SLA (" + SLA_MS + "ms)", () => { pm.expect(res.responseTime).to.be.below(SLA_MS); });
+      pm.test("[List Departments] Response is an array", () => { pm.expect(json).to.be.an("array"); });
+      pm.test("[List Departments] Each department has required fields", () => {
+          if (json.length > 0) {
+              const d = json[0];
+              pm.expect(d).to.have.property("id");
+              pm.expect(d).to.have.property("name");
+              pm.expect(d.id).to.be.a("number");
+              pm.expect(d.name).to.be.a("string").and.not.empty;
+          }
+      });
+      pm.test("[List Departments] Array items have numeric ids", () => {
+          json.forEach((item, idx) => { pm.expect(item.id, "item[" + idx + "].id").to.be.a("number"); });
+      });
+      if (json.length > 0) { pm.collectionVariables.set("lastResourceId", String(json[0].id)); }

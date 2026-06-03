@@ -1,0 +1,81 @@
+$kind: http-request
+name: Create Appointment
+method: POST
+url: '{{baseUrl}}/api/appointments'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "patient_id": 1,
+      "doctor_id": 1,
+      "date": "2025-12-01",
+      "time": "10:00",
+      "status": "scheduled",
+      "notes": "Regular checkup"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      const res    = pm.response;
+      const json   = res.json();
+      const SLA_MS = 2000;
+      
+      // â”€â”€â”€ 1. Status & Protocol â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      pm.test("[Create Appointment] Status code is 201", () => {
+          res.to.have.status(201);
+      });
+      
+      pm.test("[Create Appointment] Content-Type is application/json", () => {
+          pm.expect(res.headers.get("Content-Type")).to.include("application/json");
+      });
+      
+      pm.test("[Create Appointment] Response time is within SLA (" + SLA_MS + "ms)", () => {
+          pm.expect(res.responseTime).to.be.below(SLA_MS);
+      });
+      
+      // â”€â”€â”€ 2. Schema Assertions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      pm.test("[Create Appointment] Response body is a JSON object", () => {
+          pm.expect(json).to.be.an("object");
+      });
+      
+      pm.test("[Create Appointment] Response has 'id' as a number", () => {
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+      
+      pm.test("[Create Appointment] Response has required appointment fields", () => {
+          pm.expect(json).to.have.property("patient_id");
+          pm.expect(json).to.have.property("doctor_id");
+          pm.expect(json).to.have.property("status");
+          pm.expect(json.patient_id).to.be.a("number");
+          pm.expect(json.doctor_id).to.be.a("number");
+          pm.expect(json.status).to.be.a("string").and.not.empty;
+      });
+      
+      pm.test("[Create Appointment] Status is 'scheduled'", () => {
+          pm.expect(json.status).to.equal("scheduled");
+      });
+      
+      pm.test("[Create Appointment] Response has date and time fields", () => {
+          pm.expect(json).to.have.property("date");
+          pm.expect(json).to.have.property("time");
+      });
+      
+      pm.test("[Create Appointment] Response has created_at timestamp", () => {
+          const hasTimestamp = json.hasOwnProperty("created_at") || json.hasOwnProperty("createdAt");
+          pm.expect(hasTimestamp, "Expected created_at or createdAt").to.be.true;
+      });
+      
+      // â”€â”€â”€ 3. Variable Chaining â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      pm.test("[Create Appointment] appointmentId is set in collection variables", () => {
+          pm.expect(json.id).to.be.a("number");
+          pm.collectionVariables.set("appointmentId", String(json.id));
+          pm.collectionVariables.set("lastResourceId", String(json.id));
+          pm.expect(pm.collectionVariables.get("appointmentId")).to.equal(String(json.id));
+      });

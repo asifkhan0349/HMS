@@ -103,14 +103,14 @@ const CashReceipts = () => {
           </div>
         </div>
         <div className="col-md-6 col-lg-4">
-          <div className="glass-card p-4 border d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%)', borderColor: 'rgba(59, 130, 246, 0.15)' }}>
+          <div className="glass-card p-4 border d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.05) 0%, rgba(22, 163, 74, 0.02) 100%)', borderColor: 'rgba(22, 163, 74, 0.15)' }}>
             <div>
               <p className="text-muted fw-bold small text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Today's Receipts</p>
               <h3 className="fw-bold mb-0 text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 ₹{todayCashReceived.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
             </div>
-            <div className="rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: '56px', height: '56px' }}>
+            <div className="rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', width: '56px', height: '56px' }}>
               <i className="bi bi-calendar-check fs-4"></i>
             </div>
           </div>

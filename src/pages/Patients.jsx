@@ -885,7 +885,7 @@ const Patients = () => {
             {/* Header Summary */}
             <div className="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
               <div 
-                className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white " 
                 style={{ 
                   width: '56px', 
                   height: '56px', 

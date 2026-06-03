@@ -1,0 +1,2937 @@
+[
+  {
+    "path": "/api/health",
+    "method": "GET",
+    "summary": "Health Check",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {}
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/patients",
+    "method": "GET",
+    "summary": "List Patients",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/PatientRead"
+              },
+              "type": "array",
+              "title": "Response List Patients Api Patients Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/patients",
+    "method": "POST",
+    "summary": "Create Patient",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/PatientCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PatientRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/patients/{patient_id}",
+    "method": "GET",
+    "summary": "Get Patient",
+    "description": "",
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Patient Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PatientRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/patients/{patient_id}",
+    "method": "PUT",
+    "summary": "Update Patient",
+    "description": "",
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Patient Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/PatientUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PatientRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/patients/{patient_id}",
+    "method": "DELETE",
+    "summary": "Delete Patient",
+    "description": "",
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Patient Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/create-user",
+    "method": "POST",
+    "summary": "Create User",
+    "description": "Endpoint for Admin to create new users. \nPublic signup is disabled as per system requirements.",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/SignupRequest"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/login",
+    "method": "POST",
+    "summary": "Login",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/LoginRequest"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/logout",
+    "method": "POST",
+    "summary": "Logout",
+    "description": "Revoke the current JWT so it cannot be reused, even before natural expiry.",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/profile",
+    "method": "PATCH",
+    "summary": "Update Profile",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/ProfileUpdate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/change-password",
+    "method": "POST",
+    "summary": "Change Password",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/PasswordChange"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/forgot-password",
+    "method": "POST",
+    "summary": "Forgot Password",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/ForgotPasswordRequest"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/auth/reset-password/{token}",
+    "method": "POST",
+    "summary": "Reset Password",
+    "description": "",
+    "parameters": [
+      {
+        "name": "token",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Token"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/ResetPasswordRequest"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/appointments/public",
+    "method": "POST",
+    "summary": "Book an appointment (no authentication required)",
+    "description": "Public appointment-booking endpoint.\n\n* No authentication or role check is applied.\n* The ``status`` field is not accepted from the caller and is always\n  forced to ``\"pending\"`` so that staff can review and approve bookings.\n* All other validation rules (required fields, age-or-dob constraint, etc.)\n  remain exactly as for the protected endpoint.",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/AppointmentPublicCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/appointments",
+    "method": "GET",
+    "summary": "List Appointments",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/AppointmentRead"
+              },
+              "type": "array",
+              "title": "Response List Appointments Api Appointments Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/appointments",
+    "method": "POST",
+    "summary": "Create Appointment",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/AppointmentCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/appointments/{appointment_id}",
+    "method": "GET",
+    "summary": "Get Appointment",
+    "description": "",
+    "parameters": [
+      {
+        "name": "appointment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Appointment Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/appointments/{appointment_id}",
+    "method": "PUT",
+    "summary": "Update Appointment",
+    "description": "",
+    "parameters": [
+      {
+        "name": "appointment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Appointment Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/AppointmentUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/appointments/{appointment_id}",
+    "method": "DELETE",
+    "summary": "Delete Appointment",
+    "description": "",
+    "parameters": [
+      {
+        "name": "appointment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Appointment Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/records",
+    "method": "GET",
+    "summary": "List Records",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/MedicalRecordRead"
+              },
+              "type": "array",
+              "title": "Response List Records Api Records Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/records",
+    "method": "POST",
+    "summary": "Create Record",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/MedicalRecordCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicalRecordRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/records/{record_id}",
+    "method": "GET",
+    "summary": "Get Record",
+    "description": "",
+    "parameters": [
+      {
+        "name": "record_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Record Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicalRecordRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/records/{record_id}",
+    "method": "PUT",
+    "summary": "Update Record",
+    "description": "",
+    "parameters": [
+      {
+        "name": "record_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Record Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/MedicalRecordUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicalRecordRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/records/{record_id}",
+    "method": "DELETE",
+    "summary": "Delete Record",
+    "description": "",
+    "parameters": [
+      {
+        "name": "record_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Record Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/invoices",
+    "method": "POST",
+    "summary": "Create Invoice",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/InvoiceCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InvoiceRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/invoices/{invoice_id}",
+    "method": "PUT",
+    "summary": "Update Invoice",
+    "description": "",
+    "parameters": [
+      {
+        "name": "invoice_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Invoice Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/InvoiceUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InvoiceRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/invoices/{invoice_id}",
+    "method": "DELETE",
+    "summary": "Delete Invoice",
+    "description": "",
+    "parameters": [
+      {
+        "name": "invoice_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Invoice Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/invoices/{invoice_id}/send-paid-email",
+    "method": "POST",
+    "summary": "Send Paid Invoice Email",
+    "description": "",
+    "parameters": [
+      {
+        "name": "invoice_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Invoice Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/InvoicePaidEmailRequest"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InvoicePaidEmailResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/invoices/{invoice_id}/download-pdf",
+    "method": "GET",
+    "summary": "Download Invoice Pdf Endpoint",
+    "description": "Generate and stream an invoice PDF for download (Admin + Reception only).",
+    "parameters": [
+      {
+        "name": "invoice_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Invoice Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {}
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/medicines",
+    "method": "GET",
+    "summary": "List Medicines",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/MedicineRead"
+              },
+              "type": "array",
+              "title": "Response List Medicines Api Medicines Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/medicines",
+    "method": "POST",
+    "summary": "Create Medicine",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/MedicineCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicineRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/medicines/{medicine_id}",
+    "method": "GET",
+    "summary": "Get Medicine",
+    "description": "",
+    "parameters": [
+      {
+        "name": "medicine_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Medicine Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicineRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/medicines/{medicine_id}",
+    "method": "PUT",
+    "summary": "Update Medicine",
+    "description": "",
+    "parameters": [
+      {
+        "name": "medicine_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Medicine Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/MedicineUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicineRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/medicines/{medicine_id}",
+    "method": "DELETE",
+    "summary": "Delete Medicine",
+    "description": "",
+    "parameters": [
+      {
+        "name": "medicine_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Medicine Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/tests",
+    "method": "GET",
+    "summary": "List Tests",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/LabTestRead"
+              },
+              "type": "array",
+              "title": "Response List Tests Api Tests Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/tests",
+    "method": "POST",
+    "summary": "Create Test",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/LabTestCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LabTestRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/tests/{test_id}",
+    "method": "GET",
+    "summary": "Get Test",
+    "description": "",
+    "parameters": [
+      {
+        "name": "test_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Test Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LabTestRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/tests/{test_id}",
+    "method": "PUT",
+    "summary": "Update Test",
+    "description": "",
+    "parameters": [
+      {
+        "name": "test_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Test Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/LabTestUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LabTestRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/tests/{test_id}",
+    "method": "DELETE",
+    "summary": "Delete Test",
+    "description": "",
+    "parameters": [
+      {
+        "name": "test_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Test Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/staff",
+    "method": "GET",
+    "summary": "List Staff",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/StaffRead"
+              },
+              "type": "array",
+              "title": "Response List Staff Api Staff Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/staff",
+    "method": "POST",
+    "summary": "Create Staff Member",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/StaffCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StaffRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/staff/{staff_id}",
+    "method": "GET",
+    "summary": "Get Staff Member",
+    "description": "",
+    "parameters": [
+      {
+        "name": "staff_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Staff Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StaffRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/staff/{staff_id}",
+    "method": "PUT",
+    "summary": "Update Staff Member",
+    "description": "",
+    "parameters": [
+      {
+        "name": "staff_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Staff Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/StaffUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StaffRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/staff/{staff_id}",
+    "method": "DELETE",
+    "summary": "Delete Staff Member",
+    "description": "",
+    "parameters": [
+      {
+        "name": "staff_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Staff Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/dashboard/stats",
+    "method": "GET",
+    "summary": "Get Dashboard Stats",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DashboardStats"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/beds",
+    "method": "GET",
+    "summary": "List Beds",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/BedRead"
+              },
+              "type": "array",
+              "title": "Response List Beds Api Beds Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/beds",
+    "method": "POST",
+    "summary": "Create Bed",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/BedCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BedRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/beds/{bed_id}",
+    "method": "PUT",
+    "summary": "Update Bed",
+    "description": "",
+    "parameters": [
+      {
+        "name": "bed_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Bed Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/BedUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BedRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/beds/{bed_id}",
+    "method": "DELETE",
+    "summary": "Delete Bed",
+    "description": "",
+    "parameters": [
+      {
+        "name": "bed_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Bed Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_inventory",
+    "method": "GET",
+    "summary": "List Blood Inventory",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/BloodInventoryRead"
+              },
+              "type": "array",
+              "title": "Response List Blood Inventory Api Blood Inventory Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_inventory",
+    "method": "POST",
+    "summary": "Create Blood Inventory",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/BloodInventoryCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BloodInventoryRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_inventory/{item_id}",
+    "method": "PUT",
+    "summary": "Update Blood Inventory",
+    "description": "",
+    "parameters": [
+      {
+        "name": "item_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Item Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/BloodInventoryUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BloodInventoryRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_inventory/{item_id}",
+    "method": "DELETE",
+    "summary": "Delete Blood Inventory",
+    "description": "",
+    "parameters": [
+      {
+        "name": "item_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Item Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_activities",
+    "method": "GET",
+    "summary": "List Blood Activities",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/BloodActivityRead"
+              },
+              "type": "array",
+              "title": "Response List Blood Activities Api Blood Activities Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_activities",
+    "method": "POST",
+    "summary": "Create Blood Activity",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/BloodActivityCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BloodActivityRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_activities/{activity_id}",
+    "method": "PUT",
+    "summary": "Update Blood Activity",
+    "description": "",
+    "parameters": [
+      {
+        "name": "activity_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Activity Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/BloodActivityUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BloodActivityRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/blood_activities/{activity_id}",
+    "method": "DELETE",
+    "summary": "Delete Blood Activity",
+    "description": "",
+    "parameters": [
+      {
+        "name": "activity_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Activity Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/inventory",
+    "method": "GET",
+    "summary": "List Inventory",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/InventoryItemRead"
+              },
+              "type": "array",
+              "title": "Response List Inventory Api Inventory Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/inventory",
+    "method": "POST",
+    "summary": "Create Inventory Item",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/InventoryItemCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InventoryItemRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/inventory/{item_id}",
+    "method": "PUT",
+    "summary": "Update Inventory Item",
+    "description": "",
+    "parameters": [
+      {
+        "name": "item_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Item Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/InventoryItemUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InventoryItemRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/inventory/{item_id}",
+    "method": "DELETE",
+    "summary": "Delete Inventory Item",
+    "description": "",
+    "parameters": [
+      {
+        "name": "item_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Item Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/ambulances",
+    "method": "GET",
+    "summary": "List Ambulances",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/AmbulanceRead"
+              },
+              "type": "array",
+              "title": "Response List Ambulances Api Ambulances Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/ambulances",
+    "method": "POST",
+    "summary": "Create Ambulance",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/AmbulanceCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AmbulanceRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/ambulances/trips",
+    "method": "GET",
+    "summary": "List Completed Trips",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/AmbulanceTripRead"
+              },
+              "type": "array",
+              "title": "Response List Completed Trips Api Ambulances Trips Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/ambulances/{ambulance_id}",
+    "method": "PUT",
+    "summary": "Update Ambulance",
+    "description": "",
+    "parameters": [
+      {
+        "name": "ambulance_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Ambulance Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/AmbulanceUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AmbulanceRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/ambulances/{ambulance_id}",
+    "method": "DELETE",
+    "summary": "Delete Ambulance",
+    "description": "",
+    "parameters": [
+      {
+        "name": "ambulance_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Ambulance Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/cash-receipts",
+    "method": "GET",
+    "summary": "List Cash Receipts",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/CashReceiptRead"
+              },
+              "type": "array",
+              "title": "Response List Cash Receipts Api Cash Receipts Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/ai-insights",
+    "method": "GET",
+    "summary": "List Ai Insights",
+    "description": "",
+    "parameters": [
+      {
+        "name": "module",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Module"
+        }
+      },
+      {
+        "name": "include_health",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false,
+          "title": "Include Health"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AIInsightRead"
+              },
+              "title": "Response List Ai Insights Api Ai Insights Get"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/products",
+    "method": "GET",
+    "summary": "List Products",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/ProductModuleRead"
+              },
+              "type": "array",
+              "title": "Response List Products Api Products Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/products/{product_id}",
+    "method": "GET",
+    "summary": "Get Product",
+    "description": "",
+    "parameters": [
+      {
+        "name": "product_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "title": "Product Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProductModuleRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries/public",
+    "method": "GET",
+    "summary": "List Public Summaries",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DischargeSummaryRead"
+              },
+              "type": "array",
+              "title": "Response List Public Summaries Api Discharge Summaries Public Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries/public/{summary_id}",
+    "method": "GET",
+    "summary": "Get Public Summary",
+    "description": "",
+    "parameters": [
+      {
+        "name": "summary_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Summary Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DischargeSummaryRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries",
+    "method": "GET",
+    "summary": "List Summaries",
+    "description": "",
+    "parameters": [],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DischargeSummaryRead"
+              },
+              "type": "array",
+              "title": "Response List Summaries Api Discharge Summaries Get"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries",
+    "method": "POST",
+    "summary": "Create Summary",
+    "description": "",
+    "parameters": [],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/DischargeSummaryCreate"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "201": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DischargeSummaryRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries/{summary_id}",
+    "method": "GET",
+    "summary": "Get Summary",
+    "description": "",
+    "parameters": [
+      {
+        "name": "summary_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Summary Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DischargeSummaryRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries/{summary_id}",
+    "method": "PUT",
+    "summary": "Update Summary",
+    "description": "",
+    "parameters": [
+      {
+        "name": "summary_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Summary Id"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/DischargeSummaryUpdate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DischargeSummaryRead"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "path": "/api/discharge-summaries/{summary_id}",
+    "method": "DELETE",
+    "summary": "Delete Summary",
+    "description": "",
+    "parameters": [
+      {
+        "name": "summary_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Summary Id"
+        }
+      }
+    ],
+    "requestBody": {},
+    "responses": {
+      "200": {
+        "description": "Successful Response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPValidationError"
+            }
+          }
+        }
+      }
+    }
+  }
+]

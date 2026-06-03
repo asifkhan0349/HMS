@@ -1,0 +1,37 @@
+$kind: collection
+name: HMS API
+description: Hospital Management System API - FastAPI backend with SQLite storage
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8000'
+    description: Base URL for the HMS API
+  - key: authToken
+    value: ''
+    description: JWT auth token (set after login)
+  - key: patientId
+    value: '1'
+  - key: appointmentId
+    value: '1'
+  - key: recordId
+    value: '1'
+  - key: invoiceId
+    value: '1'
+  - key: staffId
+    value: '1'
+  - key: departmentId
+    value: '1'
+  - key: roomId
+    value: '1'
+  - key: labTestId
+    value: '1'
+  - key: prescriptionId
+    value: '1'
+  - key: nurseId
+    value: '1'
+  - key: resetToken
+    value: ''
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'

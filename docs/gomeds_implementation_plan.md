@@ -1,12 +1,12 @@
-# GoMeds Product Alignment & Production Readiness Implementation Plan
+# HMS Product Alignment & Production Readiness Implementation Plan
 
 ## Executive Summary
 
-This plan turns the GoMeds gap analysis into an implementation roadmap. The current HMS project is a strong hospital management application, but the public GoMeds website positions the product as a broader healthcare software suite across pharmacy, clinic, lab, doctor, hospital, distribution, equipment, supplier, online pharmacy, and analytics workflows.
+This plan turns the HMS gap analysis into an implementation roadmap. The current HMS project is a strong hospital management application, and the public HMS website should position the product as a broader healthcare software suite across pharmacy, clinic, lab, doctor, hospital, distribution, equipment, supplier, online pharmacy, and analytics workflows.
 
 The work should be delivered in six phases:
 
-1. Align the application with the 10-product GoMeds product claim.
+1. Align the application with the 10-product HMS product claim.
 2. Add a practical AI insights layer for high-value operational alerts.
 3. Harden production infrastructure for real healthcare usage.
 4. Fix QA, accessibility, and error-handling gaps before demos.
@@ -21,7 +21,7 @@ The recommended delivery order is demo trust first, product architecture second,
 
 | Area | Current State | Gap | Priority |
 | :--- | :--- | :--- | :--- |
-| Product scope | The repo primarily implements HMS workflows such as patients, appointments, EMR, billing, pharmacy, lab, beds, inventory, blood bank, ambulance, staff, reports, and RBAC. | The public GoMeds story claims a 10-product healthcare software suite. The app needs product-specific surfaces and permissions to match that claim. | High |
+| Product scope | The repo primarily implements HMS workflows such as patients, appointments, EMR, billing, pharmacy, lab, beds, inventory, blood bank, ambulance, staff, reports, and RBAC. | The public HMS story claims a 10-product healthcare software suite. The app needs product-specific surfaces and permissions to match that claim. | High |
 | AI claims | The public story references AI-powered healthcare operations. | The app needs a concrete AI insights layer with visible, explainable operational value. | High |
 | Production readiness | Render deployment exists for API, frontend, landing, and Postgres. | Business-critical healthcare usage needs paid infrastructure, backups, monitoring, uptime checks, audit logs, domain strategy, and stricter environment configuration. | High |
 | Demo quality | Existing QA artifacts identify accessibility and UX issues. | Error messages, labels, keyboard controls, modal semantics, and page titles need cleanup before customer demos. | High |
@@ -34,7 +34,7 @@ The recommended delivery order is demo trust first, product architecture second,
 
 ### Goal
 
-Create product-specific application surfaces that match the 10 GoMeds product claims while reusing the existing HMS foundation wherever possible.
+Create product-specific application surfaces that match the 10 HMS product claims while reusing the existing HMS foundation wherever possible.
 
 ### Product Modules
 
@@ -157,9 +157,9 @@ Move the deployment posture from demo-friendly to production-ready for healthcar
 - Add daily automated database backups.
 - Define restore procedure and test it before launch.
 - Add separate domains:
-  - `gomeds.com` for the public website.
-  - `app.gomeds.com` or `app.gomeds.in` for the authenticated application.
-  - `api.gomeds.com` for backend APIs.
+  - `hms.com` for the public website.
+  - `app.hms.com` or `app.hms.in` for the authenticated application.
+  - `api.hms.com` for backend APIs.
 
 ### Monitoring
 
@@ -228,7 +228,7 @@ Remove known demo blockers and accessibility gaps before customer demos.
 
 ### Goal
 
-Make the public GoMeds website credible, safer, and aligned with evidence.
+Make the public HMS website credible, safer, and aligned with evidence.
 
 ### Required Cleanup
 
@@ -328,7 +328,7 @@ Raise Lighthouse performance to at least 85 before paid traffic, outbound demos,
 
 ## Acceptance Criteria
 
-- The application has visible product surfaces for all 10 GoMeds product claims.
+- The application has visible product surfaces for all 10 HMS product claims.
 - Public product links route to real product surfaces or clearly marked planned modules.
 - AI insights appear in the dashboard and relevant modules with explainable trigger reasons.
 - Production deployment has backups, uptime checks, monitoring, strict CORS, and custom-domain readiness.

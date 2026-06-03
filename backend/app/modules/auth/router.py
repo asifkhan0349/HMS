@@ -98,6 +98,17 @@ def update_profile(
     token = create_access_token(user.id)
     return schemas.AuthResponse(message="Profile updated successfully.", user=user, token=token)
 
+@router.post("/signup", response_model=schemas.AuthResponse, status_code=status.HTTP_201_CREATED)
+def signup(
+    payload: schemas.SignupRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    Public signup endpoint for new users.
+    """
+    return services.register_user(db=db, payload=payload, background_tasks=background_tasks)
+
 @router.post("/change-password", response_model=schemas.MessageResponse)
 def change_password(
     payload: schemas.PasswordChange,

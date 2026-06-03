@@ -46,7 +46,7 @@ export const productModules = [
   },
   {
     id: 'distribution',
-    title: 'Medical Distribution ERP',
+    title: 'Distribution Planning',
     icon: 'bi bi-truck',
     summary: 'Purchase orders, dispatch planning, supplier stock, and receivables.',
     status: 'Planned module',
@@ -55,7 +55,7 @@ export const productModules = [
   },
   {
     id: 'equipment',
-    title: 'Medical Equipment ERP',
+    title: 'Equipment Management',
     icon: 'bi bi-tools',
     summary: 'Equipment assets, serial numbers, warranties, service, rentals, and maintenance.',
     status: 'Planned module',
@@ -64,7 +64,7 @@ export const productModules = [
   },
   {
     id: 'supplier',
-    title: 'Supplier ERP',
+    title: 'Supplier Coordination',
     icon: 'bi bi-box-seam',
     summary: 'Supplier catalog, stock commitment, fulfillment status, and payments.',
     status: 'Planned module',
@@ -73,7 +73,7 @@ export const productModules = [
   },
   {
     id: 'online-pharmacy',
-    title: 'Online Pharmacy',
+    title: 'Pharmacy Orders',
     icon: 'bi bi-bag-check',
     summary: 'Medicine catalog, prescriptions, carts, orders, delivery status, and notifications.',
     status: 'Planned module',
@@ -84,7 +84,7 @@ export const productModules = [
     id: 'analytics',
     title: 'Advanced Analytics',
     icon: 'bi bi-graph-up-arrow',
-    summary: 'Cross-product reporting, AI insights, revenue, operations, patient flow, and inventory risk.',
+    summary: 'Cross-module reporting, AI insights, revenue, operations, patient flow, and inventory risk.',
     status: 'Operational shell',
     routes: ['/reports', '/ai-insights'],
     metrics: ['AI alerts', 'Revenue trend', 'Patient flow', 'Inventory risk'],

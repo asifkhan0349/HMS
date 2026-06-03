@@ -1,90 +1,96 @@
-import { ArrowRight, MessageSquare, Timer } from "lucide-react"
+import { ArrowRight, Timer } from "lucide-react"
+import { Button } from "../ui/button"
 import { ScrollReveal } from "../ui/effects/scroll-reveal"
 
 const posts = [
   {
     category: "Insights",
-    title: "How to reduce Patient Wait Times by 60% in Tier 1 Hospitals",
-    desc: "A case study on the implementation of intelligent queuing systems.",
+    title: "Reducing Medication Dispensing Errors by 90% via Clinical AI",
+    desc: "A case study on implementing real-time drug interaction checks and smart warning logs in pharmacy networks.",
     author: "Dr. Aris Thorne",
-    readTime: "5 min",
-    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800"
+    readTime: "5 min read",
+    image: "/previews/patients_desktop.png",
+    tag: "Case Study",
   },
   {
-    category: "Product Update",
-    title: "HMS v2.0: Unified Billing and Insurance Claim Automation",
-    desc: "Streamlining the administrative burden of modern healthcare.",
+    category: "Product",
+    title: "GoMeds AI v2.0: Autonomous Wholesale Distribution Logistics",
+    desc: "Streamlining wholesale medical purchasing pipelines with automatic route planning and instant invoices.",
     author: "Sarah Jenks",
-    readTime: "3 min",
-    image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800"
+    readTime: "3 min read",
+    image: "/previews/billing_desktop.png",
+    tag: "Update",
   },
   {
     category: "Security",
-    title: "ABDM Roadmap: Integrating Unified Health Interfaces",
-    desc: "How HMS is leading the way in the global health digitalization.",
+    title: "GxP and HIPAA Standards in Healthcare Software Integration",
+    desc: "How GoMeds AI implements strict data privacy controls and sequential audit tracking to guarantee GxP validation.",
     author: "Kevin Miller",
-    readTime: "7 min",
-    image: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&q=80&w=800"
-  }
+    readTime: "7 min read",
+    image: "/previews/dashboard_desktop.png",
+    tag: "Engineering",
+  },
 ]
 
 export function BlogSection() {
   return (
-    <section id="blog" className="py-32 bg-white relative overflow-hidden">
-      <div className="section-container">
-        <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+    <section id="blog" className="py-24 md:py-32 relative overflow-hidden bg-background">
+      <div className="section-container text-left">
+        <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
           <div className="max-w-2xl">
             <ScrollReveal>
-              <div className="inline-flex py-1 px-3 rounded bg-black text-white font-bold text-xs mb-6 uppercase tracking-[0.2em]">
-                The HMS Journal
+              <div className="mono-label mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-4 rounded-full bg-gradient-premium" />
+                BLOG
               </div>
-              <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-8 text-black leading-[0.95]">
-                Intelligence <br />
-                <span className="text-black/40">In real-time.</span>
+              <h2 className="text-4xl font-bold leading-tight tracking-tight text-text-secondary">
+                Intelligence,{" "}
+                <span className="text-gradient-premium">in real-time.</span>
               </h2>
             </ScrollReveal>
           </div>
           <ScrollReveal delay={0.2}>
-            <button className="flex items-center gap-2 font-black text-black pb-2 border-b-2 border-black hover:text-primary hover:border-primary transition-all">
-              Go to all articles <ArrowRight className="h-5 w-5" />
-            </button>
+            <Button variant="outline" className="rounded-xl border-border/20 text-text-secondary hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+              View all articles <ArrowRight className="h-4 w-4 ml-1.5" />
+            </Button>
           </ScrollReveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post, i) => (
             <ScrollReveal key={i} delay={i * 0.1}>
-              <div className="group cursor-pointer">
-                <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden mb-8 shadow-sm">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-[1.03]"
+              <div
+                tabIndex={0}
+                className="premium-card bg-card overflow-hidden group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label={`Blog post: ${post.title}`}
+              >
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-6 left-6 py-2 px-4 bg-white/90 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest text-black shadow-sm">
-                    {post.category}
+                  <div className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-black/80 backdrop-blur-sm border border-white/10 text-[10px] font-bold text-text-secondary">
+                    {post.tag}
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-primary transition-colors leading-tight">
+                <div className="p-6">
+                  <div className="text-xs font-bold text-primary uppercase tracking-wider mb-3">{post.category}</div>
+                  <h3 className="text-base font-bold mb-3 leading-tight text-text-secondary group-hover:text-primary transition-colors">
                     {post.title}
                   </h3>
-                  <p className="text-muted-foreground font-medium mb-8 line-clamp-2">
+                  <p className="text-sm text-text-tertiary leading-relaxed mb-5 line-clamp-2">
                     {post.desc}
                   </p>
-                  <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
-                        <div className="h-full w-full bg-primary/20 flex items-center justify-center font-black text-[10px] text-primary">
-                          {post.author.charAt(0)}
-                        </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-border/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xs bg-gradient-premium flex items-center justify-center text-[10px] font-bold text-white">
+                        {post.author.charAt(0)}
                       </div>
-                      <div className="text-sm font-bold text-black">{post.author}</div>
+                      <div className="text-sm font-semibold text-text-secondary">{post.author}</div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs font-black text-muted-foreground uppercase">
-                      <div className="flex items-center gap-1">
-                        <Timer className="h-3 w-3" /> {post.readTime}
-                      </div>
+                    <div className="flex items-center gap-1.5 text-xs text-text-tertiary">
+                      <Timer className="h-3.5 w-3.5" /> {post.readTime}
                     </div>
                   </div>
                 </div>

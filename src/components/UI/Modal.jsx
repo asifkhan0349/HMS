@@ -4,7 +4,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   const dialogRef = useRef(null);
   const titleId = useId();
 
-  // Prevent scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -16,13 +15,11 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     };
   }, [isOpen]);
 
-  // Store latest onClose in a ref to avoid effect re-triggers while keeping it fresh for the listener
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  // Focus the first element only once when the modal opens
   useEffect(() => {
     if (isOpen && dialogRef.current) {
       const focusableSelector = [
@@ -44,7 +41,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     }
   }, [isOpen]);
 
-  // Handle keyboard events (Escape and Tab-trapping)
   useEffect(() => {
     if (!isOpen || !dialogRef.current) {
       return undefined;
@@ -72,9 +68,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         return;
       }
 
-      if (event.key !== 'Tab') {
-        return;
-      }
+      if (event.key !== 'Tab') return;
 
       const items = getFocusableElements();
       if (items.length === 0) {
@@ -107,46 +101,37 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="modal-overlay d-flex align-items-center justify-content-center"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(2, 6, 23, 0.85)',
-        backdropFilter: 'blur(12px)',
-        zIndex: 3000,
-        animation: 'fadeIn 0.3s ease'
-      }}
-      onClick={onClose}
-    >
-      <div 
+    <div className="modal-overlay" onClick={onClose}>
+      <div
         ref={dialogRef}
-        className="glass-card p-0 w-100 mx-3 animate-fade-up d-flex flex-column"
-        style={{ maxWidth: '600px', maxHeight: '90vh', overflow: 'hidden', border: '1px solid rgba(45, 212, 191, 0.4)' }}
+        className="premium-card w-100 mx-3 d-flex flex-column"
+        style={{
+          maxWidth: '560px',
+          maxHeight: '85vh',
+          overflow: 'hidden',
+
+        }}
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <div className="p-4 border-bottom border-accents-2 d-flex justify-content-between align-items-center bg-white flex-shrink-0">
-          <h4 id={titleId} className="mb-0 fw-bold d-flex align-items-center text-dark">
-            <i className="bi bi-file-earmark-plus text-primary me-2"></i>
+        <div className="px-5 py-4 border-bottom d-flex justify-content-between align-items-center flex-shrink-0" style={{ borderColor: 'var(--accents-2)' }}>
+          <h5 id={titleId} className="mb-0 fw-bold d-flex align-items-center gap-2" style={{ color: 'var(--geist-foreground)' }}>
+            <i className="bi bi-file-earmark-plus" style={{ color: 'var(--primary)' }} />
             {title}
-          </h4>
+          </h5>
           <button
             type="button"
-            className="btn btn-glass btn-sm rounded-circle"
+            className="btn btn-glass btn-sm d-flex align-items-center justify-content-center"
             onClick={onClose}
             style={{ width: '32px', height: '32px', padding: 0 }}
             aria-label={`Close ${title}`}
           >
-            <i className="bi bi-x-lg"></i>
+            <i className="bi bi-x-lg" style={{ fontSize: '0.75rem' }} />
           </button>
         </div>
-        <div className="p-4 bg-white text-dark overflow-y-auto custom-scrollbar flex-grow-1">
+        <div className="p-5 overflow-y-auto flex-grow-1" style={{ color: 'var(--geist-foreground)' }}>
           {children}
         </div>
       </div>

@@ -80,7 +80,7 @@ const UserManagement = () => {
           <p className="text-muted mb-0">Securely onboard hospital personnel and manage system roles.</p>
         </div>
         <button 
-          className="btn btn-primary px-4 py-2 rounded-3 shadow-sm d-flex align-items-center" 
+          className="btn btn-primary px-4 py-2 rounded-3  d-flex align-items-center" 
           onClick={() => setIsModalOpen(true)}
         >
           <i className="bi bi-person-plus-fill me-2"></i>
@@ -90,7 +90,7 @@ const UserManagement = () => {
 
       <div className="row g-4">
         <div className="col-lg-8">
-          <div className="glass-card p-0 overflow-hidden shadow-lg border-0">
+          <div className="glass-card p-0 overflow-hidden  border-0">
             <div className="p-4 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-10">
               <h5 className="fw-bold mb-0">Security Protocols</h5>
               <span className="badge-soft-primary px-3 py-1 rounded-pill small">Admin Override Active</span>
@@ -122,7 +122,7 @@ const UserManagement = () => {
         </div>
 
         <div className="col-lg-4">
-          <div className="glass-card p-4 h-100 shadow-sm border-0">
+          <div className="glass-card p-4 h-100  border-0">
             <h5 className="fw-bold mb-4">System Policies</h5>
             <ul className="list-unstyled mb-0">
               <li className="d-flex mb-4">

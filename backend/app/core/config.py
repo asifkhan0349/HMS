@@ -39,6 +39,7 @@ class Settings(BaseSettings):
 
     # Webhooks
     APPOINTMENT_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/webhook/Hospital-appointment-confirmation"
+    APPOINTMENT_BOOKING_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/form/e28bed45-998c-47a4-9a9d-73d8311bd1e5"
     LAB_STATUS_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/webhook/hospital-lab-status"
     INVOICE_WEBHOOK_URL: str = "https://krishnatemporary.app.n8n.cloud/webhook/hospital-invoice"
 

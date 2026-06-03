@@ -521,7 +521,7 @@ const Appointments = () => {
                                        app.status === 'Scheduled Later' ? 'rgba(0, 122, 255, 0.1)' : 
                                        'rgba(255, 159, 10, 0.1)',
                         color: app.status === 'Scheduled' ? '#00bf83' : 
-                               app.status === 'Scheduled Later' ? '#007aff' : 
+                               app.status === 'Scheduled Later' ? '#059669' : 
                                '#ff9f0a',
                         border: `1px solid ${app.status === 'Scheduled' ? 'rgba(0, 191, 131, 0.2)' : 
                                             app.status === 'Scheduled Later' ? 'rgba(0, 122, 255, 0.2)' : 
@@ -625,7 +625,7 @@ const Appointments = () => {
                     placeholder="Search or enter patient name"
                   />
                   {isPatientSuggestionsVisible && filteredPatients.length > 0 && (
-                    <div className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
+                    <div className="list-group position-absolute w-100 " style={{ zIndex: 1050, maxHeight: '250px', overflowY: 'auto' }}>
                       {filteredPatients.map((patient) => (
                         <button
                           key={patient.id}
@@ -1141,9 +1141,9 @@ const Appointments = () => {
               borderRadius: '20px',
               width: '100%',
               maxWidth: '440px',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,191,131,0.25)',
+              border: '1px solid rgba(0,191,131,0.25)',
               overflow: 'hidden',
-              animation: 'slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+              animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1310,15 +1310,15 @@ const Appointments = () => {
               borderRadius: '20px',
               width: '100%',
               maxWidth: '440px',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,122,255,0.25)',
+              border: '1px solid rgba(0,122,255,0.25)',
               overflow: 'hidden',
-              animation: 'slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+              animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div style={{
-              background: 'linear-gradient(135deg, #007aff 0%, #0055cc 100%)',
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
               padding: '1.5rem',
               display: 'flex',
               alignItems: 'center',
@@ -1370,7 +1370,7 @@ const Appointments = () => {
                 alignItems: 'center',
                 gap: '0.6rem',
               }}>
-                <i className="bi bi-person-circle" style={{ color: '#007aff', fontSize: '1rem', flexShrink: 0 }} />
+                <i className="bi bi-person-circle" style={{ color: '#059669', fontSize: '1rem', flexShrink: 0 }} />
                 <span style={{ fontSize: '0.88rem', color: '#374151' }}>
                   Patient: <strong>{scheduledLaterModalApp?.patient}</strong>
                 </span>
@@ -1516,9 +1516,9 @@ const Appointments = () => {
                     flex: 1, padding: '0.65rem 1rem',
                     border: 'none', borderRadius: '12px',
                     background: scheduledLaterDate
-                      ? 'linear-gradient(135deg, #007aff 0%, #0055cc 100%)'
-                      : '#dbeafe',
-                    color: scheduledLaterDate ? '#fff' : '#93c5fd',
+                      ? 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                      : '#d1fae5',
+                    color: scheduledLaterDate ? '#fff' : '#6ee7b7',
                     fontWeight: 700, fontSize: '0.9rem', cursor: scheduledLaterDate ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',

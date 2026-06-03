@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useSearchParams, Link, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { Hospital, ArrowLeft, Mail, Lock, User, Send } from "lucide-react"
+import { Pill, ArrowLeft, Mail, Lock, User, Send } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
@@ -25,7 +25,7 @@ export default function Login() {
   };
 
   React.useEffect(() => {
-    document.title = isLogin ? "Login | HMS" : "Sign Up | HMS"
+    document.title = isLogin ? "Login | GoMeds AI" : "Sign Up | GoMeds AI"
   }, [isLogin])
 
   return (
@@ -37,7 +37,7 @@ export default function Login() {
       </div>
 
       <MouseGlow
-        color="rgba(220, 38, 38, 0.1)"
+        color="rgba(16, 185, 129, 0.1)"
         size={600}
         blur={150}
         opacity={0.5}
@@ -47,30 +47,30 @@ export default function Login() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md z-10"
+        className="w-full max-w-md z-10 text-left"
       >
         <div className="flex justify-between items-center mb-8">
-          <Link to="/" className="flex items-center space-x-2 no-underline text-foreground group">
-            <div className="p-2 rounded-lg bg-background border border-border/40 group-hover:border-primary/40 transition-colors shadow-sm">
-              <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          <Link to="/" className="flex items-center space-x-2 no-underline text-text-secondary group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
+            <div className="p-2 rounded-lg bg-card border border-border/10 group-hover:border-primary/40 transition-colors shadow-sm">
+              <ArrowLeft className="h-4 w-4 text-text-tertiary group-hover:text-primary transition-colors" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Back to Home</span>
+            <span className="text-sm font-semibold text-text-tertiary group-hover:text-text-secondary transition-colors">Back to Home</span>
           </Link>
           
           <div className="flex items-center space-x-2">
-            <Hospital className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg tracking-tight">HMS</span>
+            <Pill className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg tracking-tight text-text-secondary">GoMeds AI</span>
           </div>
         </div>
 
-        <Card className="border-border/40 shadow-2xl bg-background/60 backdrop-blur-xl rounded-2xl overflow-hidden relative group">
+        <Card className="border-border/10 shadow-2xl bg-card/60 backdrop-blur-xl rounded-xl overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           
           <CardHeader className="space-y-1 pb-6 text-center">
-            <CardTitle className="text-3xl font-bold tracking-tight">
+            <CardTitle className="text-2xl font-bold tracking-tight text-text-secondary">
               {isLogin ? "Welcome back" : "Create an account"}
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-base">
+            <CardDescription className="text-text-tertiary text-sm">
               {isLogin 
                 ? "Enter your credentials to access your dashboard" 
                 : "Join thousands of healthcare professionals today"}
@@ -80,47 +80,47 @@ export default function Login() {
           <CardContent className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" className="text-xs font-bold text-text-secondary">Full Name</Label>
                 <div className="relative group/input">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-text-tertiary group-focus-within/input:text-primary transition-colors" />
                   <Input 
                     id="name" 
                     placeholder="Dr. John Doe" 
-                    className="pl-10 h-11 bg-background/50 border-border/40 focus:border-primary/40 focus:ring-primary/20 rounded-xl transition-all"
+                    className="pl-10 h-11 bg-background/50 border-border/10 focus:border-primary/40 focus:ring-primary/20 rounded-xl transition-all"
                   />
                 </div>
               </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email" className="text-xs font-bold text-text-secondary">Email address</Label>
               <div className="relative group/input">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-text-tertiary group-focus-within/input:text-primary transition-colors" />
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="admin@hms.com" 
-                  className="pl-10 h-11 bg-background/50 border-border/40 focus:border-primary/40 focus:ring-primary/20 rounded-xl transition-all"
+                  placeholder="admin@gomeds.com" 
+                  className="pl-10 h-11 bg-background/50 border-border/10 focus:border-primary/40 focus:ring-primary/20 rounded-xl transition-all"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-xs font-bold text-text-secondary">Password</Label>
                 {isLogin && (
-                  <Button variant="link" className="px-0 font-normal h-auto text-muted-foreground hover:text-primary no-underline text-xs">
+                  <Button variant="link" className="px-0 font-bold h-auto text-text-tertiary hover:text-primary no-underline text-xs focus-visible:ring-2 focus-visible:ring-primary">
                     Forgot password?
                   </Button>
                 )}
               </div>
               <div className="relative group/input">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-text-tertiary group-focus-within/input:text-primary transition-colors" />
                 <Input 
                   id="password" 
                   type="password" 
                   placeholder="••••••••" 
-                  className="pl-10 h-11 bg-background/50 border-border/40 focus:border-primary/40 focus:ring-primary/20 rounded-xl transition-all"
+                  className="pl-10 h-11 bg-background/50 border-border/10 focus:border-primary/40 focus:ring-primary/20 rounded-xl transition-all"
                 />
               </div>
             </div>
@@ -130,9 +130,9 @@ export default function Login() {
                 <input 
                   type="checkbox" 
                   id="remember" 
-                  className="h-4 w-4 rounded border-border/40 text-primary focus:ring-primary/20 accent-primary" 
+                  className="h-4 w-4 rounded border-border/10 text-primary focus:ring-primary/20 accent-primary" 
                 />
-                <label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer select-none">
+                <label htmlFor="remember" className="text-xs font-semibold text-text-tertiary cursor-pointer select-none">
                   Remember me for 30 days
                 </label>
               </div>
@@ -141,20 +141,20 @@ export default function Login() {
           
           <CardFooter className="flex flex-col space-y-4 pt-2">
             <Button 
-              className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2"
+              className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               onClick={() => handleAuthRedirect(isLogin ? "login" : "signup")}
             >
               {isLogin ? "Sign In" : "Get Started"}
               <Send className="h-4 w-4" />
             </Button>
             
-            <div className="text-center text-sm text-muted-foreground pt-2">
+            <div className="text-center text-xs text-text-tertiary pt-2">
               {isLogin ? (
                 <>
                   Don't have an account?{" "}
                   <button 
                     onClick={() => handleAuthRedirect('signup')}
-                    className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0 inline"
+                    className="text-primary font-bold hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0 inline cursor-pointer focus-visible:outline-none"
                   >
                     Sign up
                   </button>
@@ -164,7 +164,7 @@ export default function Login() {
                   Already have an account?{" "}
                   <button 
                     onClick={() => handleAuthRedirect('login')}
-                    className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0 inline"
+                    className="text-primary font-bold hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0 inline cursor-pointer focus-visible:outline-none"
                   >
                     Sign in
                   </button>
@@ -174,8 +174,8 @@ export default function Login() {
           </CardFooter>
         </Card>
         
-        <p className="mt-8 text-center text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
-          By continuing, you agree to our Terms of Service and Privacy Policy. Secure processing by HMS Protocol.
+        <p className="mt-8 text-center text-[10px] text-text-tertiary max-w-xs mx-auto leading-relaxed">
+          By continuing, you agree to our Terms of Service and Privacy Policy. Secure processing by GoMeds AI Protocol.
         </p>
       </motion.div>
     </div>

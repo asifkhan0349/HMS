@@ -5,7 +5,7 @@ import { authApi } from '../lib/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const { showToast } = useApp();
   const navigate = useNavigate();
@@ -23,7 +23,6 @@ const ForgotPassword = () => {
     try {
       const response = await authApi.forgotPassword(email);
       showToast(response.message, 'success');
-      // Navigate back to login after some delay
       setTimeout(() => navigate('/login'), 5000);
     } catch (error) {
       showToast(error.message || 'Failed to request password reset.', 'error');
@@ -33,43 +32,46 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="login-page d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-background)' }}>
-      <div className="p-4 p-md-5 glass-card shadow-lg" style={{ maxWidth: '460px', width: '100%', borderRadius: '12px' }}>
-        <div className="text-center mb-5">
-          <div className="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px' }}>
-            <i className="bi bi-envelope-at fs-2"></i>
-          </div>
-          <h3 className="fw-bold mb-2">Forgot Password?</h3>
-          <p className="text-muted small">Enter your email and we'll send you a link to reset your password.</p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="reset-email" className="form-label text-muted small text-uppercase fw-bold mb-2 required-label">Email Address</label>
-            <input
-              id="reset-email"
-              type="email"
-              className={`form-control py-2 ${validationErrors.email ? 'is-invalid' : ''}`}
-              placeholder="name@hospital.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: 'var(--geist-canvas-soft)' }}>
+      <div className="premium-card" style={{ maxWidth: '420px', width: '100%' }}>
+        <div className="p-6">
+          <div className="text-center mb-6">
+            <div className="d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #16a34a, #10b981)' }}>
+              <i className="bi bi-envelope-at text-white" style={{ fontSize: '1.25rem' }} />
+            </div>
+            <h4 className="fw-bold mb-1" style={{ color: 'var(--geist-foreground)' }}>Forgot Password?</h4>
+            <p className="text-muted small">Enter your email and we&apos;ll send you a reset link.</p>
           </div>
 
-          <button type="submit" className="btn btn-primary w-100 py-2 mt-2" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <><span className="spinner-border spinner-border-sm me-2"></span>Sending Link...</>
-            ) : (
-              'Send Reset Link'
-            )}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="reset-email" className="form-label required-label">Email Address</label>
+              <input
+                id="reset-email"
+                type="email"
+                className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`}
+                placeholder="name@hospital.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-        <div className="text-center mt-4">
-          <Link to="/login" className="text-decoration-none small text-muted">
-            <i className="bi bi-arrow-left me-1"></i> Back to Login
-          </Link>
+            <button type="submit" className="btn btn-primary w-100 py-2" disabled={isSubmitting} style={{ height: 44 }}>
+              {isSubmitting ? (
+                <span className="d-inline-flex align-items-center gap-2">
+                  <span className="spinner-border spinner-border-sm" role="status" />
+                  Sending Link...
+                </span>
+              ) : 'Send Reset Link'}
+            </button>
+          </form>
+
+          <div className="text-center mt-4">
+            <Link to="/login" className="text-decoration-none small fw-medium" style={{ color: 'var(--primary)' }}>
+              <i className="bi bi-arrow-left me-1" /> Back to Login
+            </Link>
+          </div>
         </div>
       </div>
     </div>
