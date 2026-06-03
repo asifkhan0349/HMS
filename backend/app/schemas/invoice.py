@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional, List
-from pydantic import Field
+from pydantic import Field, ConfigDict
 from .base import AppBaseModel, ORMBase
 
 
@@ -88,6 +88,60 @@ class InvoiceRead(InvoiceBase, ORMBase):
     invoice_code: str
     line_items: Optional[List[InvoiceLineItem]] = None
     created_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        str_strip_whitespace=True,
+        json_schema_extra={
+            "example": {
+                "id": 42,
+                "invoice_code": "INV-A1B2C3D4",
+                "patient_name": "John Doe",
+                "billing_type": "OP",
+                "invoice_date": "2026-06-03",
+                "amount": 150.00,
+                "amount_paid": 150.00,
+                "due_amount": 0.00,
+                "tax_total": 10.00,
+                "discount_total": 5.00,
+                "cgst": 5.00,
+                "sgst": 5.00,
+                "igst": 0.00,
+                "status": "Paid",
+                "payment_method": "Credit Card",
+                "payment_status": "Paid",
+                "admission_id": None,
+                "ward_name": None,
+                "stay_duration_days": None,
+                "room_charge_per_day": None,
+                "room_charges": None,
+                "insurance_provider": None,
+                "policy_number": None,
+                "covered_amount": None,
+                "remaining_amount": None,
+                "payment_notes": "Paid in full at checkout.",
+                "expected_payment_date": None,
+                "line_items": [
+                    {
+                        "category": "Consultation",
+                        "name": "General OPD Consultation",
+                        "description": "Routine checkup",
+                        "quantity": 1,
+                        "unit_price": 100.00,
+                        "tax_percentage": 10.00,
+                        "discount_percentage": 5.00,
+                        "subtotal": 100.00,
+                        "tax_amount": 10.00,
+                        "discount_amount": 5.00,
+                        "total": 105.00,
+                        "medicine_code": None
+                    }
+                ],
+                "created_at": "2026-06-03T15:44:43Z"
+            }
+        }
+    )
 
 
 class InvoicePaidEmailRequest(AppBaseModel):
